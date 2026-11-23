@@ -1,0 +1,219 @@
+{
+  "ville": { "slug": "lyon", "nom": "Lyon", "centre": [4.8335, 45.7635], "zoom": 13.2 },
+  "themes": [
+    { "id": "insolite", "nom": "Insolite" },
+    { "id": "histoire", "nom": "Histoire" },
+    { "id": "mystere", "nom": "Souterrains et mystères" },
+    { "id": "vue", "nom": "Points de vue" },
+    { "id": "nature", "nom": "Parc et nature" },
+    { "id": "famille", "nom": "Avec des enfants" }
+  ],
+  "departs": [
+    { "id": "perrache", "nom": "Gare de Perrache", "lon": 4.825736, "lat": 45.748461 },
+    { "id": "partdieu", "nom": "Gare de la Part-Dieu", "lon": 4.859562, "lat": 45.760562 },
+    { "id": "bellecour", "nom": "Place Bellecour", "lon": 4.831995, "lat": 45.757516 },
+    { "id": "vieuxlyon", "nom": "Métro Vieux-Lyon", "lon": 4.8259, "lat": 45.76 },
+    { "id": "hoteldeville", "nom": "Métro Hôtel de Ville", "lon": 4.8362, "lat": 45.7674 }
+  ],
+  "etapes": [
+    {
+      "id": "traboules",
+      "nom": "La longue traboule",
+      "lieu": "54, rue Saint-Jean",
+      "quartier": "Vieux-Lyon",
+      "lon": 4.827396, "lat": 45.762067,
+      "duree": 15,
+      "themes": ["insolite", "histoire"],
+      "fait": "Ici, on traverse les immeubles. Lyon compte environ 500 traboules, dont une cinquantaine ouvertes au public.",
+      "conseil": "Entre côté rue Saint-Jean, tu ressors rue du Bœuf. Des gens habitent ici : on traverse sans bruit.",
+      "videos": ["traboules"]
+    },
+    {
+      "id": "guignol",
+      "nom": "Le père de Guignol",
+      "lieu": "Avenue du Doyenné",
+      "quartier": "Vieux-Lyon",
+      "lon": 4.826444, "lat": 45.75968,
+      "duree": 5,
+      "themes": ["insolite", "famille"],
+      "fait": "Guignol a été créé vers 1808 par Laurent Mourguet, un ouvrier de la soie devenu arracheur de dents. Son buste est sur l'avenue.",
+      "conseil": "Le buste se trouve à deux pas de la station de métro Vieux-Lyon.",
+      "videos": ["guignol"]
+    },
+    {
+      "id": "fourviere",
+      "nom": "La colline qui prie",
+      "lieu": "Esplanade de Fourvière",
+      "quartier": "Fourvière",
+      "lon": 4.822588, "lat": 45.762284,
+      "duree": 25,
+      "themes": ["vue", "histoire"],
+      "fait": "La basilique fait face à la Croix-Rousse, « la colline qui travaille ». La Fête des Lumières est née ici, le 8 décembre 1852.",
+      "conseil": "La montée est raide. Le funiculaire part de la station Vieux-Lyon et arrive devant la basilique.",
+      "videos": ["fourviere", "lumieres"]
+    },
+    {
+      "id": "lugdunum",
+      "nom": "Le trésor jamais récupéré",
+      "lieu": "Théâtres romains, rue Cléberg",
+      "quartier": "Fourvière",
+      "lon": 4.820729, "lat": 45.760301,
+      "duree": 20,
+      "themes": ["histoire", "mystere", "vue"],
+      "fait": "Un trésor romain, enterré vers l'an 260 à Vaise, n'a jamais été récupéré par son propriétaire. Il est conservé ici, au musée Lugdunum.",
+      "conseil": "Les théâtres romains se visitent librement. Le musée est payant.",
+      "videos": ["tresor"]
+    },
+    {
+      "id": "terreaux",
+      "nom": "La fontaine prévue pour Bordeaux",
+      "lieu": "Place des Terreaux",
+      "quartier": "Presqu'île",
+      "lon": 4.83346, "lat": 45.767633,
+      "duree": 10,
+      "themes": ["histoire", "insolite"],
+      "fait": "Cette fontaine a été dessinée pour Bordeaux par Bartholdi, le sculpteur de la statue de la Liberté. Bordeaux a abandonné, Lyon l'a achetée.",
+      "conseil": "Regarde la femme et ses quatre chevaux : c'est la Garonne et ses affluents.",
+      "videos": ["fontaine"]
+    },
+    {
+      "id": "celestins",
+      "nom": "Le périscope du parking",
+      "lieu": "Place des Célestins",
+      "quartier": "Presqu'île",
+      "lon": 4.831847, "lat": 45.759798,
+      "duree": 10,
+      "themes": ["insolite", "mystere", "famille"],
+      "fait": "Sur la place, un périscope plonge dans un parking en spirale. Au fond, un miroir tourne sur lui-même : c'est une œuvre de Daniel Buren.",
+      "conseil": "Cherche le périscope sur la place et regarde dedans.",
+      "videos": ["celestins"]
+    },
+    {
+      "id": "perrache",
+      "nom": "La gare posée sur l'eau",
+      "lieu": "Place Carnot",
+      "quartier": "Perrache",
+      "lon": 4.827861, "lat": 45.750706,
+      "duree": 5,
+      "themes": ["histoire"],
+      "fait": "Avant 1770, la presqu'île s'arrêtait à Ainay. Plus au sud, il n'y avait que des îles et des marais, comblés par l'ingénieur Perrache.",
+      "conseil": "Tu marches sur plus de deux kilomètres de terres gagnées sur l'eau.",
+      "videos": ["perrache"]
+    },
+    {
+      "id": "voraces",
+      "nom": "La colline qui travaille",
+      "lieu": "Cour des Voraces, place Colbert",
+      "quartier": "Pentes de la Croix-Rousse",
+      "lon": 4.834671, "lat": 45.771962,
+      "duree": 10,
+      "themes": ["histoire", "insolite"],
+      "fait": "Sur ces pentes, les canuts tissaient la soie sur des métiers géants. C'est pour eux que les plafonds montent jusqu'à quatre mètres.",
+      "conseil": "La cour se traverse en journée. Lève la tête vers le grand escalier.",
+      "videos": ["canuts"]
+    },
+    {
+      "id": "jacquard",
+      "nom": "L'ancêtre de l'ordinateur",
+      "lieu": "Place de la Croix-Rousse",
+      "quartier": "Croix-Rousse",
+      "lon": 4.832079, "lat": 45.774891,
+      "duree": 5,
+      "themes": ["histoire"],
+      "fait": "En 1801, Jacquard commande son métier à tisser avec des cartes perforées. Trente ans plus tard, un Anglais reprend l'idée pour l'ancêtre de l'ordinateur.",
+      "conseil": "La statue de Jacquard est au milieu de la place.",
+      "videos": ["jacquard"]
+    },
+    {
+      "id": "aretes",
+      "nom": "Les galeries sans explication",
+      "lieu": "Rue des Fantasques",
+      "quartier": "Pentes de la Croix-Rousse",
+      "lon": 4.836769, "lat": 45.773462,
+      "duree": 10,
+      "themes": ["mystere", "vue", "insolite"],
+      "fait": "Sous cette rue, des galeries vieilles d'environ 2 000 ans dessinent des arêtes de poisson. Personne ne sait vraiment à quoi elles servaient.",
+      "conseil": "Les galeries sont fermées au public. La rue, elle, domine le Rhône.",
+      "videos": ["aretes"]
+    },
+    {
+      "id": "tetedor",
+      "nom": "La légende de la tête d'or",
+      "lieu": "Porte des Enfants du Rhône",
+      "quartier": "Parc de la Tête d'Or",
+      "lon": 4.845204, "lat": 45.777248,
+      "duree": 15,
+      "themes": ["mystere", "insolite", "nature", "famille"],
+      "fait": "Des croisés auraient enterré ici une tête du Christ en or. On n'a jamais rien trouvé. Et la plaque d'immatriculation est née dans ces allées, en 1891.",
+      "conseil": "L'entrée du parc est gratuite.",
+      "videos": ["legende", "voyante", "plaque"]
+    },
+    {
+      "id": "lac",
+      "nom": "Le lac creusé à la main",
+      "lieu": "Bord du lac",
+      "quartier": "Parc de la Tête d'Or",
+      "lon": 4.8482, "lat": 45.7786,
+      "duree": 25,
+      "themes": ["nature", "histoire", "famille"],
+      "fait": "Avant le parc, il n'y avait ici que des marécages. Le lac a été creusé par des ouvriers, et ses quatre îles sont artificielles.",
+      "conseil": "Fais le tour par la rive : la digue qui longe le Rhône a été montée avec la terre du lac.",
+      "videos": ["marais", "lac", "larmes"]
+    },
+    {
+      "id": "premierfilm",
+      "nom": "La rue du premier film",
+      "lieu": "Rue du Premier-Film",
+      "quartier": "Monplaisir",
+      "lon": 4.867655, "lat": 45.745615,
+      "duree": 15,
+      "themes": ["histoire", "insolite"],
+      "fait": "En 1895, les frères Lumière filment ici la sortie de leur usine : c'est le premier film tourné avec leur Cinématographe.",
+      "conseil": "Métro D, arrêt Monplaisir-Lumière. L'Institut Lumière est dans la rue.",
+      "horsCentre": true,
+      "videos": ["premierfilm"]
+    }
+  ],
+  "videos": {
+    "traboules": { "titre": "Environ 500 traboules", "source": "lyon", "de": 415, "a": 807 },
+    "fourviere": { "titre": "Deux collines face à face", "source": "lyon", "de": 851, "a": 1032 },
+    "canuts": { "titre": "Des plafonds à quatre mètres", "source": "lyon", "de": 1034, "a": 1404 },
+    "premierfilm": { "titre": "Le premier film des Lumière", "source": "lyon", "de": 1455, "a": 1858 },
+    "lumieres": { "titre": "L'origine de la Fête des Lumières", "source": "lyon", "de": 1912, "a": 2448 },
+    "guignol": { "titre": "Guignol et l'arracheur de dents", "source": "lyon2", "de": 244, "a": 590 },
+    "fontaine": { "titre": "Une fontaine dessinée pour Bordeaux", "source": "lyon2", "de": 638, "a": 1081 },
+    "plaque": { "titre": "La première plaque d'immatriculation", "source": "lyon2", "de": 1125, "a": 1518 },
+    "jacquard": { "titre": "Des cartes perforées en 1801", "source": "lyon2", "de": 1560, "a": 2064 },
+    "perrache": { "titre": "Une gare gagnée sur l'eau", "source": "lyon2", "de": 2109, "a": 2544 },
+    "celestins": { "titre": "Un miroir au fond du parking", "source": "souslyon", "de": 262, "a": 776 },
+    "tresor": { "titre": "Le trésor de Vaise", "source": "souslyon", "de": 779, "a": 1349 },
+    "aretes": { "titre": "Les arêtes de poisson", "source": "souslyon", "de": 1352, "a": 1888 },
+    "legende": { "titre": "La légende du trésor", "source": "tetedor", "de": 108, "a": 530 },
+    "voyante": { "titre": "La voyante et les fouilles", "source": "tetedor", "de": 527, "a": 919 },
+    "marais": { "titre": "Avant le parc, des marécages", "source": "tetedor", "de": 912, "a": 1320 },
+    "lac": { "titre": "Un lac creusé par des ouvriers", "source": "tetedor", "de": 1640, "a": 2088 },
+    "larmes": { "titre": "Un lac rempli de larmes ?", "source": "tetedor", "de": 2081, "a": 2387 }
+  },
+  "visites": [
+    {
+      "id": "5-secrets",
+      "nom": "Les 5 secrets",
+      "depart": "perrache",
+      "etapes": ["perrache", "celestins", "guignol", "traboules", "terreaux"]
+    }
+  ],
+  "adresses": [
+    { "id": "danieldenise", "nom": "Daniel et Denise Saint-Jean", "type": "bouchon", "repas": true, "rue": "Rue Tramassac", "quartier": "Vieux-Lyon", "lon": 4.825455, "lat": 45.760312, "note": null, "avis": null },
+    { "id": "abel", "nom": "Café Comptoir Abel", "type": "bouchon", "repas": true, "rue": "Rue Guynemer", "quartier": "Ainay", "detail": "Ouvert en 1928", "lon": 4.826002, "lat": 45.754275, "note": null, "avis": null },
+    { "id": "federations", "nom": "Café des Fédérations", "type": "bouchon", "repas": true, "rue": "Rue du Major-Martin", "quartier": "Terreaux", "lon": 4.832427, "lat": 45.766536, "note": null, "avis": null },
+    { "id": "garet", "nom": "Le Garet", "type": "bouchon", "repas": true, "rue": "Rue du Garet", "quartier": "Terreaux", "lon": 4.836903, "lat": 45.766965, "note": null, "avis": null },
+    { "id": "bouchonfilles", "nom": "Le Bouchon des Filles", "type": "bouchon", "repas": true, "rue": "Rue Sergent-Blandan", "quartier": "Pentes de la Croix-Rousse", "lon": 4.829317, "lat": 45.768677, "note": null, "avis": null },
+    { "id": "georges", "nom": "Brasserie Georges", "type": "brasserie", "repas": true, "rue": "Cours de Verdun", "quartier": "Perrache", "detail": "Fondée en 1836", "lon": 4.828343, "lat": 45.748322, "note": null, "avis": null },
+    { "id": "negociants", "nom": "Grand Café des Négociants", "type": "brasserie", "repas": true, "rue": "Place Francisque-Régaud", "quartier": "Cordeliers", "lon": 4.834533, "lat": 45.763286, "note": null, "avis": null },
+    { "id": "halles", "nom": "Halles de Lyon Paul Bocuse", "type": "halles", "repas": true, "rue": "Cours Lafayette", "quartier": "Part-Dieu", "lon": 4.850551, "lat": 45.762832, "note": null, "avis": null },
+    { "id": "marchecr", "nom": "Marché de la Croix-Rousse", "type": "marché", "repas": false, "rue": "Boulevard de la Croix-Rousse", "quartier": "Croix-Rousse", "lon": 4.828097, "lat": 45.773952, "note": null, "avis": null },
+    { "id": "terreadelice", "nom": "Terre Adélice", "type": "glacier", "repas": false, "rue": "Place de la Baleine", "quartier": "Vieux-Lyon", "lon": 4.828116, "lat": 45.763373, "note": null, "avis": null },
+    { "id": "pralus", "nom": "Pralus", "type": "pâtisserie", "repas": false, "rue": "Rue Saint-Jean", "quartier": "Vieux-Lyon", "detail": "La praluline, brioche aux pralines", "lon": 4.827841, "lat": 45.762766, "note": null, "avis": null },
+    { "id": "bernachon", "nom": "Bernachon Passion", "type": "salon de thé", "repas": false, "rue": "Cours Franklin-Roosevelt", "quartier": "Brotteaux", "lon": 4.847796, "lat": 45.768935, "note": null, "avis": null }
+  ]
+}

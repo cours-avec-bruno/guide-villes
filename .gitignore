@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+.taste-skill/
+shots/
+outils/tmp/
+*.log
+
+public/vendor/

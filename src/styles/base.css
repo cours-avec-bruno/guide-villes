@@ -1,0 +1,177 @@
+/* La charte : celle des vidéos « Ce que tu ne sais pas sur… » (papier découpé).
+   Papier ivoire, encre, mer profonde, étiquettes jaunes, tampons rouges. Bebas Neue pour les titres, Space Grotesk pour lire. */
+:root {
+  --papier: #f3eddd;
+  --feuille: #fffdf6;
+  --sable: #dccfb2;
+  --sable-clair: #e9dfc8;
+  --encre: #16202a;
+  --encre2: #434d57;
+  --encre3: #8e959c;
+  --mer: #2a6788;
+  --mer-fonce: #1b4a66;
+  --nuit: #0e2a3d;
+  --jaune: #f5bd2f;
+  --rouge: #de3341;
+  --vert: #1e9a55;
+  --ligne: rgba(22, 32, 42, 0.14);
+  --ligne-forte: rgba(22, 32, 42, 0.28);
+  --r-s: 8px;
+  --r-m: 12px;
+  --r-l: 18px;
+  --titre: "Bebas Neue", "Arial Narrow", Impact, sans-serif;
+  --texte: "Space Grotesk Variable", "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ombre-papier: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 10px 24px -12px rgba(22, 32, 42, 0.35);
+  --sortie: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  background: var(--papier);
+  color: var(--encre);
+  font-family: var(--texte);
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 450;
+  -webkit-font-smoothing: antialiased;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+img,
+video {
+  display: block;
+  max-width: 100%;
+}
+button {
+  font: inherit;
+  color: inherit;
+}
+a {
+  color: inherit;
+}
+:focus-visible {
+  outline: 2px solid var(--mer);
+  outline-offset: 3px;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.evitement {
+  position: fixed;
+  left: 12px;
+  top: -60px;
+  z-index: 100;
+  background: var(--encre);
+  color: var(--feuille);
+  padding: 12px 16px;
+  border-radius: var(--r-s);
+}
+.evitement:focus {
+  top: 12px;
+}
+
+/* Un seul couple de boutons pour tout le site */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: var(--r-m);
+  border: 1.5px solid var(--encre);
+  background: transparent;
+  color: var(--encre);
+  font-family: var(--texte);
+  font-size: 16px;
+  font-weight: 550;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.18s, color 0.18s, transform 0.18s var(--sortie), border-color 0.18s;
+}
+.btn svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  transition: transform 0.25s var(--sortie);
+}
+.btn:hover svg {
+  transform: translateX(3px);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn--plein {
+  background: var(--encre);
+  color: var(--feuille);
+}
+.btn--plein:hover {
+  background: #26384a;
+  border-color: #26384a;
+}
+.btn--contour:hover {
+  background: rgba(22, 32, 42, 0.07);
+}
+.btn--bloc {
+  width: 100%;
+}
+.sombre .btn {
+  border-color: var(--feuille);
+  color: var(--feuille);
+}
+.sombre .btn--plein {
+  background: var(--feuille);
+  color: var(--encre);
+}
+.sombre .btn--plein:hover {
+  background: #fff;
+  border-color: #fff;
+}
+
+/* L'étiquette jaune des vidéos */
+.etiquette {
+  display: inline-block;
+  background: var(--jaune);
+  color: var(--encre);
+  font-family: var(--titre);
+  font-size: 17px;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  padding: 6px 9px 4px;
+  border-radius: 3px;
+  box-shadow: 0 2px 0 rgba(22, 32, 42, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

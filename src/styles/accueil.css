@@ -1,0 +1,949 @@
+/* La page de vente.
+   Sans la classe « anime » sur <html> (pas de JavaScript, ou « réduire les animations ») : une page simple qui se lit de haut en bas.
+   Avec « anime » : la chorégraphie au défilement, pilotée par src/scripts/accueil.ts (qui pose --n, --hfs, --ic, --pfs, --sfs, --mfs, --camw, --cw). */
+:root {
+  --n: 1;
+  --u: 1px;
+  --hfs: clamp(40px, min(15vw, 19vh), 150px);
+  --ic: calc(var(--hfs) * 0.6);
+  --pfs: clamp(28px, max(4.5vw, min(10vw, 44px)), 66px);
+  --sfs: clamp(38px, 5.6vw, 84px);
+  --mfs: clamp(54px, 8.5vw, 124px);
+  --camw: min(60vw, 280px);
+  --cw: 218;
+  --nav-h: calc(86px * var(--n));
+  --nav-creux: var(--papier);
+  --gris-clair: #8499a8; /* les mots gris sur fond nuit */
+}
+html {
+  scroll-behavior: auto;
+}
+body {
+  overflow-x: hidden;
+}
+.enveloppe {
+  width: min(1120px, 100% - 48px);
+  margin: 0 auto;
+}
+.g {
+  color: #7a828a; /* les mots gris des grands titres : 3,7:1 sur le papier */
+}
+.sombre .g {
+  color: var(--gris-clair);
+}
+
+/* ——— navigation */
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  height: var(--nav-h);
+  padding: 0 calc(40px * var(--n));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  pointer-events: none;
+  color: var(--encre);
+  transition: color 0.3s, background-color 0.3s;
+}
+.nav > * {
+  pointer-events: auto;
+}
+.nav__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  text-decoration: none;
+  font-family: var(--titre);
+  font-size: max(24px, calc(28px * var(--n)));
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.nav__logo svg {
+  width: max(30px, calc(40px * var(--n)));
+  height: max(30px, calc(40px * var(--n)));
+}
+.nav__logo span {
+  padding-top: 0.12em;
+}
+.nav__liens {
+  display: flex;
+  gap: max(22px, calc(30px * var(--n)));
+}
+.nav__liens a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--encre2);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav__liens a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9px;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s var(--sortie);
+}
+.nav__liens a:hover,
+.nav__liens a[aria-current] {
+  color: var(--encre);
+}
+.nav__liens a:hover::after,
+.nav__liens a[aria-current]::after {
+  transform: scaleX(1);
+}
+.nav__btn {
+  min-height: 46px;
+  padding: 0 18px;
+}
+body.nav-fond .nav {
+  background: var(--papier);
+  box-shadow: 0 1px 0 var(--ligne);
+}
+body.nav-sombre {
+  --nav-creux: var(--nuit);
+}
+body.nav-sombre .nav {
+  color: var(--feuille);
+}
+body.nav-sombre .nav__liens a {
+  color: #9fb2bf;
+}
+body.nav-sombre .nav__liens a:hover,
+body.nav-sombre .nav__liens a[aria-current] {
+  color: #fff;
+}
+body.nav-sombre .nav__btn {
+  background: var(--feuille);
+  border-color: var(--feuille);
+  color: var(--encre);
+}
+@media (max-width: 819px) {
+  .nav {
+    padding: 0 24px;
+    gap: 12px;
+  }
+  .nav__liens {
+    display: none;
+  }
+  .nav__btn {
+    padding: 0 14px;
+    font-size: 15px;
+  }
+}
+
+html:not(.anime) .nav {
+  position: absolute;
+}
+
+@media (max-width: 430px) {
+  .nav__btn svg {
+    display: none;
+  }
+}
+@media (max-width: 345px) {
+  .nav__logo span {
+    display: none;
+  }
+}
+
+/* ——— le hero : version simple */
+.histoire {
+  position: relative;
+}
+.hero {
+  padding: calc(var(--nav-h) + 8vh) 24px 6vh;
+  text-align: center;
+}
+.hero__titre {
+  font-family: var(--titre);
+  font-weight: 400;
+  font-size: var(--hfs);
+  line-height: 1;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+}
+.hero__mot {
+  white-space: nowrap;
+}
+.hero__mot .l {
+  display: inline-block;
+  white-space: pre;
+}
+.hero__pictos,
+.avion {
+  display: none;
+}
+.hero__sous {
+  margin: 22px auto 0;
+  max-width: 34em;
+}
+.hero__sous p {
+  font-size: clamp(17px, 1.5vw, 20px);
+  color: var(--encre2);
+  text-wrap: balance;
+}
+.hero__sous .btn {
+  margin-top: 22px;
+}
+
+/* ——— la scène : version simple */
+.scene {
+  padding: 4vh 0 0;
+}
+.processus {
+  text-align: center;
+  padding: 0 16px;
+}
+.processus h2 {
+  font-family: var(--titre);
+  font-weight: 400;
+  font-size: var(--pfs);
+  line-height: 0.98;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.ligne {
+  display: block;
+}
+.m {
+  display: inline-block;
+}
+.vignette {
+  width: 0.78em;
+  height: 0.82em;
+  border-radius: 0.1em;
+  vertical-align: -0.07em;
+  margin: 0 0.08em;
+  background: url("/cartes/lyon.webp") 50% 32% / cover;
+  box-shadow: 0 0.05em 0.16em rgba(22, 32, 42, 0.3);
+  rotate: -4deg;
+}
+.processus__sous {
+  margin-top: calc(var(--pfs) * 0.3);
+  font-size: clamp(16px, 1.3vw, 19px);
+  color: var(--encre2);
+}
+.processus__btn {
+  margin-top: 22px;
+}
+.cartes {
+  list-style: none;
+  margin: 6vh auto 0;
+  padding: 0 24px;
+  max-width: 1120px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+}
+.carte-v {
+  position: relative;
+  aspect-ratio: 1 / 1.32;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--sable);
+  box-shadow: 0 8px 20px rgba(22, 32, 42, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  container-type: inline-size;
+}
+.carte-v img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.carte-v__nom {
+  position: absolute;
+  left: 7cqw;
+  bottom: 7cqw;
+  background: var(--jaune);
+  color: var(--encre);
+  font-family: var(--titre);
+  font-size: 13.5cqw;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  padding: 0.3em 0.42em 0.18em;
+  border-radius: 0.14em;
+  box-shadow: 0 0.12em 0 rgba(22, 32, 42, 0.22);
+}
+.carte-v__etat {
+  position: absolute;
+  right: 6cqw;
+  top: 6cqw;
+  background: rgba(22, 32, 42, 0.82);
+  color: var(--feuille);
+  font-size: max(12px, 7.2cqw);
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.5em 0.7em;
+  border-radius: 2em;
+}
+.carte-v[data-pret] .carte-v__etat {
+  background: #c4212d;
+}
+.carte-v--question {
+  background: var(--encre);
+}
+.carte-v__point {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-bottom: 12%;
+  color: var(--jaune);
+  font-family: var(--titre);
+  font-size: 92cqw;
+  line-height: 1;
+}
+.carte-v--question .carte-v__etat {
+  background: rgba(255, 253, 246, 0.16);
+}
+
+/* ——— le panneau de l'appli : version simple */
+.panneau {
+  position: relative;
+  margin-top: 10vh;
+  padding: 9vh 24px;
+  overflow: hidden;
+  display: grid;
+  justify-items: center;
+  gap: 5vh;
+  text-align: center;
+}
+.panneau__fond img {
+  position: absolute;
+  max-width: none;
+  left: -4%;
+  top: -4%;
+  width: 108%;
+  height: 108%;
+  object-fit: cover;
+}
+.panneau__voile {
+  position: absolute;
+  inset: 0;
+  background: rgba(243, 237, 221, 0.62);
+}
+.mots {
+  position: relative;
+  font-family: var(--titre);
+  font-size: var(--sfs);
+  line-height: 0.98;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.panneau .g {
+  color: #6f7a83;
+}
+.tel {
+  position: relative;
+  width: var(--camw);
+  aspect-ratio: 390 / 844;
+  border-radius: calc(var(--camw) * 0.14);
+  padding: calc(var(--camw) * 0.028);
+  background: var(--encre);
+  box-shadow: 0 calc(var(--camw) * 0.16) calc(var(--camw) * 0.22) calc(var(--camw) * -0.1) rgba(22, 32, 42, 0.55), inset 0 0 0 1.5px rgba(255, 255, 255, 0.14);
+}
+.tel img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  border-radius: calc(var(--camw) * 0.115);
+  background: var(--papier);
+}
+.noir {
+  display: none;
+}
+
+/* ——— la ligne : version simple */
+.manifeste {
+  background: var(--nuit);
+  color: #fff;
+  padding: 12vh 24px;
+}
+.piste {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--mfs) * 0.22) calc(var(--mfs) * 0.3);
+  max-width: 1120px;
+  margin: 0 auto;
+  font-family: var(--titre);
+  font-size: calc(var(--mfs) * 0.62);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.bloc.intro {
+  position: relative;
+  flex-basis: 100%;
+  display: grid;
+  gap: 0.2em;
+  margin: 0.8em 0 1.2em;
+}
+.bloc.intro p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.26em;
+}
+.mot {
+  display: inline-block;
+  white-space: nowrap;
+}
+.mot .c {
+  display: inline-block;
+}
+.tag {
+  display: inline-block;
+  background: var(--c, var(--jaune));
+  color: var(--encre);
+  font-family: var(--texte);
+  font-size: max(13px, 0.2em);
+  font-weight: 650;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1;
+  padding: 0.45em 0.7em;
+  border-radius: 0.3em;
+  box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.35);
+  rotate: var(--r, 0deg);
+  white-space: nowrap;
+}
+.bloc.intro .tag {
+  justify-self: start;
+}
+.anime .bloc.intro .tag {
+  position: absolute;
+}
+.tag--grand {
+  font-family: var(--titre);
+  font-size: 0.44em;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.3em 0.5em 0.18em;
+  border-radius: 0.14em;
+}
+.pile {
+  display: inline-grid;
+  justify-items: start;
+  gap: 0.1em;
+}
+.objet {
+  display: inline-block;
+  width: var(--t, 1em);
+  rotate: var(--r, 0deg);
+  flex: none;
+  filter: drop-shadow(0 0.08em 0.14em rgba(0, 0, 0, 0.4));
+}
+.objet svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.polaroid {
+  background: var(--feuille);
+  padding: 0.07em 0.07em 0.26em;
+  border-radius: 0.04em;
+}
+.polaroid img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+.piste__fin {
+  display: none;
+}
+
+/* ——— les offres */
+.offres {
+  padding: calc(var(--nav-h) + 6vh) 0 9vh;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  align-items: center;
+}
+.offres h2 {
+  font-family: var(--titre);
+  font-weight: 400;
+  font-size: clamp(44px, 6vw, 84px);
+  line-height: 0.96;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.offres__grille {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 24px;
+  margin-top: 40px;
+  align-items: stretch;
+}
+.offre {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+  border-radius: 22px;
+  border: 1px solid var(--ligne);
+  background: var(--feuille);
+  box-shadow: var(--ombre-papier);
+}
+.offre--forte {
+  background: var(--encre);
+  border-color: var(--encre);
+  color: var(--feuille);
+}
+.offre__tag {
+  position: absolute;
+  right: 26px;
+  top: -14px;
+  rotate: 3deg;
+}
+.offre h3 {
+  font-family: var(--titre);
+  font-weight: 400;
+  font-size: clamp(34px, 3.4vw, 46px);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.offre__prix {
+  margin-top: 6px;
+  font-family: var(--titre);
+  font-size: clamp(54px, 6vw, 84px);
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+.offre--forte .offre__prix {
+  color: var(--jaune);
+}
+.offre ul {
+  list-style: none;
+  margin: 18px 0 26px;
+  padding: 0;
+  display: grid;
+  gap: 0;
+  flex: 1;
+  align-content: start;
+}
+.offre li {
+  padding: 12px 0 12px 30px;
+  border-top: 1px solid var(--ligne);
+  position: relative;
+  font-size: 17px;
+}
+.offre--forte li {
+  border-color: rgba(255, 253, 246, 0.18);
+}
+.offre li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 17px;
+  width: 15px;
+  height: 8px;
+  border-left: 2.5px solid var(--rouge);
+  border-bottom: 2.5px solid var(--rouge);
+  rotate: -45deg;
+}
+.offre--forte li::before {
+  border-color: var(--jaune);
+}
+.offre__vignettes {
+  display: flex;
+  margin: 20px 0 0 8px;
+}
+.offre__vignettes img {
+  width: 46px;
+  height: 60px;
+  object-fit: cover;
+  object-position: 50% 36%;
+  border-radius: 8px;
+  border: 2px solid var(--feuille);
+  margin-left: -8px;
+  background: var(--sable);
+  box-shadow: 0 4px 8px -4px rgba(22, 32, 42, 0.4);
+  transition: transform 0.3s var(--sortie);
+}
+.offre__vignettes img:nth-child(odd) {
+  rotate: -3deg;
+}
+.offre__vignettes img:nth-child(even) {
+  rotate: 2deg;
+}
+.offre:hover .offre__vignettes img {
+  transform: translateY(-3px);
+}
+.offre__plus {
+  align-self: center;
+  margin-left: 8px;
+  min-width: 44px;
+  padding: 9px 8px 6px;
+  border-radius: 22px;
+  background: var(--jaune);
+  color: var(--encre);
+  font-family: var(--titre);
+  font-size: 22px;
+  line-height: 1;
+  text-align: center;
+}
+.offre--forte .offre__vignettes img {
+  border-color: var(--encre);
+}
+.offre ul {
+  margin-top: 14px;
+}
+.offres__suite {
+  margin-top: 28px;
+  color: var(--encre2);
+  max-width: 46em;
+}
+@media (max-width: 819px) {
+  .offres__grille {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  .offre {
+    padding: 24px 20px;
+  }
+  .offre--forte {
+    order: -1;
+  }
+}
+
+/* ——— pied */
+.pied {
+  padding: 30px 0 calc(30px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--ligne);
+  font-size: 14px;
+  color: var(--encre2);
+}
+.pied .enveloppe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 24px;
+}
+.pied__marque {
+  font-family: var(--titre);
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  color: var(--encre);
+}
+
+/* ═══════════════════════════════════════════════ la chorégraphie (html.anime) ═══════════════════════════════════════════════ */
+.anime .histoire {
+  height: 1600vh;
+}
+.anime .hero {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 100vh;
+  height: 100svh;
+  z-index: 9;
+  padding: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+.anime .hero__titre {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 41%;
+  height: 0;
+}
+.anime .hero__mot .l,
+.anime .hero__pictos .pi {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(var(--x, 0px), -50%);
+  transition: transform 0.34s cubic-bezier(0.25, 0.75, 0.2, 1);
+}
+.anime .hero__mot .l {
+  opacity: 0;
+  clip-path: inset(-25% 100% -25% 0);
+}
+.anime .hero__mot .l.vu {
+  opacity: 1;
+  clip-path: inset(-25% 0 -25% 0);
+  transition: transform 0.34s cubic-bezier(0.25, 0.75, 0.2, 1), clip-path 0.13s linear 0.07s;
+}
+.anime .hero__titre.fixe .l,
+.anime .hero__titre.fixe .pi {
+  transition: none;
+}
+.anime .hero__pictos {
+  display: block;
+}
+.anime .hero__pictos .pi {
+  width: var(--ic);
+  height: var(--ic);
+}
+.pi i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scale(0);
+  opacity: 0;
+}
+.pi svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.anime .avion {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--u) * 62);
+  height: calc(var(--u) * 62);
+  margin: calc(var(--u) * -31) 0 0 calc(var(--u) * -31);
+  opacity: 0;
+  will-change: transform;
+}
+.anime .hero__sous {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(41% + var(--hfs) * 0.66);
+  margin: 0;
+  max-width: none;
+  padding: 0 24px;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.7s, transform 0.9s var(--sortie);
+}
+.anime .hero__sous.vu {
+  opacity: 1;
+  transform: none;
+}
+.anime .hero__sous p {
+  max-width: 30em;
+  margin: 0 auto;
+}
+.anime .nav > * {
+  animation: nav-entree 0.5s var(--sortie) both;
+}
+.anime .nav__logo {
+  animation-delay: 0.15s;
+}
+.anime .nav__liens {
+  animation-delay: 0.24s;
+}
+.anime .nav__btn {
+  animation-delay: 0.3s;
+}
+@keyframes nav-entree {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.anime .scene {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  padding: 0;
+  background: var(--papier);
+}
+.anime .processus {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  top: 15%;
+  opacity: 0;
+}
+.anime .processus .m,
+.anime .mots .m {
+  opacity: 0;
+  transform: translateY(0.35em);
+  filter: blur(6px);
+}
+.anime .processus.vu .m,
+.anime .mots.vu .m {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition: opacity 0.55s var(--sortie), transform 0.55s var(--sortie), filter 0.55s var(--sortie);
+  transition-delay: calc(var(--i, 0) * 0.11s);
+}
+.anime .processus__sous,
+.anime .processus__btn {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.anime .processus.vu .processus__sous,
+.anime .processus.vu .processus__btn {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s var(--sortie) 0.7s, transform 0.5s var(--sortie) 0.7s, background-color 0.18s, border-color 0.18s;
+}
+.anime .processus.vu .processus__btn {
+  transition-delay: 0.85s, 0.85s, 0s, 0s;
+}
+.anime .cartes {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+  display: block;
+  pointer-events: none;
+}
+.anime .carte-v {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--cw) * 1px);
+  height: calc(var(--cw) * 1.32px);
+  margin: calc(var(--cw) * -0.66px) 0 0 calc(var(--cw) * -0.5px);
+  border-radius: calc(var(--cw) * 0.075px);
+  box-shadow: 0 calc(var(--cw) * 0.03px) calc(var(--cw) * 0.09px) rgba(22, 32, 42, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  opacity: 0;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+.anime .panneau {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  margin: 0;
+  padding: 0;
+  display: block;
+  visibility: hidden;
+  will-change: clip-path;
+}
+.anime .panneau__fond img {
+  will-change: transform;
+}
+.anime .tel {
+  position: absolute;
+  left: 50%;
+  top: 51%;
+  will-change: transform;
+}
+.anime .mots--hg {
+  position: absolute;
+  left: calc(40px * var(--n));
+  top: calc(104px * var(--n));
+  text-align: left;
+}
+.anime .mots--bd {
+  position: absolute;
+  right: calc(40px * var(--n));
+  bottom: calc(46px * var(--n));
+  text-align: right;
+}
+.anime .mots--bd .m {
+  --i: calc(var(--j) + 4);
+}
+.anime .noir {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background: var(--nuit);
+  opacity: 0;
+  pointer-events: none;
+}
+@media (max-width: 819px) {
+  .anime .processus {
+    top: 14%;
+  }
+  .anime .mots--hg {
+    left: 16px;
+    top: 84px;
+  }
+  .anime .mots--bd {
+    right: 16px;
+    bottom: 28px;
+  }
+}
+
+.anime .manifeste {
+  height: 850vh;
+  padding: 0;
+}
+.anime .manifeste__scene {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+.anime .piste {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  max-width: none;
+  margin: 0;
+  flex-wrap: nowrap;
+  gap: calc(var(--mfs) * 0.32);
+  font-size: var(--mfs);
+  white-space: nowrap;
+  will-change: transform;
+}
+.anime .bloc.intro {
+  flex: none;
+  font-size: 0.72em;
+  margin: 0;
+}
+.anime .bloc.intro p {
+  flex-wrap: nowrap;
+}
+.anime .tag {
+  font-size: max(13px, 0.24em);
+}
+.anime .tag--grand {
+  font-size: 0.42em;
+}
+.anime .bloc.intro .tag {
+  font-size: max(13px, 0.3em);
+}
+.anime .mot .c {
+  opacity: 0;
+  transform: translateY(0.55em) rotate(14deg);
+  transform-origin: bottom left;
+}
+.anime .vu .c,
+.anime .mot.vu .c {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s var(--sortie), transform 0.5s var(--sortie);
+  transition-delay: calc(var(--k, 0) * 35ms);
+}
+.anime .auto {
+  scale: 0;
+  rotate: -14deg;
+}
+.anime .auto.vu {
+  scale: 1;
+  rotate: var(--r, 0deg);
+  transition: scale 0.5s cubic-bezier(0.34, 1.45, 0.64, 1) 0.12s, rotate 0.5s cubic-bezier(0.34, 1.45, 0.64, 1) 0.12s;
+}
+.anime .piste__fin {
+  display: block;
+  flex: none;
+  width: 30vw;
+  height: 1px;
+}

@@ -1,0 +1,16 @@
+---
+import Base from "../layouts/Base.astro";
+import App from "../app/App.tsx";
+import "../app/app.css";
+import { MARQUE } from "../marque";
+---
+
+<Base
+  titre={`Guide de Lyon : ton itinéraire sur mesure | ${MARQUE}`}
+  description="Compose ta visite de Lyon selon ton temps et tes envies : étapes avec vidéos, horaires, bonnes adresses et carnet de voyage."
+>
+  <App client:only="react">
+    <p class="attente" slot="fallback">Chargement du guide de Lyon…</p>
+  </App>
+  <noscript><p class="attente">Le guide a besoin de JavaScript pour composer ton itinéraire.</p></noscript>
+</Base>

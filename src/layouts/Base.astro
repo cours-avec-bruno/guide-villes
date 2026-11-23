@@ -1,0 +1,37 @@
+---
+import "@fontsource/bebas-neue/400.css";
+import "@fontsource-variable/space-grotesk";
+import "../styles/base.css";
+
+interface Props {
+  titre: string;
+  description: string;
+  type?: string;
+  image?: string;
+}
+const { titre, description, type = "software", image = "/partage.jpg" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="fr" data-type={type}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{titre}</title>
+    <meta name="description" content={description} />
+    <meta name="page-type" content={type} />
+    <meta name="site-kind" content="software" />
+    <meta name="theme-color" content="#f3eddd" />
+    <meta property="og:title" content={titre} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={image} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- <link rel="canonical" href="…" /> : à ajouter quand le nom de domaine sera choisi -->
+    <slot name="tete" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
