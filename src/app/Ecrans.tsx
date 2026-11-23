@@ -1,8 +1,7 @@
-// Les écrans de l'appli : le questionnaire, le parcours, les adresses, le carnet, et la fiche d'une étape.
-import { useEffect, useRef, useState } from "react";
+// Les écrans de l'appli : les balades, le sur-mesure, le parcours, les adresses, le carnet, et la fiche d'une étape.
+import { useEffect, useMemo, useRef, useState } from "react";
 import { url } from "../base";
-import { ACTION } from "../marque";
-import { ADRESSES, DEPARTS, THEMES, VIDEOS, VISITES, dureeVideo, etape, type Adresse, type Trajets } from "./donnees";
+import { ADRESSES, DEPARTS, THEMES, VIDEOS, dureeVideo, etape, type Adresse, type Trajets } from "./donnees";
 import { distance, duree, hhmm, troncon, type Plan, type Reponses } from "./moteur";
 import { Icone } from "./Icone";
 import type { Voyage } from "./stockage";
@@ -24,10 +23,60 @@ function Puce({ actif, onClick, children }: { actif: boolean; onClick: () => voi
   );
 }
 
-// ——————————————————————————————————————————————————————————— le questionnaire
-export function Questionnaire({ depart, peutFermer, onCreer, onSecrets, onFermer }: {
-  depart: Reponses; peutFermer: boolean;
-  onCreer: (r: Reponses) => void; onSecrets: () => void; onFermer: () => void;
+// ——————————————————————————————————————————————————————————— les balades prêtes à lancer (le premier écran)
+export type Balade = { id: string; nom: string; etiquette: string; accroche: string; etapes: string[]; minutes: number; depart: string };
+
+export function Balades({ balades, peutFermer, onChoisir, onSurMesure, onFermer }: {
+  balades: Balade[]; peutFermer: boolean;
+  onChoisir: (id: string) => void; onSurMesure: () => void; onFermer: () => void;
+}) {
+  return (
+    <main className="q" id="contenu">
+      <div className="q__tete">
+        <p className="etiquette">Lyon</p>
+        {peutFermer && (
+          <button type="button" className="rond" onClick={onFermer} aria-label="Revenir à ma balade">
+            <Icone nom="fermer" />
+          </button>
+        )}
+      </div>
+      <h1 className="q__titre">Le guide de Lyon</h1>
+      <p className="q__chapo">Choisis une balade. Elle s'ouvre tout de suite, avec la carte et une vidéo à chaque étape.</p>
+
+      <ul className="balades">
+        {balades.map((b) => (
+          <li key={b.id}>
+            <button type="button" className="balade" onClick={() => onChoisir(b.id)}>
+              <span className="balade__images" aria-hidden="true">
+                {[b.etapes[0], b.etapes[Math.floor(b.etapes.length / 2)], b.etapes[b.etapes.length - 1]].map((id) => (
+                  <img key={id} src={url(`/videos/lyon/${etape(id).videos[0]}.jpg`)} alt="" loading="lazy" width="60" height="80" />
+                ))}
+              </span>
+              <span className="balade__texte">
+                <span className="adresse__type">{b.etiquette}</span>
+                <strong>{b.nom}</strong>
+                <span>{b.accroche}</span>
+                <span className="balade__meta">{b.etapes.length} étapes · {duree(b.minutes)} · départ {b.depart}</span>
+              </span>
+              <span className="balade__fleche"><Icone nom="fleche" /></span>
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      <div className="q__pied">
+        <button type="button" className="btn btn--contour btn--bloc" onClick={onSurMesure}>
+          <Icone nom="crayon" taille={16} /> Composer ma balade sur mesure
+        </button>
+      </div>
+    </main>
+  );
+}
+
+// ——————————————————————————————————————————————————————————— le sur-mesure (après les balades)
+export function Questionnaire({ depart, apercu, onCreer, onFermer }: {
+  depart: Reponses; apercu: (r: Reponses) => { n: number; minutes: number; metres: number };
+  onCreer: (r: Reponses) => void; onFermer: () => void;
 }) {
   const [r, setR] = useState<Reponses>(depart);
   const [geo, setGeo] = useState<"" | "attente" | "refus">("");
@@ -41,22 +90,20 @@ export function Questionnaire({ depart, peutFermer, onCreer, onSecrets, onFermer
       { enableHighAccuracy: true, timeout: 10000 },
     );
   };
-  const secrets = VISITES[0];
+  const res = useMemo(() => apercu(r), [r]);
   return (
-    <main className="q" id="contenu">
+    <main className="q q--mesure" id="contenu">
       <div className="q__tete">
         <p className="etiquette">Lyon</p>
-        {peutFermer && (
-          <button type="button" className="rond" onClick={onFermer} aria-label="Revenir à mon itinéraire">
-            <Icone nom="fermer" />
-          </button>
-        )}
+        <button type="button" className="rond" onClick={onFermer} aria-label="Revenir aux balades">
+          <Icone nom="retour" />
+        </button>
       </div>
-      <h1 className="q__titre">Ton itinéraire dans Lyon</h1>
-      <p className="q__chapo">Cinq réponses, et le parcours se compose tout seul, avec les horaires.</p>
+      <h1 className="q__titre">Ta balade sur mesure</h1>
+      <p className="q__chapo">Règle ton temps et tes envies : le résultat se met à jour en bas de l'écran.</p>
 
       <fieldset className="q__bloc">
-        <legend>Tu as combien de temps ?</legend>
+        <legend>Combien de temps ?</legend>
         <div className="puces">
           {DUREES.map((d) => (
             <Puce key={d.min} actif={r.duree === d.min} onClick={() => maj({ duree: d.min })}>{d.nom}</Puce>
@@ -65,7 +112,7 @@ export function Questionnaire({ depart, peutFermer, onCreer, onSecrets, onFermer
       </fieldset>
 
       <fieldset className="q__bloc">
-        <legend>Tu pars d'où ?</legend>
+        <legend>Départ</legend>
         <div className="puces">
           {DEPARTS.map((d) => (
             <Puce key={d.id} actif={r.depart === d.id} onClick={() => maj({ depart: d.id })}>{d.nom}</Puce>
@@ -78,7 +125,7 @@ export function Questionnaire({ depart, peutFermer, onCreer, onSecrets, onFermer
       </fieldset>
 
       <fieldset className="q__bloc">
-        <legend>Tu aimes quoi ? <span>Plusieurs choix possibles</span></legend>
+        <legend>Tes envies <span>Facultatif, plusieurs choix possibles</span></legend>
         <div className="puces">
           {THEMES.map((t) => (
             <Puce key={t.id} actif={r.themes.includes(t.id)} onClick={() => maj({ themes: r.themes.includes(t.id) ? r.themes.filter((x) => x !== t.id) : [...r.themes, t.id] })}>
@@ -89,31 +136,32 @@ export function Questionnaire({ depart, peutFermer, onCreer, onSecrets, onFermer
       </fieldset>
 
       <fieldset className="q__bloc">
-        <legend>Les montées, ça te va ?</legend>
+        <legend>Les collines</legend>
         <div className="puces">
-          <Puce actif={r.montees} onClick={() => maj({ montees: true })}>Oui, à pied</Puce>
-          <Puce actif={!r.montees} onClick={() => maj({ montees: false })}>Plutôt en funiculaire</Puce>
+          <Puce actif={r.montees} onClick={() => maj({ montees: true })}>Je monte à pied</Puce>
+          <Puce actif={!r.montees} onClick={() => maj({ montees: false })}>Funiculaire et métro</Puce>
         </div>
       </fieldset>
 
       <fieldset className="q__bloc q__bloc--ligne">
-        <legend>Départ et repas</legend>
+        <legend>Heure et repas</legend>
         <label className="champ">
           <span>Heure de départ</span>
-          <input type="time" value={r.heure} step={300} onChange={(e) => maj({ heure: e.target.value || "10:00" })} />
+          <input type="time" value={r.heure} step={300} onChange={(ev) => maj({ heure: ev.target.value || "10:00" })} />
         </label>
         <label className="bascule">
-          <input type="checkbox" checked={r.repas} onChange={(e) => maj({ repas: e.target.checked })} />
+          <input type="checkbox" checked={r.repas} onChange={(ev) => maj({ repas: ev.target.checked })} />
           <span>Prévoir une pause repas</span>
         </label>
       </fieldset>
 
-      <div className="q__pied">
-        <button type="button" className="btn btn--plein btn--bloc" onClick={() => onCreer(r)}>
-          {ACTION} <Icone nom="fleche" taille={16} />
-        </button>
-        <button type="button" className="lien" onClick={onSecrets}>
-          Suivre « {secrets.nom} », {secrets.etapes.length} étapes au départ de Perrache
+      <div className="q__resultat">
+        <p role="status">
+          <strong>{res.n} étape{res.n > 1 ? "s" : ""} · {duree(res.minutes)}</strong>
+          <span>{distance(res.metres)} à pied</span>
+        </p>
+        <button type="button" className="btn btn--plein" onClick={() => onCreer(r)}>
+          Voir ma balade <Icone nom="fleche" taille={16} />
         </button>
       </div>
     </main>
@@ -121,9 +169,9 @@ export function Questionnaire({ depart, peutFermer, onCreer, onSecrets, onFermer
 }
 
 // ——————————————————————————————————————————————————————————— le parcours
-export function Parcours({ voyage, plan, proche, onOuvrir, onCocher, onModifier, onPartager, onAdresse, partage }: {
+export function Parcours({ voyage, plan, proche, onOuvrir, onCocher, onModifier, onPartager, onAdresse, onCarnet, partage }: {
   voyage: Voyage; plan: Plan; proche: string | null; partage: string;
-  onOuvrir: (id: string) => void; onCocher: (id: string) => void; onModifier: () => void; onPartager: () => void; onAdresse: (id: string) => void;
+  onOuvrir: (id: string) => void; onCocher: (id: string) => void; onModifier: () => void; onPartager: () => void; onAdresse: (id: string) => void; onCarnet: () => void;
 }) {
   const n = voyage.etapes.length;
   const vus = voyage.etapes.filter((id) => voyage.vus[id]).length;
@@ -131,7 +179,7 @@ export function Parcours({ voyage, plan, proche, onOuvrir, onCocher, onModifier,
     <section className="ecran" aria-labelledby="t-parcours">
       <div className="resume">
         <p className="etiquette">Lyon</p>
-        <h1 id="t-parcours">{voyage.mode === "5-secrets" ? "Les 5 secrets de Lyon" : "Ton itinéraire"}</h1>
+        <h1 id="t-parcours">{voyage.nom ?? (voyage.mode === "5-secrets" ? "Les 5 secrets de Lyon" : "Ta balade sur mesure")}</h1>
         <p className="resume__chiffres">
           {n} étape{n > 1 ? "s" : ""} · {duree(plan.minutes)} · {distance(plan.metres)} à pied
         </p>
@@ -140,10 +188,21 @@ export function Parcours({ voyage, plan, proche, onOuvrir, onCocher, onModifier,
         </div>
         <p className="resume__etat">{vus === 0 ? "Coche chaque étape quand tu y es." : vus === n ? "Toutes les étapes sont cochées. Ton carnet est complet." : `${vus} étape${vus > 1 ? "s" : ""} sur ${n} cochée${vus > 1 ? "s" : ""}.`}</p>
         <div className="resume__actions">
-          <button type="button" className="btn btn--contour" onClick={onModifier}><Icone nom="crayon" taille={16} /> Modifier</button>
+          <button type="button" className="btn btn--contour" onClick={onModifier}><Icone nom="rejouer" taille={16} /> Autre balade</button>
           <button type="button" className="btn btn--contour" onClick={onPartager}><Icone nom="partage" taille={16} /> {partage || "Partager"}</button>
         </div>
       </div>
+
+      {vus === n && (
+        <div className="fini">
+          <p className="fini__titre">Balade terminée</p>
+          <p>Tes {n} étapes sont dans ton carnet, avec l'heure de passage et tes photos.</p>
+          <div className="resume__actions">
+            <button type="button" className="btn btn--plein" onClick={onCarnet}>Voir mon carnet <Icone nom="fleche" taille={16} /></button>
+            <button type="button" className="btn btn--contour" onClick={onModifier}>Autre balade</button>
+          </div>
+        </div>
+      )}
 
       {proche && !voyage.vus[proche] && (
         <button type="button" className="tu-y-es" onClick={() => onOuvrir(proche)}>

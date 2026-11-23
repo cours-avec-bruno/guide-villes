@@ -421,6 +421,182 @@
   text-align: center;
 }
 
+/* ——— les balades prêtes à lancer */
+.balades {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.balade {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--ligne);
+  border-radius: var(--r-l);
+  background: var(--feuille);
+  box-shadow: var(--ombre-papier);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.22s var(--sortie);
+}
+.balade:hover {
+  transform: translateY(-2px);
+}
+.balade:active {
+  transform: scale(0.985);
+}
+.balade__images {
+  flex: none;
+  display: flex;
+  padding-left: 14px;
+}
+.balade__images img {
+  width: 44px;
+  height: 62px;
+  object-fit: cover;
+  object-position: 50% 36%;
+  border-radius: 8px;
+  border: 2px solid var(--feuille);
+  margin-left: -14px;
+  background: var(--sable);
+  box-shadow: 0 4px 8px -4px rgba(22, 32, 42, 0.4);
+}
+.balade__images img:nth-child(odd) {
+  rotate: -4deg;
+}
+.balade__images img:nth-child(even) {
+  rotate: 3deg;
+}
+.balade__texte {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  font-size: 15px;
+  color: var(--encre2);
+}
+.balade__texte strong {
+  font-family: var(--titre);
+  font-weight: 400;
+  font-size: 27px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--encre);
+  margin-top: 2px;
+}
+.balade__meta {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mer-fonce);
+}
+.balade__fleche {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--encre);
+  color: var(--feuille);
+  transition: transform 0.25s var(--sortie);
+}
+.balade:hover .balade__fleche {
+  transform: translateX(3px);
+}
+@media (max-width: 520px) {
+  .balade {
+    gap: 12px;
+    padding: 12px;
+  }
+  .balade__images {
+    padding-left: 12px;
+  }
+  .balade__images img {
+    width: 38px;
+    height: 54px;
+    margin-left: -18px;
+  }
+  .balade__fleche {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* ——— le sur-mesure : le résultat reste visible en bas */
+.q--mesure {
+  padding-bottom: 130px;
+}
+.q__resultat {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: var(--feuille);
+  border-top: 1px solid var(--ligne);
+  box-shadow: 0 -10px 24px -18px rgba(22, 32, 42, 0.5);
+}
+.q__resultat p {
+  display: grid;
+  line-height: 1.25;
+  font-size: 14px;
+  color: var(--encre2);
+}
+.q__resultat strong {
+  font-size: 17px;
+  font-weight: 650;
+  color: var(--encre);
+}
+@media (min-width: 620px) {
+  .q__resultat {
+    left: 50%;
+    right: auto;
+    width: 528px;
+    translate: -50% 0;
+    bottom: 16px;
+    border: 1px solid var(--ligne);
+    border-radius: var(--r-l);
+  }
+}
+
+/* ——— la fin de la balade */
+.fini {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: var(--r-l);
+  background: var(--encre);
+  color: var(--feuille);
+}
+.fini__titre {
+  font-family: var(--titre);
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--jaune);
+  margin-bottom: 6px;
+}
+.fini .btn {
+  border-color: var(--feuille);
+  color: var(--feuille);
+}
+.fini .btn--plein {
+  background: var(--feuille);
+  color: var(--encre);
+}
+
 /* ——— le fil du parcours */
 .tu-y-es {
   margin-top: 18px;

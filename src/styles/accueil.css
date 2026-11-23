@@ -391,13 +391,21 @@ html.simple .bascule__anime {
   background: var(--encre);
   box-shadow: 0 calc(var(--camw) * 0.16) calc(var(--camw) * 0.22) calc(var(--camw) * -0.1) rgba(22, 32, 42, 0.55), inset 0 0 0 1.5px rgba(255, 255, 255, 0.14);
 }
-.tel img {
-  width: 100%;
-  height: 100%;
+.tel__ecran {
+  position: absolute;
+  inset: calc(var(--camw) * 0.028);
+  width: calc(100% - var(--camw) * 0.056);
+  height: calc(100% - var(--camw) * 0.056);
+  max-width: none;
   object-fit: cover;
   object-position: top;
   border-radius: calc(var(--camw) * 0.115);
   background: var(--papier);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.tel__ecran.actif {
+  opacity: 1;
 }
 .noir {
   display: none;
@@ -683,7 +691,7 @@ html.simple .bascule__anime {
 
 /* ═══════════════════════════════════════════════ la chorégraphie (html.anime) ═══════════════════════════════════════════════ */
 .anime .histoire {
-  height: 1600vh;
+  height: 1250vh;
 }
 .anime .hero {
   position: absolute;
@@ -699,7 +707,7 @@ html.simple .bascule__anime {
   position: absolute;
   left: 0;
   right: 0;
-  top: 41%;
+  top: var(--ty, 41%);
   height: 0;
 }
 .anime .hero__mot .l,
@@ -757,7 +765,7 @@ html.simple .bascule__anime {
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(41% + var(--hfs) * 0.66);
+  top: calc(var(--ty, 41%) + var(--hfs) * 0.66);
   margin: 0;
   max-width: none;
   padding: 0 24px;
@@ -919,7 +927,7 @@ html.simple .bascule__anime {
 }
 
 .anime .manifeste {
-  height: 850vh;
+  height: 700vh; /* le script la règle sur la longueur de la ligne */
   padding: 0;
 }
 .anime .manifeste__scene {
@@ -984,4 +992,417 @@ html.simple .bascule__anime {
   flex: none;
   width: 30vw;
   height: 1px;
+}
+
+/* ═══════════════════════════════════════════════ la page refaite autour du produit ═══════════════════════════════════════════════ */
+/* le hero : l'étiquette au-dessus du titre, la ligne de réassurance sous le bouton */
+.hero__sur {
+  margin-bottom: 14px;
+}
+.hero__note {
+  margin-top: 12px;
+  font-size: 14px !important;
+  font-weight: 600;
+  color: var(--encre2);
+}
+.anime .hero__sur {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--ty, 41%) - var(--hfs) * 0.5 - 48px);
+  margin: 0;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.6s, transform 0.8s var(--sortie);
+}
+.anime .hero__sur.vu {
+  opacity: 1;
+  transform: none;
+}
+
+/* « Tu as vu la vidéo ? » : la preuve sous la phrase */
+.processus__preuve {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--encre2);
+}
+.anime .processus__preuve {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.anime .processus.vu .processus__preuve {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s var(--sortie) 0.78s, transform 0.5s var(--sortie) 0.78s;
+}
+.processus__btn {
+  margin-top: 18px;
+}
+
+/* le téléphone : les légendes des quatre écrans */
+.legendes {
+  position: relative;
+  display: grid;
+  gap: 0.12em;
+}
+.legende {
+  font-size: calc(var(--sfs) * 0.62);
+}
+.anime .legendes {
+  position: absolute;
+  right: calc(40px * var(--n));
+  bottom: calc(46px * var(--n));
+  display: block;
+  width: min(90vw, 13em * 4);
+  height: calc(var(--sfs) * 2.1);
+  font-size: var(--sfs);
+  pointer-events: none;
+}
+.anime .legende {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  font-size: var(--sfs);
+  text-align: right;
+  opacity: 0;
+  transform: translateY(0.3em);
+  transition: opacity 0.35s, transform 0.5s var(--sortie);
+}
+.anime .legendes.vu .legende.actif {
+  opacity: 1;
+  transform: none;
+}
+@media (max-width: 819px) {
+  .anime .legendes {
+    right: 16px;
+    bottom: 28px;
+    width: calc(100vw - 32px);
+  }
+}
+
+/* la ligne : les numéros des trois gestes, la bande des lieux, le bouton */
+.num {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 0.92em;
+  height: 0.92em;
+  padding-top: 0.06em;
+  border-radius: 50%;
+  background: var(--jaune);
+  color: var(--encre);
+  font-size: 0.86em;
+  line-height: 1;
+  rotate: var(--r, 0deg);
+  box-shadow: 0 0.06em 0 rgba(0, 0, 0, 0.3);
+}
+.lieux {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 14px;
+  flex-basis: 100%;
+}
+.lieu {
+  position: relative;
+  aspect-ratio: 3 / 4.3;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--mer-fonce);
+  rotate: var(--r, 0deg);
+  box-shadow: 0 10px 24px -8px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+.lieu img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+.lieu__num {
+  position: absolute;
+  left: 9px;
+  top: 9px;
+  min-width: 30px;
+  height: 30px;
+  padding: 3px 7px 0;
+  border-radius: 5px;
+  background: var(--rouge);
+  color: #fff;
+  font-family: var(--titre);
+  font-size: 24px;
+  line-height: 28px;
+  letter-spacing: 0;
+  text-align: center;
+}
+.lieu__texte {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: grid;
+  gap: 2px;
+  padding: 28px 11px 11px;
+  background: linear-gradient(to top, rgba(14, 42, 61, 0.94) 55%, rgba(14, 42, 61, 0));
+  font-family: var(--texte);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.25;
+  text-transform: none;
+  color: #c9d6de;
+  white-space: normal;
+}
+.lieu__texte strong {
+  font-size: 15px;
+  font-weight: 650;
+  color: #fff;
+}
+.piste__btn {
+  flex: none;
+  font-size: 16px;
+  letter-spacing: -0.005em;
+  text-transform: none;
+}
+.anime .lieux {
+  flex: none;
+  display: flex;
+  gap: calc(var(--mfs) * 0.16);
+}
+.anime .lieu {
+  flex: none;
+  width: max(168px, calc(var(--mfs) * 1.85));
+}
+
+/* un arrêt du guide, en vrai */
+.exemple {
+  padding: calc(var(--nav-h) + 5vh) 0 8vh;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  align-items: center;
+}
+.exemple__grille {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(28px, 6vw, 88px);
+}
+.exemple__lecteur {
+  justify-self: end;
+  width: min(100%, 320px, 56vh * 0.5625);
+}
+.lecteur-ex,
+.lecteur-ex__video {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--nuit);
+  box-shadow: 0 30px 50px -24px rgba(14, 42, 61, 0.7), 0 0 0 7px var(--encre);
+  cursor: pointer;
+}
+.lecteur-ex__video {
+  object-fit: cover;
+  cursor: auto;
+}
+.lecteur-ex img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--sortie);
+}
+.lecteur-ex:hover img {
+  transform: scale(1.03);
+}
+.lecteur-ex::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(14, 42, 61, 0.75), rgba(14, 42, 61, 0) 45%);
+}
+.lecteur-ex__rond {
+  position: absolute;
+  left: 50%;
+  bottom: 62px;
+  z-index: 1;
+  width: 68px;
+  height: 68px;
+  margin-left: -34px;
+  display: grid;
+  place-items: center;
+  padding-left: 4px;
+  border-radius: 50%;
+  background: var(--jaune);
+  color: var(--encre);
+  transition: transform 0.3s var(--sortie);
+}
+.lecteur-ex:hover .lecteur-ex__rond {
+  transform: scale(1.08);
+}
+.lecteur-ex:active .lecteur-ex__rond {
+  transform: scale(0.94);
+}
+.lecteur-ex__texte {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 24px;
+  z-index: 1;
+  color: #fff;
+  font-family: var(--texte);
+  font-size: 16px;
+  font-weight: 650;
+  text-align: center;
+}
+.exemple h2,
+.faq h2,
+.fin h2 {
+  font-family: var(--titre);
+  font-weight: 400;
+  font-size: clamp(44px, 6vw, 84px);
+  line-height: 0.96;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.exemple h2 {
+  margin-top: 14px;
+}
+.exemple__lieu {
+  margin-top: 6px;
+  font-weight: 650;
+  color: var(--mer-fonce);
+}
+.exemple__fait {
+  margin-top: 18px;
+  font-size: clamp(18px, 1.6vw, 21px);
+  max-width: 30em;
+}
+.exemple__conseil {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: var(--r-m);
+  background: var(--sable-clair);
+  max-width: 34em;
+}
+.exemple .btn {
+  margin-top: 24px;
+}
+@media (max-width: 819px) {
+  .exemple__grille {
+    grid-template-columns: 1fr;
+  }
+  .exemple__lecteur {
+    justify-self: center;
+    width: min(72vw, 300px);
+  }
+}
+
+/* le tarif */
+.offre__prix small {
+  display: inline-block;
+  margin-left: 12px;
+  font-family: var(--texte);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: #b9c5cd;
+  vertical-align: 0.5em;
+}
+.offre__note {
+  margin-top: 12px;
+  font-size: 14px;
+  text-align: center;
+  color: var(--encre2);
+}
+.offre--forte .offre__note {
+  color: #b9c5cd;
+}
+.offres__grille {
+  grid-template-columns: 1.15fr 1fr;
+}
+@media (max-width: 819px) {
+  .offres__grille {
+    grid-template-columns: 1fr;
+  }
+  .offre--forte {
+    order: 0;
+  }
+}
+
+/* les questions */
+.faq {
+  padding: 9vh 0 10vh;
+  border-top: 1px solid var(--ligne);
+}
+.faq__liste {
+  margin: 40px 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 56px;
+}
+.faq__liste > div {
+  padding: 22px 0;
+  border-top: 1px solid var(--ligne);
+}
+.faq dt {
+  font-size: 19px;
+  font-weight: 650;
+}
+.faq dd {
+  margin: 8px 0 0;
+  color: var(--encre2);
+  max-width: 34em;
+}
+@media (max-width: 819px) {
+  .faq__liste {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* le dernier appel */
+.fin {
+  padding: 13vh 0;
+  background: var(--nuit);
+  color: #fff;
+  text-align: center;
+}
+.fin .btn {
+  margin-top: 30px;
+}
+.fin__suite {
+  margin: 34px auto 0;
+  max-width: 34em;
+  color: #b9c5cd;
+}
+.fin__suite a {
+  color: #fff;
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+.pied {
+  border-top: 0;
+}
+
+/* la navigation sur les parties sombres qui défilent normalement */
+body.nav-fond.nav-sombre .nav {
+  background: var(--nuit);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* les blocs des sections normales montent en entrant à l'écran */
+.anime .entre {
+  opacity: 0;
+  transform: translateY(26px);
+}
+.anime .entre.vu {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.7s var(--sortie), transform 0.9s var(--sortie), background-color 0.18s, border-color 0.18s;
+  transition-delay: calc(var(--d, 0) * 80ms), calc(var(--d, 0) * 80ms), 0s, 0s;
 }

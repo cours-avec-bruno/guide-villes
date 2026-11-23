@@ -30,7 +30,9 @@ const imagePartage = new URL(url(image), Astro.site ?? Astro.url).href;
     <meta property="og:image" content={imagePartage} />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href={url("/favicon.svg")} type="image/svg+xml" />
-    <!-- <link rel="canonical" href="…" /> : à ajouter quand le nom de domaine sera choisi -->
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site ?? Astro.url).href} />
+    <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site ?? Astro.url).href} />
+    <meta property="og:locale" content="fr_FR" />
     <slot name="tete" />
   </head>
   <body>

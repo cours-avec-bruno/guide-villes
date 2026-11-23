@@ -1,10 +1,10 @@
-// L'appli de visite de Lyon : questionnaire → itinéraire avec horaires → carte, adresses et carnet de voyage.
+// L'appli de visite de Lyon : on choisit une balade prête (ou on la compose) → parcours avec horaires → carte, adresses, carnet.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { url } from "../base";
 import { MARQUE } from "../marque";
 import Carte, { traceCarnet } from "./Carte";
 import { ADRESSES, DEPARTS, ETAPES, VISITES, chargerTrajets, depart as leDepart, type Trajets } from "./donnees";
-import { Adresses, Carnet, FicheAdresse, FicheEtape, Parcours, Questionnaire } from "./Ecrans";
+import { Adresses, Balades, Carnet, FicheAdresse, FicheEtape, Parcours, Questionnaire, type Balade } from "./Ecrans";
 import { Icone } from "./Icone";
 import { composer, coord, planifier, vol, type Reponses } from "./moteur";
 import { ajouterPhoto, ecrire, lire, lirePhoto, nouvelId, supprimerPhoto, type Etat, type Voyage } from "./stockage";
@@ -25,6 +25,12 @@ function heureParDefaut() {
   return `${String(Math.floor(q / 60)).padStart(2, "0")}:${String(q % 60).padStart(2, "0")}`;
 }
 const reponsesParDefaut = (): Reponses => ({ duree: 180, depart: "bellecour", themes: [], montees: true, repas: true, heure: heureParDefaut() });
+// les balades toutes faites du premier écran (la première est fixe, les autres sont composées par le moteur)
+const MODELES: { id: string; nom: string; etiquette: string; accroche: string; reponses: Partial<Reponses> }[] = [
+  { id: "5-secrets", nom: "Les 5 secrets", etiquette: "Pour commencer", accroche: "De la gare de Perrache à la place des Terreaux.", reponses: { depart: VISITES[0].depart, repas: false, duree: 120 } },
+  { id: "coeur", nom: "Le cœur de Lyon", etiquette: "La demi-journée", accroche: "L'essentiel du centre, à pied depuis Bellecour.", reponses: { depart: "bellecour", repas: false, duree: 180 } },
+  { id: "journee", nom: "Lyon en une journée", etiquette: "Le grand tour", accroche: "Les deux collines, la Presqu'île et le parc, pause repas comprise.", reponses: { depart: "bellecour", repas: true, duree: 480 } },
+];
 const nomDepart = (r: Reponses) => (r.depart === "position" ? "ta position" : leDepart(r.depart).nom);
 
 function useLarge() {
@@ -42,7 +48,7 @@ export default function App() {
   const [T, setT] = useState<Trajets | null>(null);
   const [etat, setEtatBrut] = useState<Etat>(lire);
   const [onglet, setOnglet] = useState<Onglet>("parcours");
-  const [edition, setEdition] = useState(false);
+  const [ecran, setEcran] = useState<"balades" | "mesure" | null>(null); // null : la balade en cours
   const [fiche, setFiche] = useState<string | null>(null);
   const [ficheAdr, setFicheAdr] = useState<string | null>(null);
   const [ici, setIci] = useState<[number, number] | null>(null);
@@ -59,7 +65,7 @@ export default function App() {
   const creerVoyage = (v: Omit<Voyage, "id" | "cree" | "vus" | "photos">) => {
     const neuf: Voyage = { ...v, id: nouvelId(), cree: Date.now(), vus: {}, photos: {} };
     setEtat((e) => ({ voyages: [...e.voyages.slice(-9), neuf], courant: neuf.id }));
-    setEdition(false);
+    setEcran(null);
     setOnglet("parcours");
     window.scrollTo(0, 0);
   };
@@ -85,7 +91,8 @@ export default function App() {
         mode: "sur-mesure", etapes: ids,
         reponses: { ...reponsesParDefaut(), depart: DEPARTS.some((x) => x.id === d) ? d : "bellecour", heure: /^\d\d:\d\d$/.test(p.get("h") ?? "") ? p.get("h")! : "10:00", montees: p.get("m") !== "0", repas: p.get("r") === "1" },
       });
-    } else if (p.get("nouveau") !== null) setEdition(true);
+    } else if (p.has("mesure")) setEcran("mesure");
+    else if (p.has("nouveau")) setEcran("balades");
     const o = p.get("onglet") as Onglet | null;
     if (o && ONGLETS.some((x) => x.id === o)) setOnglet(o);
     // « ?nu » : la carte seule, sans en-tête ni boutons (sert à fabriquer les images de la page de vente)
@@ -145,16 +152,34 @@ export default function App() {
   if (panne) return <p className="attente">Le guide n'a pas pu se charger. Vérifie ta connexion, puis recharge la page.</p>;
   if (!T) return <p className="attente" role="status">Chargement du guide de Lyon…</p>;
 
-  if (!voyage || !plan || edition) {
+  if (!voyage || !plan || ecran) {
+    if (ecran === "mesure") {
+      return (
+        <div className="appli appli--q">
+          <EnTete />
+          <Questionnaire
+            depart={voyage?.mode === "sur-mesure" ? voyage.reponses : reponsesParDefaut()}
+            apercu={(r) => { const et = composer(T, r); const pl = planifier(T, r, et, nomDepart(r)); return { n: et.length, minutes: pl.minutes, metres: pl.metres }; }}
+            onFermer={() => setEcran("balades")}
+            onCreer={(r) => creerVoyage({ mode: "sur-mesure", reponses: r, etapes: composer(T, r) })}
+          />
+        </div>
+      );
+    }
+    const balades: (Balade & { reponses: Reponses })[] = MODELES.map((mo) => {
+      const reponses = { ...reponsesParDefaut(), ...mo.reponses };
+      const etapes = mo.id === "5-secrets" ? VISITES[0].etapes : composer(T, reponses);
+      return { id: mo.id, nom: mo.nom, etiquette: mo.etiquette, accroche: mo.accroche, etapes, reponses, minutes: planifier(T, reponses, etapes, nomDepart(reponses)).minutes, depart: nomDepart(reponses) };
+    });
     return (
       <div className="appli appli--q">
         <EnTete />
-        <Questionnaire
-          depart={voyage?.mode === "sur-mesure" ? voyage.reponses : reponsesParDefaut()}
-          peutFermer={!!voyage}
-          onFermer={() => setEdition(false)}
-          onSecrets={() => lancerSecrets()}
-          onCreer={(r) => creerVoyage({ mode: "sur-mesure", reponses: r, etapes: composer(T, r) })}
+        <Balades
+          balades={balades}
+          peutFermer={!!voyage && !!plan}
+          onFermer={() => setEcran(null)}
+          onSurMesure={() => { setEcran("mesure"); window.scrollTo(0, 0); }}
+          onChoisir={(id) => { const b = balades.find((x) => x.id === id)!; creerVoyage({ mode: id === "5-secrets" ? "5-secrets" : "balade", nom: b.nom, reponses: b.reponses, etapes: b.etapes }); }}
         />
       </div>
     );
@@ -185,7 +210,7 @@ export default function App() {
 
       <main className="panneau" id="contenu">
         {actif === "parcours" && (
-          <Parcours voyage={voyage} plan={plan} proche={proche} partage={partage} onOuvrir={ouvrirEtape} onCocher={cocher} onModifier={() => setEdition(true)} onPartager={partager} onAdresse={ouvrirAdresse} />
+          <Parcours voyage={voyage} plan={plan} proche={proche} partage={partage} onOuvrir={ouvrirEtape} onCocher={cocher} onModifier={() => { setEcran("balades"); window.scrollTo(0, 0); }} onPartager={partager} onAdresse={ouvrirAdresse} onCarnet={() => { setOnglet("carnet"); window.scrollTo(0, 0); }} />
         )}
         {actif === "adresses" && <Adresses T={T} voyage={voyage} onAdresse={ouvrirAdresse} />}
         {actif === "carnet" && (

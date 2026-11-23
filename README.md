@@ -1,8 +1,8 @@
 # Guide de villes — V1 Lyon
 
 Le site que les Reels « Ce que tu ne sais pas sur… » font connaître : une page de vente (`/`) et une appli de visite
-(`/lyon`) qui compose un itinéraire sur mesure, le fait suivre sur une carte, propose des adresses et garde un carnet
-de voyage avec les photos.
+(`/lyon`) qui propose des balades prêtes à lancer ou sur mesure, les fait suivre sur une carte, donne des adresses
+et garde un carnet de voyage avec les photos. `/lyon/?nouveau` ouvre le choix des balades, `/lyon/?mesure` le sur-mesure.
 
 Le nom « Dédale » et le prix de 6,90 € sont **provisoires** : ils se changent dans `src/marque.ts`.
 
@@ -34,7 +34,7 @@ demande de « réduire les animations », un lien « Version sans animation » a
 |---|---|
 | `src/pages/index.astro` | la page de vente (textes, cartes de villes, offres) |
 | `src/styles/accueil.css`, `src/scripts/accueil.ts` | sa mise en forme et sa chorégraphie au défilement |
-| `src/pages/lyon.astro`, `src/app/` | l'appli : `App.tsx` (onglets, mémoire), `Ecrans.tsx` (questionnaire, parcours, adresses, carnet, fiches), `Carte.tsx` (MapLibre), `moteur.ts` (composition et horaires), `stockage.ts` (parcours et photos gardés sur le téléphone) |
+| `src/pages/lyon.astro`, `src/app/` | l'appli : `App.tsx` (onglets, mémoire), `Ecrans.tsx` (balades prêtes à lancer, sur-mesure, parcours, adresses, carnet, fiches), `Carte.tsx` (MapLibre), `moteur.ts` (composition et horaires), `stockage.ts` (parcours et photos gardés sur le téléphone) |
 | `src/data/lyon.json` | **les contenus de Lyon** : étapes, vidéos (image de début et de fin dans l'épisode), adresses, points de départ |
 | `src/styles/base.css` | la charte (papier, encre, mer, étiquettes jaunes ; Bebas Neue et Space Grotesk) |
 | `public/videos/lyon/` | les clips des étapes, découpés dans les épisodes |

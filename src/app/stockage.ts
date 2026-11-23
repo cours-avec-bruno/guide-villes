@@ -6,7 +6,8 @@ import type { Reponses } from "./moteur";
 export type Voyage = {
   id: string;
   cree: number;
-  mode: "sur-mesure" | "5-secrets";
+  mode: "sur-mesure" | "5-secrets" | "balade";
+  nom?: string; // le nom de la balade toute faite
   reponses: Reponses;
   etapes: string[];
   vus: Record<string, number>; // étape → moment où elle a été cochée

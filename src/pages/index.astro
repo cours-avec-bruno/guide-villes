@@ -1,13 +1,12 @@
 ---
-// La page de vente. Sa chorégraphie au défilement reprend, à la demande de Bruno, celle du brief « Tides in Motion » :
-// titre qui s'assemble à partir de pictos en pixels, éventail de cartes → dispersion → pile → roue, panneau qui grandit
-// depuis le centre avec un objet qui flotte puis dans lequel on plonge, enfin une ligne de texte qui défile de côté.
-// Tout est adapté au guide : les cartes sont les villes, l'objet est le téléphone avec l'appli, la ligne dit ce qu'on y fait.
-// Sans JavaScript ou avec « réduire les animations », la page se lit comme une page normale (classe « anime » absente).
+// La page de vente. Elle garde la chorégraphie au défilement du brief « Tides in Motion » (titre qui s'assemble,
+// éventail de cartes → dispersion → pile → roue, panneau qui grandit avec le téléphone, plongeon dans l'écran,
+// ligne qui défile de côté), mais tout y parle du produit : ce que c'est, ce qu'on y trouve, comment ça marche, le prix.
+// Sans JavaScript ou en « version sans animation » (?simple), la page se lit de haut en bas.
 import Base from "../layouts/Base.astro";
 import { url } from "../base";
 import { ACTION, MARQUE, PRIX_SUR_MESURE } from "../marque";
-import { ADRESSES, ETAPES, NB_VIDEOS } from "../app/donnees";
+import { ADRESSES, ETAPES, NB_VIDEOS, VIDEOS, etape } from "../app/donnees";
 
 const VILLES = [
   { id: "bordeaux", nom: "Bordeaux" },
@@ -22,14 +21,53 @@ const VILLES = [
   { id: "grenoble", nom: "Grenoble" },
   { id: "montpellier", nom: "Montpellier" },
 ];
-const TITRE = "Lyon à ta façon";
+const TITRE = "Les secrets de Lyon";
 const nE = ETAPES.length, nA = ADRESSES.length;
-const lienAppli = url("/lyon/?nouveau");
+const lienAppli = url("/lyon/");
+const lienSecrets = url("/lyon/?visite=5-secrets");
+// Vues de la série « Ce que tu ne sais pas sur… » (Instagram + TikTok), relevées le 23.11.2026 : 1,83 million.
+const PREUVE = "plus de 1,8 million de vues";
+const INSTAGRAM = "https://www.instagram.com/geopolitik13/";
+
+// les quatre écrans de l'appli montrés dans le téléphone, et leur légende
+const ECRANS = [
+  { img: "parcours", gris: "Ton parcours,", net: "heure par heure.", alt: "Le parcours : les étapes, leur heure de passage et le temps de marche entre chacune." },
+  { img: "video", gris: "Une vidéo", net: "à chaque arrêt.", alt: "La fiche d'une étape : la vidéo du lieu, son histoire et un conseil sur place." },
+  { img: "carte", gris: "La carte", net: "te guide.", alt: "La carte de Lyon avec le tracé de la balade, les étapes numérotées et les bonnes adresses." },
+  { img: "carnet", gris: "Ton carnet", net: "garde tout.", alt: "Le carnet de voyage : le trajet réellement parcouru et les étapes cochées." },
+];
+const exemple = etape("guignol");
+const videoExemple = exemple.videos[0];
+const dureeExemple = Math.round((VIDEOS[videoExemple].a - VIDEOS[videoExemple].de) / 30);
+
+const FAQ = [
+  { q: "Faut-il installer une appli ?", r: "Non. Le guide s'ouvre dans le navigateur de ton téléphone. Pas de téléchargement, pas de compte à créer." },
+  { q: "Combien de temps dure la visite ?", r: "Le temps que tu as : 1 h 30, 3 h, 5 h ou la journée. Le guide choisit les lieux et calcule les horaires, pause repas comprise si tu veux." },
+  { q: "D'où part-on ?", r: "De la gare de Perrache, de la Part-Dieu, de la place Bellecour, d'une station de métro ou de l'endroit où tu te trouves." },
+  { q: "Faut-il du réseau ?", r: "Oui, pour charger la carte et les vidéos. Ton parcours, tes étapes cochées et tes photos restent enregistrés sur ton téléphone." },
+  { q: "Est-ce adapté aux enfants ?", r: "Oui. Choisis « Avec des enfants » dans la balade sur mesure : le guide retient les arrêts qui leur parlent, comme Guignol ou le parc de la Tête d'Or." },
+  { q: "Et les autres villes ?", r: "Bordeaux, Nice, Paris, Marseille, Toulouse, Nantes, Rennes, Lille, Grenoble et Montpellier sont en préparation." },
+];
+const donnees = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TouristTrip",
+      name: "Les secrets de Lyon",
+      description: `Guide de visite de Lyon à suivre sur son téléphone : ${nE} lieux, ${NB_VIDEOS} vidéos, ${nA} bonnes adresses.`,
+      touristType: "Visite à pied",
+      inLanguage: "fr",
+      itinerary: { "@type": "ItemList", numberOfItems: nE, itemListElement: ETAPES.map((e, i) => ({ "@type": "ListItem", position: i + 1, name: `${e.nom} (${e.lieu}, ${e.quartier})` })) },
+    },
+    { "@type": "FAQPage", mainEntity: FAQ.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.r } })) },
+  ],
+};
+const Fleche = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>`;
 ---
 
 <Base
-  titre={`${MARQUE} : le guide de Lyon sur mesure, étape par étape`}
-  description={`Compose ta visite de Lyon selon ton temps : ${nE} étapes racontées en vidéo, les horaires, ${nA} bonnes adresses et un carnet de voyage avec tes photos.`}
+  titre={`Guide de Lyon : ${nE} lieux secrets à visiter en vidéo | ${MARQUE}`}
+  description={`Visite Lyon avec un guide sur ton téléphone : ${nE} lieux insolites, une vidéo à chaque arrêt, la carte, les horaires et ${nA} bonnes adresses. Sans appli à installer.`}
 >
   <script is:inline slot="tete">
     // Le défilement animé est la version par défaut de la page d'accueil, même quand l'appareil demande de réduire
@@ -44,32 +82,32 @@ const lienAppli = url("/lyon/?nouveau");
       document.documentElement.classList.add(simple ? "simple" : "anime");
     })();
   </script>
+  <script is:inline slot="tete" type="application/ld+json" set:html={JSON.stringify(donnees)} />
 
-  <a class="evitement" href="#offres">Aller aux offres</a>
+  <a class="evitement" href="#offres">Aller au tarif</a>
 
   <nav class="nav" aria-label="Navigation principale">
     <a class="nav__logo" href="#haut" aria-label={`${MARQUE}, haut de la page`}>
       <svg viewBox="0 0 48 48" aria-hidden="true">
-        <path d="M24 45S8 30.8 8 19a16 16 0 1132 0c0 11.800-16 26-16 26z" fill="currentColor"></path>
-        <path d="M16.500 19a7.500 7.500 0 0115 0v5.500h-4.800V19a2.700 2.700 0 00-5.400 0v9.500" fill="none" stroke="var(--nav-creux)" stroke-width="3.200" stroke-linecap="round"></path>
+        <path d="M24 45S8 30.8 8 19a16 16 0 1132 0c0 11.8-16 26-16 26z" fill="currentColor"></path>
+        <path d="M16.5 19a7.5 7.5 0 0115 0v5.5h-4.8V19a2.7 2.7 0 00-5.4 0v9.5" fill="none" stroke="var(--nav-creux)" stroke-width="3.2" stroke-linecap="round"></path>
       </svg>
       <span>{MARQUE}</span>
     </a>
     <div class="nav__liens">
-      <a href="#villes" data-saut="0.2">Villes</a>
-      <a href="#appli" data-saut="0.74">Appli</a>
-      <a href="#offres">Offres</a>
+      <a href="#guide" data-saut="0.2">Le guide</a>
+      <a href="#appli" data-saut="0.74">L'appli</a>
+      <a href="#lieux">Les lieux</a>
+      <a href="#offres">Tarif</a>
     </div>
-    <a class="btn btn--plein nav__btn" href={lienAppli}>
-      {ACTION}
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>
-    </a>
+    <a class="btn btn--plein nav__btn" href={lienAppli}>{ACTION}<Fragment set:html={Fleche} /></a>
   </nav>
 
   <main id="haut">
     <section class="histoire" id="histoire">
       <header class="hero">
-        <h1 class="hero__titre" aria-label={`${TITRE} : le guide de visite sur mesure`}>
+        <p class="hero__sur"><span class="etiquette">Le guide de visite de Lyon</span></p>
+        <h1 class="hero__titre" aria-label={`${TITRE} : le guide de visite sur ton téléphone`}>
           <span class="hero__mot" aria-hidden="true">{TITRE.split("").map((c) => <span class="l">{c}</span>)}</span>
           <span class="hero__pictos" aria-hidden="true"></span>
         </h1>
@@ -78,15 +116,13 @@ const lienAppli = url("/lyon/?nouveau");
             <path d="M3 30L61 5 43 59 30 38z" fill="#fffdf6"></path>
             <path d="M61 5L30 38l-5 15z" fill="#dccfb2"></path>
             <path d="M61 5L3 30l22 8z" fill="#fffdf6" stroke="#16202a" stroke-width="2" stroke-linejoin="round"></path>
-            <path d="M3 30L61 5 43 59 30 38l-5 15-0.200-15z" fill="none" stroke="#16202a" stroke-width="2" stroke-linejoin="round"></path>
+            <path d="M3 30L61 5 43 59 30 38l-5 15-0.2-15z" fill="none" stroke="#16202a" stroke-width="2" stroke-linejoin="round"></path>
           </svg>
         </div>
         <div class="hero__sous">
-          <p>Le guide de visite qui s'adapte à ton temps : {nE} étapes racontées en vidéo, {nA} bonnes adresses.</p>
-          <a class="btn btn--plein" href={lienAppli}>
-            {ACTION}
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>
-          </a>
+          <p>{nE} lieux à voir sur place, une vidéo à chaque arrêt, la carte qui te guide. Sur ton téléphone, sans appli à installer.</p>
+          <a class="btn btn--plein" href={lienAppli}>{ACTION}<Fragment set:html={Fleche} /></a>
+          <p class="hero__note">Gratuit pendant le lancement · sans compte</p>
         </div>
         <p class="bascule">
           <a class="bascule__simple" href="?simple">Version sans animation</a>
@@ -95,22 +131,20 @@ const lienAppli = url("/lyon/?nouveau");
       </header>
 
       <div class="scene">
-        <div class="processus" id="villes">
+        <div class="processus" id="guide">
           <h2>
             <span class="ligne">
-              <span class="m g">De</span> <span class="m">la</span> <span class="m">vidéo</span>
+              <span class="m g">Tu</span> <span class="m g">as</span> <span class="m g">vu</span> <span class="m">la</span> <span class="m">vidéo</span>
               <span class="m vignette" aria-hidden="true" style={`background-image:url(${url("/cartes/lyon.webp")})`}></span>
-              <span class="m g">à</span> <span class="m">la</span> <span class="m">rue,</span>
+              <span class="m">?</span>
             </span>
             <span class="ligne">
-              <span class="m">une</span> <span class="m">ville</span> <span class="m g">après</span> <span class="m">l'autre</span>
+              <span class="m g">Maintenant,</span> <span class="m">va</span> <span class="m">voir</span> <span class="m">en</span> <span class="m">vrai.</span>
             </span>
           </h2>
-          <p class="processus__sous">Le guide de Lyon est prêt. Dix autres villes arrivent.</p>
-          <a class="btn btn--plein processus__btn" href="#offres">
-            Voir les offres
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>
-          </a>
+          <p class="processus__sous">Le guide de Lyon est prêt : {nE} lieux, {NB_VIDEOS} vidéos, {nA} bonnes adresses.</p>
+          <p class="processus__preuve">Par la série « Ce que tu ne sais pas sur… », {PREUVE}.</p>
+          <a class="btn btn--plein processus__btn" href={lienAppli}>{ACTION}<Fragment set:html={Fleche} /></a>
         </div>
 
         <ul class="cartes" aria-label="Les guides de villes">
@@ -124,7 +158,7 @@ const lienAppli = url("/lyon/?nouveau");
           <li class="carte-v carte-v--question">
             <span class="carte-v__point" aria-hidden="true">?</span>
             <span class="carte-v__nom">Ta ville</span>
-            <span class="carte-v__etat">À toi de voter</span>
+            <span class="carte-v__etat">Bientôt</span>
           </li>
         </ul>
 
@@ -134,106 +168,157 @@ const lienAppli = url("/lyon/?nouveau");
             <img src={url("/plaques/lyon-paysage.webp")} alt="" loading="lazy" decoding="async" />
           </picture>
           <div class="panneau__voile"></div>
-          <p class="mots mots--hg"><span class="m g">Pas</span> <span class="m g">juste</span> <span class="m">des</span> <span class="m">vidéos.</span></p>
+          <p class="mots mots--hg"><span class="m g">Ton</span> <span class="m g">guide,</span> <span class="m">dans</span> <span class="m">ta</span> <span class="m">poche.</span></p>
           <div class="tel">
-            <img src={url("/plaques/appli.webp")} alt="L'appli ouverte sur un parcours dans Lyon : les étapes, leurs horaires et les trajets à pied." width="780" height="1688" loading="lazy" decoding="async" />
+            {ECRANS.map((e, i) => (
+              <img class:list={["tel__ecran", { actif: i === 0 }]} src={url(`/plaques/ecran-${e.img}.webp`)} alt={e.alt} width="780" height="1688" loading="lazy" decoding="async" />
+            ))}
           </div>
-          <p class="mots mots--bd"><span class="m g">Un</span> <span class="m">guide</span> <span class="m g">qui</span> <span class="m">marche</span> <span class="m">avec</span> <span class="m">toi.</span></p>
+          <div class="legendes">
+            {ECRANS.map((e, i) => (
+              <p class:list={["mots", "legende", { actif: i === 0 }]}><span class="g">{e.gris}</span> {e.net}</p>
+            ))}
+          </div>
         </div>
         <div class="noir"></div>
       </div>
     </section>
 
-    <section class="manifeste sombre" id="manifeste" aria-label="Ce que fait le guide">
+    <section class="manifeste sombre" id="lieux" aria-label="Comment marche le guide, et les lieux qu'il fait visiter">
       <div class="manifeste__scene">
         <div class="piste">
           <div class="bloc intro">
-            <p><span class="mot g">Ton</span> <span class="mot g">voyage,</span> <span class="mot">du</span> <span class="mot">premier</span> <span class="mot">pas</span></p>
-            <p><span class="mot">au</span> <span class="mot">carnet</span> <span class="mot g">de</span> <span class="mot g">souvenirs.</span></p>
-            <span class="tag auto" style="--r:-6deg;--c:#f5bd2f;top:calc(var(--mfs) * -0.52);left:0">{nE} étapes</span>
+            <p><span class="mot g">Trois</span> <span class="mot g">gestes,</span></p>
+            <p><span class="mot">et</span> <span class="mot">Lyon</span> <span class="mot">se</span> <span class="mot">raconte.</span></p>
+            <span class="tag auto" style="--r:-6deg;--c:#f5bd2f;top:calc(var(--mfs) * -0.52);left:0">{nE} lieux</span>
             <span class="tag auto" style="--r:-4deg;--c:#dccfb2;top:calc(var(--mfs) * -0.6);left:calc(var(--mfs) * 2.1)">{NB_VIDEOS} vidéos</span>
             <span class="tag auto" style="--r:4deg;--c:#a9cfe2;bottom:calc(var(--mfs) * -0.5);left:calc(var(--mfs) * 0.4)">{nA} adresses</span>
           </div>
 
-          <span class="objet auto" style="--r:-12deg;--t:1.150em" aria-hidden="true">
-            <svg viewBox="0 0 60 78"><path d="M30 76S4 50 4 29a26 26 0 1152 0c0 21-26 47-26 47z" fill="#de3341" stroke="#fffdf6" stroke-width="4"></path><circle cx="30" cy="29" r="10" fill="#fffdf6"></circle></svg>
-          </span>
-
-          <span class="mot g">Tu</span><span class="mot g">choisis</span>
+          <span class="num auto" style="--r:-6deg" aria-hidden="true">1</span>
+          <span class="mot">Tu</span><span class="mot">choisis</span><span class="mot g">une</span><span class="mot g">balade.</span>
           <span class="pile">
-            <span class="tag tag--grand auto" style="--r:-8deg;--c:#f5bd2f">1 h 30</span>
+            <span class="tag tag--grand auto" style="--r:-8deg;--c:#f5bd2f">1 h 45</span>
             <span class="tag auto" style="--r:6deg;--c:#a9cfe2">ou la journée</span>
           </span>
-          <span class="mot">ton</span><span class="mot">temps,</span><span class="mot g">tes</span><span class="mot g">envies.</span>
 
-          <span class="objet auto" style="--r:8deg;--t:.340em" aria-hidden="true">
-            <svg viewBox="0 0 20 20"><path d="M10 0c.800 5.600 3.600 8.600 10 10-6.400 1.400-9.200 4.400-10 10-.800-5.600-3.600-8.600-10-10 6.400-1.400 9.200-4.400 10-10z" fill="#f5e7c4"></path></svg>
+          <span class="num auto" style="--r:5deg" aria-hidden="true">2</span>
+          <span class="mot">Tu</span><span class="mot">marches,</span>
+          <span class="objet auto" style="--r:-12deg;--t:1.05em" aria-hidden="true">
+            <svg viewBox="0 0 60 78"><path d="M30 76S4 50 4 29a26 26 0 1152 0c0 21-26 47-26 47z" fill="#de3341" stroke="#fffdf6" stroke-width="4"></path><circle cx="30" cy="29" r="10" fill="#fffdf6"></circle></svg>
           </span>
-          <span class="objet auto" style="--r:9deg;--t:1em" aria-hidden="true">
-            <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="35" fill="#fffdf6" stroke="#16202a" stroke-width="5"></circle><path d="M40 18v23l14 9" fill="none" stroke="#de3341" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="40" cy="40" r="4" fill="#16202a"></circle></svg>
-          </span>
+          <span class="mot g">la</span><span class="mot g">carte</span><span class="mot g">te</span><span class="mot g">guide.</span>
 
-          <span class="mot">Le</span><span class="mot">parcours</span><span class="mot g">se</span><span class="mot g">compose,</span>
-          <span class="tag tag--grand auto" style="--r:-8deg;--c:#dccfb2">horaires</span>
-          <span class="tag tag--grand auto" style="--r:3deg;--c:#f5bd2f">pause repas</span>
-          <span class="mot g">tu</span><span class="mot">coches</span><span class="mot">chaque</span><span class="mot">étape.</span>
-
-          <span class="objet auto" style="--r:-9deg;--t:1.700em" aria-hidden="true">
+          <span class="num auto" style="--r:-4deg" aria-hidden="true">3</span>
+          <span class="mot g">Sur</span><span class="mot g">place,</span><span class="mot">tu</span><span class="mot">lances</span><span class="mot">la</span><span class="mot">vidéo.</span>
+          <span class="objet auto" style="--r:-9deg;--t:1.7em" aria-hidden="true">
             <svg viewBox="0 0 150 70"><rect x="4" y="4" width="142" height="62" rx="8" fill="none" stroke="#f0606c" stroke-width="6"></rect><rect x="13" y="13" width="124" height="44" rx="4" fill="none" stroke="#f0606c" stroke-width="2"></rect><text x="75" y="48" text-anchor="middle" font-family="Bebas Neue, Impact, sans-serif" font-size="38" letter-spacing="3" fill="#f0606c">VISITÉ</text></svg>
           </span>
 
-          <span class="mot g">Sur</span><span class="mot g">le</span><span class="mot g">chemin,</span><span class="mot">les</span><span class="mot">bonnes</span><span class="mot">adresses.</span>
-          <span class="objet auto" style="--r:10deg;--t:1.100em" aria-hidden="true">
-            <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="35" fill="#f5bd2f" stroke="#fffdf6" stroke-width="5"></circle><path d="M30 20v15a5 5 0 005 5v22M26 20v11M34 20v11M52 20c-4 2-7 8-7 16 0 3 2 4 7 4v22" fill="none" stroke="#16202a" stroke-width="4.500" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span class="objet auto" style="--r:8deg;--t:.34em" aria-hidden="true">
+            <svg viewBox="0 0 20 20"><path d="M10 0c.8 5.6 3.6 8.6 10 10-6.4 1.4-9.2 4.4-10 10-.8-5.6-3.6-8.6-10-10 6.4-1.4 9.2-4.4 10-10z" fill="#f5e7c4"></path></svg>
           </span>
-          <span class="tag tag--grand auto" style="--r:-10deg;--c:#a9cfe2">bouchons</span>
+          <span class="mot g">Les</span><span class="mot">{nE}</span><span class="mot">lieux</span><span class="mot g">du</span><span class="mot g">guide</span>
 
-          <span class="mot g">Et</span><span class="mot g">à</span><span class="mot g">la</span><span class="mot g">fin,</span><span class="mot">ton</span><span class="mot">trajet</span><span class="mot g">et</span><span class="mot">tes</span><span class="mot">photos</span>
-          <span class="objet polaroid auto" style="--r:7deg;--t:1.250em" aria-hidden="true"><img src={url("/cartes/lyon.webp")} alt="" loading="lazy" decoding="async" /></span>
-          <span class="mot g">sur</span><span class="mot g">la</span><span class="mot">carte.</span>
+          <ol class="lieux">
+            {ETAPES.map((e, i) => (
+              <li class="lieu auto" style={`--r:${i % 2 ? 2 : -2}deg`}>
+                <img src={url(`/videos/lyon/${e.videos[0]}.jpg`)} alt="" width="540" height="960" loading="lazy" decoding="async" />
+                <span class="lieu__num" aria-hidden="true">{i + 1}</span>
+                <span class="lieu__texte"><strong>{e.nom}</strong><span>{e.quartier}</span></span>
+              </li>
+            ))}
+          </ol>
+
+          <span class="mot g">et</span><span class="mot">{nA}</span><span class="mot">bonnes</span><span class="mot">adresses</span>
+          <span class="objet auto" style="--r:10deg;--t:1em" aria-hidden="true">
+            <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="35" fill="#f5bd2f" stroke="#fffdf6" stroke-width="5"></circle><path d="M30 20v15a5 5 0 005 5v22M26 20v11M34 20v11M52 20c-4 2-7 8-7 16 0 3 2 4 7 4v22" fill="none" stroke="#16202a" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </span>
+          <span class="mot g">sur</span><span class="mot g">le</span><span class="mot g">chemin.</span>
+          <a class="btn btn--plein piste__btn auto" href={lienAppli}>{ACTION}<Fragment set:html={Fleche} /></a>
           <span class="piste__fin"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="exemple" id="exemple">
+      <div class="enveloppe exemple__grille">
+        <div class="exemple__lecteur entre">
+          <button type="button" class="lecteur-ex" data-video={url(`/videos/lyon/${videoExemple}.mp4`)} aria-label={`Lire la vidéo de l'arrêt « ${exemple.nom} », ${dureeExemple} secondes, avec le son`}>
+            <img src={url(`/videos/lyon/${videoExemple}.jpg`)} alt="" width="540" height="960" loading="lazy" decoding="async" />
+            <span class="lecteur-ex__rond" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5-11-6.5z"></path></svg></span>
+            <span class="lecteur-ex__texte" aria-hidden="true">Voir la vidéo · {dureeExemple} s</span>
+          </button>
+        </div>
+        <div class="exemple__texte entre">
+          <p class="etiquette">Un arrêt du guide · {exemple.quartier}</p>
+          <h2>{exemple.nom}</h2>
+          <p class="exemple__lieu">{exemple.lieu}</p>
+          <p class="exemple__fait">{exemple.fait}</p>
+          <p class="exemple__conseil"><strong>Sur place.</strong> {exemple.conseil}</p>
+          <a class="btn btn--plein" href={lienAppli}>{ACTION}<Fragment set:html={Fleche} /></a>
         </div>
       </div>
     </section>
 
     <section class="offres" id="offres">
       <div class="enveloppe">
-        <h2>Deux façons de visiter Lyon</h2>
+        <h2 class="entre">Le tarif. <span class="g">Offert pendant le lancement.</span></h2>
         <div class="offres__grille">
-          <article class="offre">
+          <article class="offre offre--forte sombre entre">
+            <p class="etiquette offre__tag">Offert pendant le lancement</p>
+            <h3>Le guide complet de Lyon</h3>
+            <p class="offre__prix"><span data-assumed>{PRIX_SUR_MESURE}</span><small>après le lancement</small></p>
+            <div class="offre__vignettes" aria-hidden="true">
+              {ETAPES.slice(0, 6).map((e) => <img src={url(`/videos/lyon/${e.videos[e.videos.length - 1]}.jpg`)} alt="" width="46" height="60" loading="lazy" decoding="async" />)}
+              <span class="offre__plus">+{nE - 6}</span>
+            </div>
+            <ul>
+              <li>{nE} lieux et {NB_VIDEOS} vidéos</li>
+              <li>Des balades de 1 h 30 à la journée, ou sur mesure</li>
+              <li>{nA} bonnes adresses sur le chemin</li>
+              <li>Ton carnet de voyage, avec tes photos</li>
+            </ul>
+            <a class="btn btn--plein btn--bloc" href={lienAppli}>{ACTION}<Fragment set:html={Fleche} /></a>
+            <p class="offre__note">Aucun paiement demandé. Pas de compte à créer.</p>
+          </article>
+          <article class="offre entre">
             <h3>Les 5 secrets</h3>
             <p class="offre__prix">Gratuit</p>
             <div class="offre__vignettes" aria-hidden="true">
               {["perrache", "celestins", "guignol", "traboules", "fontaine"].map((id) => <img src={url(`/videos/lyon/${id}.jpg`)} alt="" width="46" height="60" loading="lazy" decoding="async" />)}
             </div>
             <ul>
-              <li>5 étapes, de Perrache aux Terreaux</li>
-              <li>Une vidéo à chaque étape</li>
-              <li>La carte et les horaires</li>
+              <li>5 lieux, de Perrache aux Terreaux</li>
+              <li>1 h 45 à pied</li>
+              <li>Une vidéo à chaque arrêt</li>
             </ul>
-            <a class="btn btn--contour btn--bloc" href={url("/lyon/?visite=5-secrets")}>Commencer les 5 secrets</a>
-          </article>
-          <article class="offre offre--forte sombre">
-            <p class="etiquette offre__tag">Le guide complet</p>
-            <h3>Lyon sur mesure</h3>
-            <p class="offre__prix" data-assumed>{PRIX_SUR_MESURE}</p>
-            <div class="offre__vignettes" aria-hidden="true">
-              {ETAPES.slice(0, 6).map((e) => <img src={url(`/videos/lyon/${e.videos[e.videos.length - 1]}.jpg`)} alt="" width="46" height="60" loading="lazy" decoding="async" />)}
-              <span class="offre__plus">+{nE - 6}</span>
-            </div>
-            <ul>
-              <li>Un parcours selon ton temps et tes envies</li>
-              <li>{nE} étapes et {NB_VIDEOS} vidéos</li>
-              <li>{nA} bonnes adresses sur le chemin</li>
-              <li>Ton carnet de voyage, avec tes photos</li>
-            </ul>
-            <a class="btn btn--plein btn--bloc" href={lienAppli}>
-              {ACTION}
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>
-            </a>
+            <a class="btn btn--contour btn--bloc" href={lienSecrets}>Voir les 5 secrets</a>
+            <p class="offre__note">Pour goûter avant le grand tour.</p>
           </article>
         </div>
-        <p class="offres__suite">Bordeaux, Nice, Paris, Marseille, Toulouse, Nantes, Rennes, Lille, Grenoble et Montpellier arrivent.</p>
+      </div>
+    </section>
+
+    <section class="faq" id="questions">
+      <div class="enveloppe">
+        <h2 class="entre">Les questions avant de partir</h2>
+        <dl class="faq__liste">
+          {FAQ.map((f) => (
+            <div class="entre">
+              <dt>{f.q}</dt>
+              <dd>{f.r}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </section>
+
+    <section class="fin sombre" id="depart">
+      <div class="enveloppe">
+        <h2 class="entre">{nE} lieux t'attendent <span class="g">à Lyon.</span></h2>
+        <a class="btn btn--plein entre" href={lienAppli}>{ACTION}<Fragment set:html={Fleche} /></a>
+        <p class="fin__suite entre">Ta ville n'est pas encore là ? <a href={INSTAGRAM} rel="noopener">Suis la série sur Instagram</a> : c'est là que sortent les vidéos de chaque ville.</p>
       </div>
     </section>
   </main>
