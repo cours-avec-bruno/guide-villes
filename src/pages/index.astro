@@ -5,6 +5,7 @@
 // Tout est adapté au guide : les cartes sont les villes, l'objet est le téléphone avec l'appli, la ligne dit ce qu'on y fait.
 // Sans JavaScript ou avec « réduire les animations », la page se lit comme une page normale (classe « anime » absente).
 import Base from "../layouts/Base.astro";
+import { url } from "../base";
 import { ACTION, MARQUE, PRIX_SUR_MESURE } from "../marque";
 import { ADRESSES, ETAPES, NB_VIDEOS } from "../app/donnees";
 
@@ -23,7 +24,7 @@ const VILLES = [
 ];
 const TITRE = "Lyon à ta façon";
 const nE = ETAPES.length, nA = ADRESSES.length;
-const lienAppli = "/lyon?nouveau";
+const lienAppli = url("/lyon/?nouveau");
 ---
 
 <Base
@@ -85,7 +86,7 @@ const lienAppli = "/lyon?nouveau";
           <h2>
             <span class="ligne">
               <span class="m g">De</span> <span class="m">la</span> <span class="m">vidéo</span>
-              <span class="m vignette" aria-hidden="true"></span>
+              <span class="m vignette" aria-hidden="true" style={`background-image:url(${url("/cartes/lyon.webp")})`}></span>
               <span class="m g">à</span> <span class="m">la</span> <span class="m">rue,</span>
             </span>
             <span class="ligne">
@@ -102,7 +103,7 @@ const lienAppli = "/lyon?nouveau";
         <ul class="cartes" aria-label="Les guides de villes">
           {VILLES.map((v, i) => (
             <li class="carte-v" data-pret={v.pret ? "" : undefined}>
-              <img src={`/cartes/${v.id}.webp`} alt="" width="600" height="792" loading="eager" fetchpriority={i < 6 ? "high" : "low"} decoding="async" />
+              <img src={url(`/cartes/${v.id}.webp`)} alt="" width="600" height="792" loading="eager" fetchpriority={i < 6 ? "high" : "low"} decoding="async" />
               <span class="carte-v__nom">{v.nom}</span>
               <span class="carte-v__etat">{v.pret ? "Disponible" : "Bientôt"}</span>
             </li>
@@ -116,13 +117,13 @@ const lienAppli = "/lyon?nouveau";
 
         <div class="panneau" id="appli">
           <picture class="panneau__fond">
-            <source media="(max-width: 819px)" srcset="/plaques/lyon-portrait.webp" />
-            <img src="/plaques/lyon-paysage.webp" alt="" loading="lazy" decoding="async" />
+            <source media="(max-width: 819px)" srcset={url("/plaques/lyon-portrait.webp")} />
+            <img src={url("/plaques/lyon-paysage.webp")} alt="" loading="lazy" decoding="async" />
           </picture>
           <div class="panneau__voile"></div>
           <p class="mots mots--hg"><span class="m g">Pas</span> <span class="m g">juste</span> <span class="m">des</span> <span class="m">vidéos.</span></p>
           <div class="tel">
-            <img src="/plaques/appli.webp" alt="L'appli ouverte sur un parcours dans Lyon : les étapes, leurs horaires et les trajets à pied." width="780" height="1688" loading="lazy" decoding="async" />
+            <img src={url("/plaques/appli.webp")} alt="L'appli ouverte sur un parcours dans Lyon : les étapes, leurs horaires et les trajets à pied." width="780" height="1688" loading="lazy" decoding="async" />
           </div>
           <p class="mots mots--bd"><span class="m g">Un</span> <span class="m">guide</span> <span class="m g">qui</span> <span class="m">marche</span> <span class="m">avec</span> <span class="m">toi.</span></p>
         </div>
@@ -175,7 +176,7 @@ const lienAppli = "/lyon?nouveau";
           <span class="tag tag--grand auto" style="--r:-10deg;--c:#a9cfe2">bouchons</span>
 
           <span class="mot g">Et</span><span class="mot g">à</span><span class="mot g">la</span><span class="mot g">fin,</span><span class="mot">ton</span><span class="mot">trajet</span><span class="mot g">et</span><span class="mot">tes</span><span class="mot">photos</span>
-          <span class="objet polaroid auto" style="--r:7deg;--t:1.250em" aria-hidden="true"><img src="/cartes/lyon.webp" alt="" loading="lazy" decoding="async" /></span>
+          <span class="objet polaroid auto" style="--r:7deg;--t:1.250em" aria-hidden="true"><img src={url("/cartes/lyon.webp")} alt="" loading="lazy" decoding="async" /></span>
           <span class="mot g">sur</span><span class="mot g">la</span><span class="mot">carte.</span>
           <span class="piste__fin"></span>
         </div>
@@ -190,21 +191,21 @@ const lienAppli = "/lyon?nouveau";
             <h3>Les 5 secrets</h3>
             <p class="offre__prix">Gratuit</p>
             <div class="offre__vignettes" aria-hidden="true">
-              {["perrache", "celestins", "guignol", "traboules", "fontaine"].map((id) => <img src={`/videos/lyon/${id}.jpg`} alt="" width="46" height="60" loading="lazy" decoding="async" />)}
+              {["perrache", "celestins", "guignol", "traboules", "fontaine"].map((id) => <img src={url(`/videos/lyon/${id}.jpg`)} alt="" width="46" height="60" loading="lazy" decoding="async" />)}
             </div>
             <ul>
               <li>5 étapes, de Perrache aux Terreaux</li>
               <li>Une vidéo à chaque étape</li>
               <li>La carte et les horaires</li>
             </ul>
-            <a class="btn btn--contour btn--bloc" href="/lyon?visite=5-secrets">Commencer les 5 secrets</a>
+            <a class="btn btn--contour btn--bloc" href={url("/lyon/?visite=5-secrets")}>Commencer les 5 secrets</a>
           </article>
           <article class="offre offre--forte sombre">
             <p class="etiquette offre__tag">Le guide complet</p>
             <h3>Lyon sur mesure</h3>
             <p class="offre__prix" data-assumed>{PRIX_SUR_MESURE}</p>
             <div class="offre__vignettes" aria-hidden="true">
-              {ETAPES.slice(0, 6).map((e) => <img src={`/videos/lyon/${e.videos[e.videos.length - 1]}.jpg`} alt="" width="46" height="60" loading="lazy" decoding="async" />)}
+              {ETAPES.slice(0, 6).map((e) => <img src={url(`/videos/lyon/${e.videos[e.videos.length - 1]}.jpg`)} alt="" width="46" height="60" loading="lazy" decoding="async" />)}
               <span class="offre__plus">+{nE - 6}</span>
             </div>
             <ul>

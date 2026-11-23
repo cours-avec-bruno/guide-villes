@@ -2,6 +2,7 @@
 import "@fontsource/bebas-neue/400.css";
 import "@fontsource-variable/space-grotesk";
 import "../styles/base.css";
+import { url } from "../base";
 
 interface Props {
   titre: string;
@@ -10,6 +11,7 @@ interface Props {
   image?: string;
 }
 const { titre, description, type = "software", image = "/partage.jpg" } = Astro.props;
+const imagePartage = new URL(url(image), Astro.site ?? Astro.url).href;
 ---
 
 <!doctype html>
@@ -25,9 +27,9 @@ const { titre, description, type = "software", image = "/partage.jpg" } = Astro.
     <meta property="og:title" content={titre} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content={image} />
+    <meta property="og:image" content={imagePartage} />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={url("/favicon.svg")} type="image/svg+xml" />
     <!-- <link rel="canonical" href="…" /> : à ajouter quand le nom de domaine sera choisi -->
     <slot name="tete" />
   </head>

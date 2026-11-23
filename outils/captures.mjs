@@ -2,16 +2,20 @@
 //   public/plaques/lyon-paysage.webp   grand écran (1920 × 1200)
 //   public/plaques/lyon-portrait.webp  téléphone (900 × 1800)
 // La capture passe par l'outil du skill de design (Chrome sans fenêtre, il attend que la carte soit dessinée).
-// Le serveur de développement doit tourner (npm run dev). Usage : node outils/captures.mjs
+// Le serveur de développement doit tourner (npm run dev). Usage : OUTIL_CAPTURE=<chemin de shoot.mjs> node outils/captures.mjs
 // L'écran du téléphone (public/plaques/appli.webp) est une capture de l'appli à 390 × 844, faite à la main.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const racine = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SHOOT = path.join(os.homedir(), ".claude", "skills", "design-taste-frontend", "scripts", "shoot.mjs");
+// OUTIL_CAPTURE : le chemin de shoot.mjs (l'outil de capture), à donner dans l'environnement
+const SHOOT = process.env.OUTIL_CAPTURE;
+if (!SHOOT || !fs.existsSync(SHOOT)) {
+  console.error("Indique le chemin de l'outil de capture : OUTIL_CAPTURE=<chemin de shoot.mjs> node outils/captures.mjs");
+  process.exit(1);
+}
 const BASE = process.argv[2] ?? "http://127.0.0.1:4321";
 const dst = path.join(racine, "public", "plaques");
 const tmp = path.join(racine, "outils", "tmp");

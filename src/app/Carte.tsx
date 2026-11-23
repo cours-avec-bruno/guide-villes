@@ -3,6 +3,7 @@
 //   « carnet »     : le voyage tel qu'il a été fait, dans l'ordre où les étapes ont été cochées, avec les photos.
 import { useEffect, useRef, useState } from "react";
 import type * as ML from "maplibre-gl";
+import { url } from "../base";
 import { ADRESSES, VILLE, etape, type Trajets } from "./donnees";
 import { coord, noeudDepart, troncon, type Plan } from "./moteur";
 import type { Voyage } from "./stockage";
@@ -25,12 +26,12 @@ function chargerMapLibre() {
   if (!promesse) {
     const lien = document.createElement("link");
     lien.rel = "stylesheet";
-    lien.href = "/vendor/maplibre/maplibre-gl.css";
+    lien.href = url("/vendor/maplibre/maplibre-gl.css");
     document.head.appendChild(lien);
     // import « à la main » : le fichier est servi tel quel depuis /public (MapLibre 6 charge son worker à côté de lui),
     // il ne doit donc pas passer par le bundler
     const importer = new Function("u", "return import(u)") as (u: string) => Promise<typeof ML>;
-    promesse = importer("/vendor/maplibre/maplibre-gl.mjs");
+    promesse = importer(url("/vendor/maplibre/maplibre-gl.mjs"));
   }
   return promesse;
 }
@@ -73,7 +74,7 @@ export default function Carte({ T, voyage, plan, vue, visible, rejouer, vignette
         ml.current = lib;
         const m = new lib.Map({
           container: boite.current,
-          style: "/data/style-papier.json",
+          style: url("/data/style-papier.json"),
           center: VILLE.centre,
           zoom: VILLE.zoom,
           minZoom: 11,

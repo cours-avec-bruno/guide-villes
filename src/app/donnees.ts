@@ -1,3 +1,4 @@
+import { url } from "../base";
 import brut from "../data/lyon.json";
 
 export type Etape = {
@@ -31,4 +32,4 @@ export const NB_VIDEOS = Object.keys(VIDEOS).length;
 export type Trajets = { trajets: Record<string, { m: number; s: number; g: string }>; alt: Record<string, number> };
 
 let cache: Promise<Trajets> | null = null;
-export const chargerTrajets = () => (cache ??= fetch("/data/lyon-trajets.json").then((r) => r.json() as Promise<Trajets>));
+export const chargerTrajets = () => (cache ??= fetch(url("/data/lyon-trajets.json")).then((r) => r.json() as Promise<Trajets>));

@@ -1,5 +1,6 @@
 // L'appli de visite de Lyon : questionnaire → itinéraire avec horaires → carte, adresses et carnet de voyage.
 import { useEffect, useMemo, useRef, useState } from "react";
+import { url } from "../base";
 import { MARQUE } from "../marque";
 import Carte, { traceCarnet } from "./Carte";
 import { ADRESSES, DEPARTS, ETAPES, VISITES, chargerTrajets, depart as leDepart, type Trajets } from "./donnees";
@@ -208,7 +209,7 @@ function EnTete() {
   return (
     <header className="tete">
       <a className="evitement" href="#contenu">Aller au contenu</a>
-      <a className="tete__marque" href="/" aria-label={`${MARQUE}, retour à l'accueil`}>
+      <a className="tete__marque" href={url("/")} aria-label={`${MARQUE}, retour à l'accueil`}>
         <svg viewBox="0 0 48 48" width="26" height="26" aria-hidden="true">
           <path d="M24 44S9 30.6 9 19.5a15 15 0 1130 0C39 30.6 24 44 24 44z" fill="currentColor" />
           <path d="M17 19.5a7 7 0 0114 0v5h-4.5v-5a2.5 2.5 0 00-5 0V28" fill="none" stroke="#f3eddd" strokeWidth="3" strokeLinecap="round" />

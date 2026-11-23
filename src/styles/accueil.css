@@ -226,7 +226,9 @@ html:not(.anime) .nav {
   border-radius: 0.1em;
   vertical-align: -0.07em;
   margin: 0 0.08em;
-  background: url("/cartes/lyon.webp") 50% 32% / cover;
+  background-color: var(--sable);
+  background-position: 50% 32%;
+  background-size: cover;
   box-shadow: 0 0.05em 0.16em rgba(22, 32, 42, 0.3);
   rotate: -4deg;
 }

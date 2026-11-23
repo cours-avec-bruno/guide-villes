@@ -10,7 +10,9 @@
     "prebuild": "node outils/vendor.mjs",
     "build": "astro build",
     "preview": "astro preview",
-    "verifier": "astro check"
+    "verifier": "astro check",
+    "build:pages": "node outils/vendor.mjs && astro build --base /guide-villes",
+    "preview:pages": "astro preview --base /guide-villes --port 4322"
   },
   "dependencies": {
     "@astrojs/react": "^7.1.9",

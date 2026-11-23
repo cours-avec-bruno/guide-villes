@@ -1,5 +1,6 @@
 // Les écrans de l'appli : le questionnaire, le parcours, les adresses, le carnet, et la fiche d'une étape.
 import { useEffect, useRef, useState } from "react";
+import { url } from "../base";
 import { ACTION } from "../marque";
 import { ADRESSES, DEPARTS, THEMES, VIDEOS, VISITES, dureeVideo, etape, type Adresse, type Trajets } from "./donnees";
 import { distance, duree, hhmm, troncon, type Plan, type Reponses } from "./moteur";
@@ -206,7 +207,7 @@ export function Parcours({ voyage, plan, proche, onOuvrir, onCocher, onModifier,
               <span className="fil__heure">{hhmm(l.heure)}</span>
               <button type="button" className="etape" onClick={() => onOuvrir(l.id)}>
                 <span className="etape__image">
-                  <img src={`/videos/lyon/${e.videos[0]}.jpg`} alt="" loading="lazy" width="72" height="96" />
+                  <img src={url(`/videos/lyon/${e.videos[0]}.jpg`)} alt="" loading="lazy" width="72" height="96" />
                   <span className="etape__num">{l.numero}</span>
                 </span>
                 <span className="etape__texte">
@@ -355,7 +356,7 @@ export function FicheEtape({ id, numero, voyage, urls, onFermer, onCocher, onAjo
     <Feuille titre={e.nom} onFermer={onFermer}>
       <div className="lecteur">
         <video
-          ref={video} key={v} src={joue ? `/videos/lyon/${v}.mp4` : undefined} poster={`/videos/lyon/${v}.jpg`}
+          ref={video} key={v} src={joue ? url(`/videos/lyon/${v}.mp4`) : undefined} poster={url(`/videos/lyon/${v}.jpg`)}
           controls={joue} playsInline preload="none" aria-label={`Vidéo : ${VIDEOS[v].titre}`}
         />
         {!joue && (

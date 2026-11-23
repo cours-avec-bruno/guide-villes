@@ -14,6 +14,16 @@ npm run build      # le site statique dans dist/
 npm run verifier   # contrôle des types
 ```
 
+## En ligne
+
+Chaque envoi sur `main` reconstruit le site et le publie sur GitHub Pages (`.github/workflows/pages.yml`) :
+https://cours-avec-bruno.github.io/guide-villes/
+
+Le site y est servi dans le dossier `/guide-villes` : tous les chemins passent par `url()` (`src/base.ts`).
+Pour le voir en local comme en ligne : `npm run build:pages` puis `npm run preview:pages`
+(http://127.0.0.1:4322/guide-villes/). Le jour où le site a son propre nom de domaine, il suffit de retirer `BASE_PATH`
+du fichier de mise en ligne et d'y mettre la bonne `SITE_URL`.
+
 `/?anime` force l'animation de la page de vente quand l'appareil demande de « réduire les animations »
 (dans ce cas, la page s'affiche en version simple, sans chorégraphie).
 
