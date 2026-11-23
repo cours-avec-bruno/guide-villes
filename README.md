@@ -24,8 +24,9 @@ Pour le voir en local comme en ligne : `npm run build:pages` puis `npm run previ
 (http://127.0.0.1:4322/guide-villes/). Le jour où le site a son propre nom de domaine, il suffit de retirer `BASE_PATH`
 du fichier de mise en ligne et d'y mettre la bonne `SITE_URL`.
 
-`/?anime` force l'animation de la page de vente quand l'appareil demande de « réduire les animations »
-(dans ce cas, la page s'affiche en version simple, sans chorégraphie).
+La page d'accueil s'ouvre toujours en version animée (le défilement avec les cartes de villes). Sur un appareil qui
+demande de « réduire les animations », un lien « Version sans animation » apparaît sous le menu : il mène à
+`/?simple`, la page sans chorégraphie, et ce choix est retenu ; `/?anime` revient à la version animée.
 
 ## Où est quoi
 

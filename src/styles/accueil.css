@@ -198,6 +198,42 @@ html:not(.anime) .nav {
   margin-top: 22px;
 }
 
+/* le lien pour passer d'une version à l'autre : discret, et seulement là où il sert */
+.bascule {
+  margin-top: 6px;
+  font-size: 14px;
+}
+.bascule a {
+  display: none;
+  align-items: center;
+  min-height: 44px;
+  color: var(--encre2);
+  text-underline-offset: 3px;
+}
+.bascule a:hover {
+  color: var(--encre);
+}
+html.simple .bascule__anime {
+  display: inline-flex;
+}
+@media (prefers-reduced-motion: reduce) {
+  .anime .bascule {
+    position: absolute;
+    top: calc(var(--nav-h) - 6px);
+    right: calc(40px * var(--n));
+    margin: 0;
+    pointer-events: auto;
+  }
+  .anime .bascule__simple {
+    display: inline-flex;
+  }
+}
+@media (prefers-reduced-motion: reduce) and (max-width: 819px) {
+  .anime .bascule {
+    right: 24px;
+  }
+}
+
 /* ——— la scène : version simple */
 .scene {
   padding: 4vh 0 0;

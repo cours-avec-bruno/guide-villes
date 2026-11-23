@@ -32,8 +32,17 @@ const lienAppli = url("/lyon/?nouveau");
   description={`Compose ta visite de Lyon selon ton temps : ${nE} étapes racontées en vidéo, les horaires, ${nA} bonnes adresses et un carnet de voyage avec tes photos.`}
 >
   <script is:inline slot="tete">
-    // « ?anime » force l'animation même si l'appareil demande de réduire les animations (pour la tester)
-    if (!matchMedia("(prefers-reduced-motion: reduce)").matches || /[?&]anime\b/.test(location.search)) document.documentElement.classList.add("anime");
+    // Le défilement animé est la version par défaut de la page d'accueil, même quand l'appareil demande de réduire
+    // les animations (choix du projet). « ?simple » affiche la page sans animation et retient ce choix ; « ?anime » y revient.
+    (function () {
+      var q = location.search, simple = /[?&]simple\b/.test(q);
+      try {
+        if (simple) localStorage.setItem("accueil", "simple");
+        else if (/[?&]anime\b/.test(q)) localStorage.removeItem("accueil");
+        else simple = localStorage.getItem("accueil") === "simple";
+      } catch (e) {}
+      document.documentElement.classList.add(simple ? "simple" : "anime");
+    })();
   </script>
 
   <a class="evitement" href="#offres">Aller aux offres</a>
@@ -79,6 +88,10 @@ const lienAppli = url("/lyon/?nouveau");
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>
           </a>
         </div>
+        <p class="bascule">
+          <a class="bascule__simple" href="?simple">Version sans animation</a>
+          <a class="bascule__anime" href="?anime">Voir la version animée</a>
+        </p>
       </header>
 
       <div class="scene">
