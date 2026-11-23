@@ -63,6 +63,7 @@ const donnees = {
   ],
 };
 const Fleche = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>`;
+const Bas = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4"></path></svg>`;
 ---
 
 <Base
@@ -84,7 +85,7 @@ const Fleche = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strok
   </script>
   <script is:inline slot="tete" type="application/ld+json" set:html={JSON.stringify(donnees)} />
 
-  <a class="evitement" href="#offres">Aller au tarif</a>
+  <a class="evitement" href="#offres">Aller à l'offre</a>
 
   <nav class="nav" aria-label="Navigation principale">
     <a class="nav__logo" href="#haut" aria-label={`${MARQUE}, haut de la page`}>
@@ -95,13 +96,17 @@ const Fleche = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strok
       <span>{MARQUE}</span>
     </a>
     <div class="nav__liens">
-      <a href="#guide" data-saut="0.2">Le guide</a>
-      <a href="#appli" data-saut="0.74">L'appli</a>
+      <a href="#guide" data-saut="0.13">Le guide</a>
+      <a href="#appli" data-saut="0.66">L'appli</a>
       <a href="#lieux">Les lieux</a>
-      <a href="#offres">Tarif</a>
     </div>
-    <a class="btn btn--plein nav__btn" href={lienAppli}>{ACTION}<Fragment set:html={Fleche} /></a>
+    <div class="nav__actions">
+      <a class="btn btn--contour nav__offre" href="#offres">Voir l'offre</a>
+      <a class="btn btn--plein nav__btn" href={lienAppli}>{ACTION}<Fragment set:html={Fleche} /></a>
+    </div>
   </nav>
+
+  <a class="raccourci" href="#offres">Voir l'offre<Fragment set:html={Bas} /></a>
 
   <main id="haut">
     <section class="histoire" id="histoire">
@@ -121,7 +126,10 @@ const Fleche = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strok
         </div>
         <div class="hero__sous">
           <p>{nE} lieux à voir sur place, une vidéo à chaque arrêt, la carte qui te guide. Sur ton téléphone, sans appli à installer.</p>
-          <a class="btn btn--plein" href={lienAppli}>{ACTION}<Fragment set:html={Fleche} /></a>
+          <div class="hero__actions">
+            <a class="btn btn--plein" href={lienAppli}>{ACTION}<Fragment set:html={Fleche} /></a>
+            <a class="btn btn--contour btn--bas" href="#offres">Voir l'offre<Fragment set:html={Bas} /></a>
+          </div>
           <p class="hero__note">Gratuit pendant le lancement · sans compte</p>
         </div>
         <p class="bascule">
@@ -168,7 +176,10 @@ const Fleche = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strok
             <img src={url("/plaques/lyon-paysage.webp")} alt="" loading="lazy" decoding="async" />
           </picture>
           <div class="panneau__voile"></div>
-          <p class="mots mots--hg"><span class="m g">Ton</span> <span class="m g">guide,</span> <span class="m">dans</span> <span class="m">ta</span> <span class="m">poche.</span></p>
+          <div class="panneau__tete">
+            <p class="mots mots--hg"><span class="m g">Ton</span> <span class="m g">guide,</span> <span class="m">dans</span> <span class="m">ta</span> <span class="m">poche.</span></p>
+            <a class="btn btn--plein panneau__btn" href={lienAppli}>{ACTION}<Fragment set:html={Fleche} /></a>
+          </div>
           <div class="tel">
             {ECRANS.map((e, i) => (
               <img class:list={["tel__ecran", { actif: i === 0 }]} src={url(`/plaques/ecran-${e.img}.webp`)} alt={e.alt} width="780" height="1688" loading="lazy" decoding="async" />
@@ -230,12 +241,10 @@ const Fleche = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strok
             ))}
           </ol>
 
-          <span class="mot g">et</span><span class="mot">{nA}</span><span class="mot">bonnes</span><span class="mot">adresses</span>
-          <span class="objet auto" style="--r:10deg;--t:1em" aria-hidden="true">
-            <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="35" fill="#f5bd2f" stroke="#fffdf6" stroke-width="5"></circle><path d="M30 20v15a5 5 0 005 5v22M26 20v11M34 20v11M52 20c-4 2-7 8-7 16 0 3 2 4 7 4v22" fill="none" stroke="#16202a" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-          </span>
-          <span class="mot g">sur</span><span class="mot g">le</span><span class="mot g">chemin.</span>
+          <span class="tag tag--grand auto" style="--r:-5deg;--c:#f5bd2f">+ {nA} bonnes adresses</span>
+          <span class="mot">On</span><span class="mot">y</span><span class="mot">va ?</span>
           <a class="btn btn--plein piste__btn auto" href={lienAppli}>{ACTION}<Fragment set:html={Fleche} /></a>
+          <a class="btn btn--contour btn--bas piste__btn piste__btn--offre auto" href="#offres">Voir l'offre<Fragment set:html={Bas} /></a>
           <span class="piste__fin"></span>
         </div>
       </div>
@@ -263,7 +272,7 @@ const Fleche = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strok
 
     <section class="offres" id="offres">
       <div class="enveloppe">
-        <h2 class="entre">Le tarif. <span class="g">Offert pendant le lancement.</span></h2>
+        <h2 class="entre">L'offre de lancement. <span class="g">C'est offert.</span></h2>
         <div class="offres__grille">
           <article class="offre offre--forte sombre entre">
             <p class="etiquette offre__tag">Offert pendant le lancement</p>

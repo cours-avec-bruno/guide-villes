@@ -194,8 +194,12 @@ html:not(.anime) .nav {
   color: var(--encre2);
   text-wrap: balance;
 }
-.hero__sous .btn {
+.hero__actions {
   margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
 
 /* le lien pour passer d'une version à l'autre : discret, et seulement là où il sert */
@@ -514,7 +518,7 @@ html.simple .bascule__anime {
 
 /* ——— les offres */
 .offres {
-  padding: calc(var(--nav-h) + 6vh) 0 9vh;
+  padding: calc(var(--nav-h) + 3vh) 0 5vh; /* « Voir l'offre » y mène d'un coup : tout doit tenir dans l'écran */
   min-height: 100vh;
   min-height: 100svh;
   display: grid;
@@ -532,7 +536,7 @@ html.simple .bascule__anime {
   display: grid;
   grid-template-columns: 1fr 1.15fr;
   gap: 24px;
-  margin-top: 40px;
+  margin-top: 28px;
   align-items: stretch;
 }
 .offre {
@@ -691,7 +695,7 @@ html.simple .bascule__anime {
 
 /* ═══════════════════════════════════════════════ la chorégraphie (html.anime) ═══════════════════════════════════════════════ */
 .anime .histoire {
-  height: 1250vh;
+  height: 680vh; /* 5,8 écrans de défilement : le minutage est dans accueil.ts */
 }
 .anime .hero {
   position: absolute;
@@ -791,7 +795,7 @@ html.simple .bascule__anime {
 .anime .nav__liens {
   animation-delay: 0.24s;
 }
-.anime .nav__btn {
+.anime .nav__actions {
   animation-delay: 0.3s;
 }
 @keyframes nav-entree {
@@ -885,13 +889,15 @@ html.simple .bascule__anime {
 .anime .tel {
   position: absolute;
   left: 50%;
-  top: 51%;
+  top: var(--tel-y, 51%); /* sur téléphone, le script le centre dans la place qui reste */
   will-change: transform;
 }
-.anime .mots--hg {
+.anime .panneau__tete {
   position: absolute;
   left: calc(40px * var(--n));
   top: calc(104px * var(--n));
+  justify-items: start;
+  gap: 16px;
   text-align: left;
 }
 .anime .mots--bd {
@@ -916,8 +922,9 @@ html.simple .bascule__anime {
   .anime .processus {
     top: 14%;
   }
-  .anime .mots--hg {
+  .anime .panneau__tete {
     left: 16px;
+    right: 16px;
     top: 84px;
   }
   .anime .mots--bd {
@@ -990,7 +997,7 @@ html.simple .bascule__anime {
 .anime .piste__fin {
   display: block;
   flex: none;
-  width: 30vw;
+  width: 12vw;
   height: 1px;
 }
 
@@ -1077,7 +1084,7 @@ html.simple .bascule__anime {
 @media (max-width: 819px) {
   .anime .legendes {
     right: 16px;
-    bottom: 28px;
+    bottom: 72px; /* au-dessus du raccourci « Voir l'offre » */
     width: calc(100vw - 32px);
   }
 }
@@ -1167,12 +1174,14 @@ html.simple .bascule__anime {
 }
 .anime .lieux {
   flex: none;
-  display: flex;
-  gap: calc(var(--mfs) * 0.16);
+  display: grid;
+  grid-template-columns: none;
+  grid-template-rows: repeat(2, auto);
+  grid-auto-flow: column;
+  gap: 16px calc(var(--mfs) * 0.16);
 }
 .anime .lieu {
-  flex: none;
-  width: max(168px, calc(var(--mfs) * 1.85));
+  width: var(--lw, 200px); /* posée par le script : deux rangs tiennent dans la hauteur de l'écran */
 }
 
 /* un arrêt du guide, en vrai */
@@ -1405,4 +1414,127 @@ body.nav-fond.nav-sombre .nav {
   transform: none;
   transition: opacity 0.7s var(--sortie), transform 0.9s var(--sortie), background-color 0.18s, border-color 0.18s;
   transition-delay: calc(var(--d, 0) * 80ms), calc(var(--d, 0) * 80ms), 0s, 0s;
+}
+
+/* ═══════════════════════════════════════════════ les accès à l'offre ═══════════════════════════════════════════════ */
+/* la navigation : « Voir l'offre » à côté de « Commencer la visite » (grand écran) */
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav__offre {
+  min-height: 46px;
+  padding: 0 16px;
+}
+body.nav-sombre .nav__offre {
+  border-color: rgba(255, 253, 246, 0.75);
+  color: var(--feuille);
+}
+body.nav-sombre .nav__offre:hover {
+  background: rgba(255, 253, 246, 0.12);
+}
+@media (max-width: 819px) {
+  .nav__offre {
+    display: none;
+  }
+}
+@media (max-width: 430px) {
+  .hero__actions .btn {
+    padding: 0 14px;
+    font-size: 15px;
+  }
+  .hero__actions .btn svg {
+    display: none;
+  }
+}
+
+/* le panneau de l'appli : le titre et son bouton */
+.panneau__tete {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+}
+.anime .panneau__btn {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+.anime .mots--hg.vu + .panneau__btn {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  transition: opacity 0.5s var(--sortie) 0.6s, transform 0.5s var(--sortie) 0.6s, background-color 0.18s, border-color 0.18s;
+}
+@media (max-width: 819px) {
+  .anime .panneau__btn {
+    display: none; /* sur téléphone, la place va au téléphone : la navigation et le raccourci portent les boutons */
+  }
+}
+
+/* le raccourci « Voir l'offre » : sur téléphone, il reste en bas de l'écran pendant toute la chorégraphie */
+.raccourci {
+  display: none;
+}
+@media (max-width: 819px) {
+  .anime .raccourci {
+    position: fixed;
+    z-index: 40;
+    left: 50%;
+    bottom: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px 0 18px;
+    border: 1.5px solid var(--encre);
+    border-radius: var(--r-m);
+    background: var(--feuille);
+    color: var(--encre);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 8px 20px -6px rgba(22, 32, 42, 0.45);
+    translate: -50% 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(14px);
+    transition: opacity 0.25s, transform 0.35s var(--sortie), visibility 0s 0.25s;
+  }
+  .anime .raccourci svg {
+    width: 15px;
+    height: 15px;
+  }
+  .anime .raccourci:active {
+    transform: scale(0.97);
+  }
+  body.raccourci-vu .raccourci {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity 0.25s, transform 0.35s var(--sortie), visibility 0s;
+  }
+  @supports (height: 100svh) {
+    .anime .raccourci {
+      top: calc(100svh - 60px); /* dans la scène, même quand la barre du navigateur se replie */
+      bottom: auto;
+    }
+  }
+}
+#offres:focus {
+  outline: none;
+}
+.btn--bas:hover svg {
+  transform: translateY(3px); /* la flèche pointe vers le bas : elle descend */
+}
+@media (max-width: 819px) {
+  .anime .piste__btn--offre {
+    display: none; /* sur téléphone, le raccourci du bas de l'écran fait déjà ce travail */
+  }
+}
+/* sans animation, le titre tient toujours dans la largeur de l'écran (il mesure 6,6 fois sa taille de lettre) */
+html:not(.anime) .hero__titre {
+  font-size: min(var(--hfs), calc((100vw - 48px) / 6.7));
 }
