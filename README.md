@@ -8,7 +8,7 @@ Le site que les Reels « Ce que tu ne sais pas sur… » font connaître. Quatre
 - `/gratuit/` : « Visiter gratuitement ». On y entre le code à 4 chiffres reçu après un commentaire sous le Reel de la ville.
 - `/lyon/visite/` : l'appli de visite (balades prêtes ou sur mesure, carte, adresses, carnet avec les photos).
 
-Le nom « Dédale » et le prix de 6,90 € sont **provisoires** : ils se changent dans `src/marque.ts`.
+Le nom « Dédale » est **provisoire** ; lui et le prix du guide complet (17,90 €) se changent dans `src/marque.ts`.
 
 ## Lancer
 
