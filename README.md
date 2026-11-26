@@ -8,11 +8,11 @@ Le site que les Reels « Ce que tu ne sais pas sur… » font connaître :
   suivre sur une carte, donne des adresses et garde un carnet de voyage. `/lyon/?nouveau` ouvre le choix des balades,
   `/lyon/?mesure` le sur-mesure.
 
-Le nom « Dédale », le prix de 6,90 €, le lien de paiement et la vidéo à commenter se règlent dans `src/marque.ts`.
+Le nom « Dédale », le prix de 17,90 €, le lien de paiement et la vidéo à commenter se règlent dans `src/marque.ts`.
 
 ## Les deux formules et les codes
 
-| | Guide gratuit | Guide complet (6,90 €) |
+| | Guide gratuit | Guide complet (17,90 €) |
 |---|---|---|
 | Comment l'avoir | un code reçu par e-mail après un commentaire sous la vidéo | un code donné après l'achat |
 | Balades | « Les 5 secrets » seulement | toutes, et le sur-mesure |

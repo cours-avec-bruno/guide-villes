@@ -1,7 +1,7 @@
 // Les réglages de la marque et de la vente, à un seul endroit.
 export const MARQUE = "Dédale"; // nom PROVISOIRE
-export const PRIX_COMPLET = "6,90 €"; // prix du guide complet, PROVISOIRE
-export const PRIX_COMPLET_NOMBRE = "6.90"; // le même, pour les moteurs de recherche
+export const PRIX_COMPLET = "17,90 €"; // prix du guide complet
+export const PRIX_COMPLET_NOMBRE = "17.90"; // le même, pour les moteurs de recherche
 
 // Le lien de paiement du guide complet de Lyon (un « Payment Link » Stripe, Lemon Squeezy…). Vide : le bouton d'achat
 // affiche « Paiement bientôt ouvert ». Après le paiement, faire revenir l'acheteur sur
