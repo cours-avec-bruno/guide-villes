@@ -1,44 +1,14 @@
 # Guide de villes — V1 Lyon
 
-Le site que les Reels « Ce que tu ne sais pas sur… » font connaître :
+Le site que les Reels « Ce que tu ne sais pas sur… » font connaître. Quatre sortes de pages :
 
-- `/` : la page d'accueil (ce qu'est le guide, les villes à faire glisser, comment ça marche, les deux formules, les questions) ;
-- `/guides/<ville>/` : la page d'achat du guide de chaque ville (Lyon) ou sa page « en préparation » (les autres) ;
-- `/lyon/` : l'appli de visite, qui s'ouvre avec un code. Elle propose des balades prêtes à lancer ou sur mesure, les fait
-  suivre sur une carte, donne des adresses et garde un carnet de voyage. `/lyon/?nouveau` ouvre le choix des balades,
-  `/lyon/?mesure` le sur-mesure.
+- `/` : l'accueil. Ce qu'est le guide, puis la roue des villes (elle tourne au défilement, chaque carte mène à sa ville).
+- `/<ville>/` : la page d'une ville. Le « film » de présentation (le téléphone montre l'appli pendant que le texte dit
+  ce qu'on y gagne) et l'achat du guide complet. Une ville sans guide a la même page, marquée « bientôt ».
+- `/gratuit/` : « Visiter gratuitement ». On y entre le code à 4 chiffres reçu après un commentaire sous le Reel de la ville.
+- `/lyon/visite/` : l'appli de visite (balades prêtes ou sur mesure, carte, adresses, carnet avec les photos).
 
-Le nom « Dédale », le prix de 17,90 €, le lien de paiement et la vidéo à commenter se règlent dans `src/marque.ts`.
-
-## Les deux formules et les codes
-
-| | Guide gratuit | Guide complet (17,90 €) |
-|---|---|---|
-| Comment l'avoir | un code reçu par e-mail après un commentaire sous la vidéo | un code donné après l'achat |
-| Balades | « Les 5 secrets » seulement | toutes, et le sur-mesure |
-| Carte, vidéos, adresses, carnet | oui | oui |
-| Photos dans le carnet | non | oui |
-
-Le visiteur entre son code sur `/lyon/`, ou ouvre directement `/lyon/?code=LE-CODE` (le lien à mettre dans l'e-mail, et
-l'adresse de retour après le paiement). L'accès reste ensuite sur son téléphone.
-
-Le dépôt est public : **les codes n'y sont jamais écrits**, seulement leur empreinte (`src/data/codes.json`). Pour changer
-un code, puis envoyer le site en ligne :
-
-```powershell
-node outils/code.mjs lyon gratuit NOUVEAU-CODE      # remplace le code du guide gratuit
-node outils/code.mjs lyon complet NOUVEAU-CODE      # remplace le code du guide complet
-node outils/code.mjs lyon gratuit AUTRE --ajouter   # ajoute un code sans retirer les autres
-```
-
-Ceux qui ont déjà ouvert le guide gardent leur accès. C'est une protection simple, adaptée à un site sans serveur :
-quelqu'un qui connaît le code peut le partager.
-
-**Le paiement** : mettre dans `LIEN_PAIEMENT` (`src/marque.ts`) un lien de paiement (Stripe « Payment Link », Lemon
-Squeezy…), et régler ce lien pour qu'après le paiement l'acheteur revienne sur
-`https://cours-avec-bruno.github.io/guide-villes/lyon/?code=<code du guide complet>`. Écrire aussi le code dans le reçu,
-pour qu'il puisse ouvrir le guide sur un autre téléphone. Tant que le lien est vide, les pages affichent « Paiement
-bientôt ouvert ».
+Le nom « Dédale » est **provisoire** ; lui et le prix du guide complet (17,90 €) se changent dans `src/marque.ts`.
 
 ## Lancer
 
@@ -58,25 +28,44 @@ Pour le voir en local comme en ligne : `npm run build:pages` puis `npm run previ
 (http://127.0.0.1:4322/guide-villes/). Le jour où le site a son propre nom de domaine, il suffit de retirer `BASE_PATH`
 du fichier de mise en ligne et d'y mettre la bonne `SITE_URL`.
 
-Les pages de vente défilent normalement : pas de chorégraphie, seulement les blocs qui apparaissent doucement (rien du
-tout si l'appareil demande de réduire les animations).
+Les pages s'ouvrent toujours en version animée (le défilement avec les cartes de villes, le film). Sur un appareil qui
+demande de « réduire les animations », un lien « Version sans animation » apparaît sous le menu : il mène à
+`/?simple`, la page sans chorégraphie, et ce choix est retenu ; `/?anime` revient à la version animée.
+
+## Les accès
+
+L'appli s'ouvre avec un accès, retenu sur l'appareil du visiteur (`src/acces.ts`) :
+
+| Accès | Ce qu'il ouvre | Comment on l'obtient |
+|---|---|---|
+| gratuit | la visite des 5 secrets | un code à 4 chiffres, multiple de 6 ou de 8, entré sur `/gratuit/` (ou porté par un lien `/lyon/visite/?code=1234`) |
+| complet | tout le guide | la clé d'achat, que le paiement renvoie dans l'adresse : `/lyon/visite/?cle=<clé>` |
+
+Sans accès, l'appli renvoie à la page de la ville. C'est une barrière légère : le site est statique, tout se vérifie
+dans le navigateur. Le dépôt ne contient que l'empreinte de la clé d'achat, pas la clé.
+
+Le paiement n'est pas encore branché. Le jour où il l'est : mettre le lien de paiement dans `LIENS_PAIEMENT`
+(`src/marque.ts`) et régler chez le prestataire l'adresse de retour `/lyon/visite/?cle=<clé>`.
 
 ## Où est quoi
 
 | Dossier | Contenu |
 |---|---|
-| `src/pages/index.astro`, `src/pages/guides/[ville].astro` | la page d'accueil et les pages d'achat des villes |
-| `src/components/` | leurs morceaux : navigation et menu, rangée des villes, comment ça marche, formules, questions… |
-| `src/layouts/Site.astro`, `src/styles/site.css`, `src/scripts/site.ts` | leur cadre, leur mise en forme, et le peu de mouvement (menu, rangée des villes, apparitions) |
-| `src/data/villes.ts`, `src/data/faq.ts` | la liste des villes (prêtes ou non) et les questions |
-| `src/pages/lyon.astro`, `src/app/` | l'appli : `App.tsx` (onglets, mémoire), `Acces.tsx` et `acces.ts` (le code, les deux formules), `Ecrans.tsx` (balades prêtes à lancer, sur-mesure, parcours, adresses, carnet, fiches), `Carte.tsx` (MapLibre), `moteur.ts` (composition et horaires), `stockage.ts` (parcours et photos gardés sur le téléphone) |
-| `src/data/codes.json` | les empreintes des codes d'accès (voir `outils/code.mjs`) |
+| `src/villes.ts`, `src/marque.ts` | la liste des villes ; le nom, le prix, les liens de paiement |
+| `src/pages/index.astro`, `src/scripts/accueil.ts` | l'accueil et sa chorégraphie au défilement (éventail → roue des villes) |
+| `src/pages/[ville]/index.astro`, `src/scripts/ville.ts` | la page d'une ville : le film (plans, phrases, autocollants, tous calés sur une horloge) et l'achat |
+| `src/pages/gratuit.astro`, `src/scripts/gratuit.ts` | la page du code gratuit |
+| `src/styles/accueil.css`, `src/styles/pages.css` | la mise en forme de ces pages |
+| `src/pages/lyon/visite.astro`, `src/app/` | l'appli : `App.tsx` (accès, onglets, mémoire), `Ecrans.tsx` (balades, sur-mesure, parcours, adresses, carnet, fiches), `Carte.tsx` (MapLibre), `moteur.ts` (composition et horaires), `stockage.ts` (parcours et photos gardés sur le téléphone) |
 | `src/data/lyon.json` | **les contenus de Lyon** : étapes, vidéos (image de début et de fin dans l'épisode), adresses, points de départ |
 | `src/styles/base.css` | la charte (papier, encre, mer, étiquettes jaunes ; Bebas Neue et Space Grotesk) |
 | `public/videos/lyon/` | les clips des étapes, découpés dans les épisodes |
-| `public/cartes/`, `public/plaques/` | les images des cartes de villes, les fonds de carte et l'écran du téléphone |
+| `public/cartes/`, `public/plaques/` | les images des cartes de villes, les fonds de carte et les écrans du téléphone |
 | `public/data/` | les trajets à pied calculés à l'avance et le fond de carte « papier » |
 | `outils/` | les scripts qui fabriquent tout ça (voir ci-dessous) |
+
+Ajouter une ville : la passer à `pret: true` dans `src/villes.ts`, lui donner ses plaques (`public/plaques/<ville>-paysage.webp`
+et `-portrait.webp`), sa page d'appli et sa clé d'achat.
 
 ## Refaire les contenus
 
@@ -90,17 +79,15 @@ Tous les scripts se lancent depuis la racine : `node outils/<script>.mjs`.
 | `medias.mjs` | découpe les clips et fabrique les images des cartes de villes (ffmpeg) |
 | `style-carte.mjs` | recolore le Plan IGN aux couleurs « papier » → `public/data/style-papier.json` |
 | `captures.mjs` | fabrique les fonds de carte de la page de vente à partir de l'appli (serveur lancé) |
-| `code.mjs` | change le code d'accès d'un guide (gratuit ou complet) |
 | `vendor.mjs` | copie MapLibre dans `public/vendor/` (fait tout seul avant `dev` et `build`) |
 
 Après avoir ajouté une étape ou une adresse dans `lyon.json` : `geocoder` si besoin, puis `trajets`, puis `medias clips`.
 
 ## Ce qui n'est pas branché
 
-- **Le paiement** : tant que `LIEN_PAIEMENT` est vide (voir plus haut).
-- **L'envoi des codes par e-mail** après un commentaire : à faire hors du site (outil de réponse automatique, ou à la main).
+- **Le paiement** : le bouton « Créer mon itinéraire » ouvre l'appli sans rien faire payer.
 - **Les notes des adresses** : les champs `note` et `avis` de `lyon.json` sont vides ; l'appli les affiche dès qu'ils sont remplis.
-- **Les autres villes** : seules leurs cartes et leur page « en préparation » existent.
+- **Les autres villes** : seules leurs cartes existent, marquées « Bientôt ».
 - **L'hébergement**, le nom de domaine, les mentions légales et la collecte d'e-mails.
 
 ## Sources et licences

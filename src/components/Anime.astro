@@ -1,0 +1,16 @@
+---
+// Les pages animées le sont par défaut, même quand l'appareil demande de réduire les animations (choix du projet).
+// « ?simple » affiche les pages sans animation et retient ce choix ; « ?anime » y revient.
+---
+
+<script is:inline>
+  (function () {
+    var q = location.search, simple = /[?&]simple\b/.test(q);
+    try {
+      if (simple) localStorage.setItem("accueil", "simple");
+      else if (/[?&]anime\b/.test(q)) localStorage.removeItem("accueil");
+      else simple = localStorage.getItem("accueil") === "simple";
+    } catch (e) {}
+    document.documentElement.classList.add(simple ? "simple" : "anime");
+  })();
+</script>

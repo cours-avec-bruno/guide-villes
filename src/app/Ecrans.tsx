@@ -1,8 +1,8 @@
 // Les écrans de l'appli : les balades, le sur-mesure, le parcours, les adresses, le carnet, et la fiche d'une étape.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { url } from "../base";
-import { ADRESSES, DEPARTS, THEMES, VIDEOS, dureeVideo, etape, type Adresse, type Trajets } from "./donnees";
-import { distance, duree, hhmm, troncon, type Plan, type Reponses } from "./moteur";
+import { ADRESSES, DEPARTS, ETAPES, THEMES, VIDEOS, dureeVideo, etape, type Adresse, type Trajets } from "./donnees";
+import { distance, duree, hhmm, troncon, vol, type Plan, type Reponses } from "./moteur";
 import { Icone } from "./Icone";
 import type { Voyage } from "./stockage";
 
@@ -24,12 +24,13 @@ function Puce({ actif, onClick, children }: { actif: boolean; onClick: () => voi
 }
 
 // ——————————————————————————————————————————————————————————— les balades prêtes à lancer (le premier écran)
-export type Balade = { id: string; nom: string; etiquette: string; accroche: string; etapes: string[]; minutes: number; depart: string; verrou?: boolean };
+export type Balade = { id: string; nom: string; etiquette: string; accroche: string; etapes: string[]; minutes: number; depart: string };
 
-export function Balades({ balades, peutFermer, gratuit, onChoisir, onSurMesure, onFermer, onVerrou }: {
-  balades: Balade[]; peutFermer: boolean; gratuit: boolean;
-  onChoisir: (id: string) => void; onSurMesure: () => void; onFermer: () => void; onVerrou: (raison: string) => void;
+export function Balades({ balades, peutFermer, complet, onChoisir, onSurMesure, onFermer }: {
+  balades: Balade[]; peutFermer: boolean; complet: boolean;
+  onChoisir: (id: string) => void; onSurMesure: () => void; onFermer: () => void;
 }) {
+  const guide = url("/lyon/"); // la page qui présente le guide complet
   return (
     <main className="q" id="contenu">
       <div className="q__tete">
@@ -41,37 +42,43 @@ export function Balades({ balades, peutFermer, gratuit, onChoisir, onSurMesure, 
         )}
       </div>
       <h1 className="q__titre">Le guide de Lyon</h1>
-      <p className="q__chapo">
-        {gratuit
-          ? "Ton guide gratuit contient « Les 5 secrets ». Les autres balades et le sur-mesure sont dans le guide complet."
-          : "Choisis une balade. Elle s'ouvre tout de suite, avec la carte et une vidéo à chaque étape."}
-      </p>
+      <p className="q__chapo">{complet ? "Choisis une balade. Elle s'ouvre tout de suite, avec la carte et une vidéo à chaque étape." : "Ta visite gratuite : Les 5 secrets. Les autres balades s'ouvrent avec le guide complet."}</p>
 
       <ul className="balades">
-        {balades.map((b) => (
-          <li key={b.id}>
-            <button type="button" className="balade" data-verrou={b.verrou || undefined} onClick={() => (b.verrou ? onVerrou(`« ${b.nom} » est dans le guide complet`) : onChoisir(b.id))}>
+        {balades.map((b) => {
+          const fermee = !complet && b.id !== "5-secrets";
+          const contenu = (
+            <>
               <span className="balade__images" aria-hidden="true">
                 {[b.etapes[0], b.etapes[Math.floor(b.etapes.length / 2)], b.etapes[b.etapes.length - 1]].map((id) => (
                   <img key={id} src={url(`/videos/lyon/${etape(id).videos[0]}.jpg`)} alt="" loading="lazy" width="60" height="80" />
                 ))}
               </span>
               <span className="balade__texte">
-                <span className="adresse__type">{b.verrou ? <><Icone nom="cadenas" taille={13} /> Guide complet</> : b.etiquette}</span>
+                <span className="adresse__type">{fermee ? "Dans le guide complet" : b.etiquette}</span>
                 <strong>{b.nom}</strong>
                 <span>{b.accroche}</span>
                 <span className="balade__meta">{b.etapes.length} étapes · {duree(b.minutes)} · départ {b.depart}</span>
               </span>
-              <span className="balade__fleche"><Icone nom={b.verrou ? "cadenas" : "fleche"} /></span>
-            </button>
-          </li>
-        ))}
+              <span className="balade__fleche"><Icone nom={fermee ? "cadenas" : "fleche"} /></span>
+            </>
+          );
+          return (
+            <li key={b.id}>
+              {fermee ? <a className="balade balade--fermee" href={guide}>{contenu}</a> : <button type="button" className="balade" onClick={() => onChoisir(b.id)}>{contenu}</button>}
+            </li>
+          );
+        })}
       </ul>
 
       <div className="q__pied">
-        <button type="button" className="btn btn--contour btn--bloc" onClick={() => (gratuit ? onVerrou("La balade sur mesure est dans le guide complet") : onSurMesure())}>
-          <Icone nom={gratuit ? "cadenas" : "crayon"} taille={16} /> Composer ma balade sur mesure
-        </button>
+        {complet ? (
+          <button type="button" className="btn btn--contour btn--bloc" onClick={onSurMesure}>
+            <Icone nom="crayon" taille={16} /> Composer ma balade sur mesure
+          </button>
+        ) : (
+          <a className="btn btn--plein btn--bloc" href={guide}>Voir le guide complet <Icone nom="fleche" taille={16} /></a>
+        )}
       </div>
     </main>
   );
@@ -173,8 +180,8 @@ export function Questionnaire({ depart, apercu, onCreer, onFermer }: {
 }
 
 // ——————————————————————————————————————————————————————————— le parcours
-export function Parcours({ voyage, plan, proche, photos, onOuvrir, onCocher, onModifier, onPartager, onAdresse, onCarnet, partage }: {
-  voyage: Voyage; plan: Plan; proche: string | null; partage: string; photos: boolean;
+export function Parcours({ voyage, plan, proche, onOuvrir, onCocher, onModifier, onPartager, onAdresse, onCarnet, partage }: {
+  voyage: Voyage; plan: Plan; proche: string | null; partage: string;
   onOuvrir: (id: string) => void; onCocher: (id: string) => void; onModifier: () => void; onPartager: () => void; onAdresse: (id: string) => void; onCarnet: () => void;
 }) {
   const n = voyage.etapes.length;
@@ -200,7 +207,7 @@ export function Parcours({ voyage, plan, proche, photos, onOuvrir, onCocher, onM
       {vus === n && (
         <div className="fini">
           <p className="fini__titre">Balade terminée</p>
-          <p>Tes {n} étapes sont dans ton carnet, avec l'heure de passage{photos ? " et tes photos" : ""}.</p>
+          <p>Tes {n} étapes sont dans ton carnet, avec l'heure de passage et tes photos.</p>
           <div className="resume__actions">
             <button type="button" className="btn btn--plein" onClick={onCarnet}>Voir mon carnet <Icone nom="fleche" taille={16} /></button>
             <button type="button" className="btn btn--contour" onClick={onModifier}>Autre balade</button>
@@ -353,7 +360,7 @@ export function FicheAdresse({ a, onFermer }: { a: Adresse; onFermer: () => void
 }
 
 // ——————————————————————————————————————————————————————————— la fiche d'une étape
-export function Feuille({ titre, onFermer, children }: { titre: string; onFermer: () => void; children: React.ReactNode }) {
+function Feuille({ titre, onFermer, children }: { titre: string; onFermer: () => void; children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const avant = document.activeElement as HTMLElement | null;
@@ -404,18 +411,10 @@ export function Photos({ cles, urls, onAjouter, onSupprimer }: {
   );
 }
 
-/** À la place des photos, avec le guide gratuit. */
-function PhotosVerrou({ onDebloquer }: { onDebloquer: () => void }) {
-  return (
-    <button type="button" className="photos-verrou" onClick={onDebloquer}>
-      <Icone nom="cadenas" /> <span><strong>Tes photos dans ton carnet</strong> Avec le guide complet, tu gardes tes photos à chaque étape.</span>
-    </button>
-  );
-}
-
-export function FicheEtape({ id, numero, voyage, urls, photos, onFermer, onCocher, onAjouter, onSupprimer, onDebloquer }: {
-  id: string; numero: number | null; voyage: Voyage; urls: Record<string, string>; photos: boolean;
-  onFermer: () => void; onCocher: (id: string) => void; onAjouter: (id: string, f: File) => void; onSupprimer: (id: string, cle: string) => void; onDebloquer: () => void;
+export function FicheEtape({ id, numero, voyage, urls, complet, onEtape, onAdresse, onFermer, onCocher, onAjouter, onSupprimer }: {
+  id: string; numero: number | null; voyage: Voyage; urls: Record<string, string>; complet: boolean;
+  onEtape: (id: string) => void; onAdresse: (id: string) => void;
+  onFermer: () => void; onCocher: (id: string) => void; onAjouter: (id: string, f: File) => void; onSupprimer: (id: string, cle: string) => void;
 }) {
   const e = etape(id);
   const [v, setV] = useState(e.videos[0]);
@@ -423,6 +422,10 @@ export function FicheEtape({ id, numero, voyage, urls, photos, onFermer, onCoche
   const video = useRef<HTMLVideoElement>(null);
   const vu = voyage.vus[id];
   const choisir = (x: string) => { setV(x); setJoue(true); };
+  // à deux pas : les deux adresses les plus proches, et le lieu du guide le plus proche qui n'est pas dans la balade
+  const ici: [number, number] = [e.lon, e.lat];
+  const tables = ADRESSES.map((a) => ({ a, d: vol(ici, [a.lon, a.lat]) })).sort((x, y) => x.d - y.d).slice(0, 2);
+  const aussi = ETAPES.filter((x) => x.id !== id && !voyage.etapes.includes(x.id)).map((x) => ({ x, d: vol(ici, [x.lon, x.lat]) })).filter((x) => x.d < 800).sort((x, y) => x.d - y.d)[0]; // « à deux pas » : moins de 800 m
   useEffect(() => { if (joue) video.current?.play().catch(() => {}); }, [v, joue]);
   return (
     <Feuille titre={e.nom} onFermer={onFermer}>
@@ -458,21 +461,43 @@ export function FicheEtape({ id, numero, voyage, urls, photos, onFermer, onCoche
         </button>
         <a className="btn btn--contour" href={guidage(e.lat, e.lon)} target="_blank" rel="noopener">Me guider</a>
       </div>
+      <h3 className="feuille__sous-titre">À deux pas</h3>
+      <ul className="pres">
+        {tables.map(({ a, d }) => (
+          <li key={a.id}>
+            <button type="button" className="pres__ligne" onClick={() => onAdresse(a.id)}>
+              <Icone nom="fourchette" taille={18} />
+              <span><strong>{a.nom}</strong><span>Pour manger · {a.type} · à {distance(d)}</span></span>
+            </button>
+          </li>
+        ))}
+        {aussi && (
+          <li>
+            {complet ? (
+              <button type="button" className="pres__ligne" onClick={() => onEtape(aussi.x.id)}>
+                <Icone nom="cible" taille={18} />
+                <span><strong>{aussi.x.nom}</strong><span>À voir aussi · à {distance(aussi.d)}</span></span>
+              </button>
+            ) : (
+              <a className="pres__ligne" href={url("/lyon/")}>
+                <Icone nom="cadenas" taille={18} />
+                <span><strong>{aussi.x.nom}</strong><span>À voir aussi · à {distance(aussi.d)} · dans le guide complet</span></span>
+              </a>
+            )}
+          </li>
+        )}
+      </ul>
       <h3 className="feuille__sous-titre">Tes photos ici</h3>
-      {photos ? (
-        <Photos cles={voyage.photos[id] ?? []} urls={urls} onAjouter={(f) => onAjouter(id, f)} onSupprimer={(c) => onSupprimer(id, c)} />
-      ) : (
-        <PhotosVerrou onDebloquer={onDebloquer} />
-      )}
+      <Photos cles={voyage.photos[id] ?? []} urls={urls} onAjouter={(f) => onAjouter(id, f)} onSupprimer={(c) => onSupprimer(id, c)} />
     </Feuille>
   );
 }
 
 // ——————————————————————————————————————————————————————————— le carnet
-export function Carnet({ voyage, metres, urls, photos, onOuvrir, onRejouer, onAjouter, onSupprimer, onParcours, onDebloquer }: {
-  voyage: Voyage; metres: number; urls: Record<string, string>; photos: boolean;
+export function Carnet({ voyage, metres, urls, onOuvrir, onRejouer, onAjouter, onSupprimer, onParcours }: {
+  voyage: Voyage; metres: number; urls: Record<string, string>;
   onOuvrir: (id: string) => void; onRejouer: () => void; onParcours: () => void;
-  onAjouter: (id: string, f: File) => void; onSupprimer: (id: string, cle: string) => void; onDebloquer: () => void;
+  onAjouter: (id: string, f: File) => void; onSupprimer: (id: string, cle: string) => void;
 }) {
   const ordre = Object.entries(voyage.vus).sort((a, b) => a[1] - b[1]);
   const nbPhotos = Object.values(voyage.photos).reduce((n, l) => n + l.length, 0);
@@ -485,7 +510,7 @@ export function Carnet({ voyage, metres, urls, photos, onOuvrir, onRejouer, onAj
         <h1 id="t-carnet">Ton carnet de voyage</h1>
         {ordre.length === 0 ? (
           <>
-            <p className="resume__chiffres">Chaque étape cochée s'ajoute ici, sur la carte, avec l'heure{photos ? " et tes photos" : ""}.</p>
+            <p className="resume__chiffres">Chaque étape cochée s'ajoute ici, sur la carte, avec l'heure et tes photos.</p>
             <div className="resume__actions">
               <button type="button" className="btn btn--plein" onClick={onParcours}>Voir mon parcours <Icone nom="fleche" taille={16} /></button>
             </div>
@@ -505,7 +530,6 @@ export function Carnet({ voyage, metres, urls, photos, onOuvrir, onRejouer, onAj
             )}
           </>
         )}
-        {!photos && <PhotosVerrou onDebloquer={onDebloquer} />}
       </div>
       <ol className="journal">
         {ordre.map(([id, t], i) => {
@@ -519,7 +543,7 @@ export function Carnet({ voyage, metres, urls, photos, onOuvrir, onRejouer, onAj
                   <span>{heureReelle(t)} · {e.quartier}</span>
                 </span>
               </button>
-              {photos && <Photos cles={voyage.photos[id] ?? []} urls={urls} onAjouter={(f) => onAjouter(id, f)} onSupprimer={(c) => onSupprimer(id, c)} />}
+              <Photos cles={voyage.photos[id] ?? []} urls={urls} onAjouter={(f) => onAjouter(id, f)} onSupprimer={(c) => onSupprimer(id, c)} />
             </li>
           );
         })}

@@ -1,8 +1,0 @@
----
-// Les petites flèches des boutons : vers la droite (aller), vers le bas (plus bas dans la page).
-interface Props { sens?: "droite" | "bas" | "gauche" }
-const { sens = "droite" } = Astro.props;
-const d = sens === "bas" ? "M8 3v10M4 9l4 4 4-4" : sens === "gauche" ? "M13 8H3M7 4L3 8l4 4" : "M3 8h10M9 4l4 4-4 4";
----
-
-<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={d}></path></svg>

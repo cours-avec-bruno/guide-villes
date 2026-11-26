@@ -1,86 +1,134 @@
 ---
-// La page d'accueil : ce qu'on vend (un guide de visite en vidéo), les villes, comment ça marche, un vrai arrêt,
-// les deux formules du guide de Lyon et les questions. Tout se lit de haut en bas, sans défilement animé.
-import Site from "../layouts/Site.astro";
-import Villes from "../components/Villes.astro";
-import Etapes from "../components/Etapes.astro";
-import Exemple from "../components/Exemple.astro";
-import Formules from "../components/Formules.astro";
-import Faq from "../components/Faq.astro";
-import Fleche from "../components/Fleche.astro";
-import Telephone from "../components/Telephone.astro";
+// La page d'accueil : ce qu'est le guide (un guide de visite interactif, ville par ville), puis le choix de la ville.
+// Au défilement : le titre s'assemble, l'éventail de cartes se disperse (« Tu as vu la vidéo ? »), se range en pile et
+// s'ouvre en roue. La roue tourne avec le défilement ; chaque carte mène à la page de sa ville.
+// Sans JavaScript ou en « version sans animation » (?simple), la page se lit de haut en bas.
+import Anime from "../components/Anime.astro";
+import Logo from "../components/Logo.astro";
+import Base from "../layouts/Base.astro";
 import { url } from "../base";
-import { MARQUE, PREUVE, PRIX_COMPLET, PRIX_COMPLET_NOMBRE } from "../marque";
-import { ADRESSES, ETAPES, NB_VIDEOS } from "../app/donnees";
-import { FAQ } from "../data/faq";
+import { INSTAGRAM, MARQUE, PREUVE } from "../marque";
+import { VILLES } from "../villes";
 
-const nE = ETAPES.length, nA = ADRESSES.length;
+const TITRE = "Chaque ville a ses secrets";
+const prete = VILLES.find((v) => v.pret)!;
+const lienGratuit = url("/gratuit/");
 const donnees = {
   "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Product",
-      name: "Le guide de Lyon",
-      description: `Guide de visite de Lyon à suivre sur son téléphone : ${nE} lieux, ${NB_VIDEOS} vidéos, ${nA} bonnes adresses.`,
-      brand: { "@type": "Brand", name: MARQUE },
-      offers: [
-        { "@type": "Offer", name: "Guide gratuit : Les 5 secrets de Lyon", price: "0", priceCurrency: "EUR" },
-        { "@type": "Offer", name: "Guide complet de Lyon", price: PRIX_COMPLET_NOMBRE, priceCurrency: "EUR" },
-      ],
-    },
-    { "@type": "FAQPage", mainEntity: FAQ.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.r } })) },
-  ],
+  "@type": "WebSite",
+  name: MARQUE,
+  inLanguage: "fr",
+  description: "Le guide de visite interactif des villes de France : un itinéraire tout prêt, une vidéo à chaque arrêt, la carte qui guide.",
 };
+const Fleche = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>`;
 ---
 
-<Site
-  titre={`${MARQUE} : les guides de visite en vidéo, à suivre sur ton téléphone`}
-  description={`Va voir en vrai les lieux des vidéos « Ce que tu ne sais pas sur… ». Le guide de Lyon : ${nE} lieux, une vidéo à chaque arrêt, la carte qui te guide. Gratuit avec un code, ou ${PRIX_COMPLET} le guide complet.`}
-  ici={["villes", "comment", "formules", "questions"]}
+<Base
+  titre={`${MARQUE} : le guide de visite interactif des villes de France`}
+  description="Visite les villes de France avec un guide interactif sur ton téléphone : un itinéraire tout prêt, une vidéo à chaque arrêt, la carte qui te guide. Sans appli à installer."
 >
+  <Anime slot="tete" />
   <script is:inline slot="tete" type="application/ld+json" set:html={JSON.stringify(donnees)} />
 
-  <section class="hero" aria-labelledby="t-hero">
-    <div class="enveloppe hero__grille">
-      <div class="hero__texte">
-        <p class="etiquette">Des guides de visite en vidéo</p>
-        <h1 id="t-hero"><span class="g">Tu as vu la vidéo&#8239;?</span> <span>Va voir en vrai.</span></h1>
-        <p class="hero__chapo">Le guide sur ton téléphone te mène de lieu en lieu. Sur place, tu lances la vidéo qui raconte ce que tu as sous les yeux.</p>
-        <div class="hero__actions">
-          <a class="btn btn--plein btn--grand" href="#formules">Commencer gratuitement<Fleche sens="bas" /></a>
-          <a class="btn btn--contour btn--grand" href={url("/lyon/")}>J'ai un code</a>
+  <a class="evitement" href="#villes">Aller au choix de la ville</a>
+
+  <nav class="nav" aria-label="Navigation principale">
+    <Logo href="#haut" nom={`${MARQUE}, haut de la page`} />
+    <div class="nav__actions">
+      <a class="nav__gratuit" href={lienGratuit}><span class="zero">0 €</span>Visite gratuite</a>
+      <a class="btn btn--plein nav__btn" href="#villes" data-roue>Guide complet<Fragment set:html={Fleche} /></a>
+    </div>
+  </nav>
+
+  <main id="haut">
+    <section class="histoire" id="histoire">
+      <header class="hero">
+        <p class="hero__sur"><span class="etiquette">Le guide de visite interactif</span></p>
+        <h1 class="hero__titre" aria-label={`${TITRE} : le guide de visite interactif des villes de France`}>
+          <span class="hero__mot" aria-hidden="true">{TITRE.split("").map((c) => <span class="l">{c}</span>)}</span>
+          <span class="hero__pictos" aria-hidden="true"></span>
+        </h1>
+        <div class="avion" aria-hidden="true">
+          <svg viewBox="0 0 64 64">
+            <path d="M3 30L61 5 43 59 30 38z" fill="#fffdf6"></path>
+            <path d="M61 5L30 38l-5 15z" fill="#dccfb2"></path>
+            <path d="M61 5L3 30l22 8z" fill="#fffdf6" stroke="#16202a" stroke-width="2" stroke-linejoin="round"></path>
+            <path d="M3 30L61 5 43 59 30 38l-5 15-0.2-15z" fill="none" stroke="#16202a" stroke-width="2" stroke-linejoin="round"></path>
+          </svg>
         </div>
-        <ul class="hero__points">
-          <li>Gratuit avec un code, ou {PRIX_COMPLET} le guide complet</li>
-          <li>Sans appli à installer, sans compte</li>
-          <li>Par la série « Ce que tu ne sais pas sur… », {PREUVE}</li>
+        <div class="hero__sous">
+          <p>Dans chaque ville, un itinéraire tout prêt, une vidéo à chaque arrêt et la carte qui te guide. Sur ton téléphone, sans appli à installer.</p>
+          <div class="hero__actions">
+            <a class="btn btn--plein" href="#villes" data-roue>Profiter d'un guide complet<Fragment set:html={Fleche} /></a>
+            <a class="btn btn--contour btn--petit" href={lienGratuit}><span class="zero">0 €</span>Visiter gratuitement</a>
+          </div>
+        </div>
+        <p class="bascule">
+          <a class="bascule__simple" href="?simple">Version sans animation</a>
+          <a class="bascule__anime" href="?anime">Voir la version animée</a>
+        </p>
+      </header>
+
+      <div class="scene">
+        <div class="processus" id="guide">
+          <h2>
+            <span class="ligne">
+              <span class="m g">Tu</span> <span class="m g">as</span> <span class="m g">vu</span> <span class="m">la</span> <span class="m">vidéo</span>
+              <span class="m vignette" aria-hidden="true" style={`background-image:url(${url(`/cartes/${prete.id}.webp`)})`}></span>
+              <span class="m">?</span>
+            </span>
+            <span class="ligne">
+              <span class="m g">Maintenant,</span> <span class="m">va</span> <span class="m">voir</span> <span class="m">en</span> <span class="m">vrai.</span>
+            </span>
+          </h2>
+          <p class="processus__sous">Le guide t'emmène sur place, d'un secret à l'autre.</p>
+          <p class="processus__preuve">Par la série « Ce que tu ne sais pas sur… », {PREUVE}.</p>
+        </div>
+
+        <div class="choix" id="villes">
+          <h2 class="choix__titre"><span class="m">Choisis</span> <span class="m g">ta</span> <span class="m g">ville.</span></h2>
+        </div>
+
+        <ul class="cartes" aria-label="Les villes du guide">
+          {VILLES.map((v, i) => (
+            <li class="carte-v" data-pret={v.pret ? "" : undefined} data-ville={v.id} data-nom={v.nom} data-de={v.de}>
+              <a href={url(`/${v.id}/`)} aria-label={v.pret ? `Le guide ${v.de}, disponible` : `Le guide ${v.de}, bientôt`}>
+                <img src={url(`/cartes/${v.id}.webp`)} alt="" width="600" height="792" loading="eager" fetchpriority={i < 6 ? "high" : "low"} decoding="async" />
+                <span class="carte-v__nom">{v.nom}</span>
+                <span class="carte-v__etat">{v.pret ? "Disponible" : "Bientôt"}</span>
+              </a>
+            </li>
+          ))}
+          <li class="carte-v carte-v--question" data-ville="autre" data-nom="Ta ville">
+            <a href={INSTAGRAM} rel="noopener" aria-label="Ta ville n'est pas là : propose-la sur Instagram">
+              <span class="carte-v__point" aria-hidden="true">?</span>
+              <span class="carte-v__nom">Ta ville</span>
+              <span class="carte-v__etat">Bientôt</span>
+            </a>
+          </li>
         </ul>
+
+        <div class="choix__pied">
+          <a class="btn btn--plein choix__btn" href={url(`/${prete.id}/`)}><span>Voir le guide {prete.de}</span><Fragment set:html={Fleche} /></a>
+          <p class="choix__aide">Fais défiler pour faire tourner la roue.</p>
+        </div>
       </div>
-      <div class="hero__visuel" aria-hidden="true">
-        <img class="hero__carte" src={url("/cartes/lyon.webp")} alt="" width="600" height="792" fetchpriority="high" />
-        <Telephone ecran="video" alt="" class="hero__tel" eager />
-        <p class="hero__bulle"><strong>{nE} lieux</strong> à Lyon</p>
-      </div>
-    </div>
-  </section>
+    </section>
+  </main>
 
-  <Villes id="villes" titre="Choisis ta ville" sous="Le guide de Lyon est prêt. Fais glisser pour voir les villes qui arrivent." />
-
-  <Etapes />
-
-  <Exemple />
-
-  <Formules />
-
-  <Faq />
-
-  <section class="fin sombre" aria-labelledby="t-fin">
+  <footer class="pied">
     <div class="enveloppe">
-      <h2 id="t-fin" class="titre-section entre">{nE} lieux t'attendent <span class="g">à Lyon.</span></h2>
-      <div class="fin__actions entre">
-        <a class="btn btn--jaune btn--grand" href="#formules">Commencer gratuitement<Fleche sens="bas" /></a>
-        <a class="btn btn--contour btn--grand" href={url("/guides/lyon/")}>Voir le guide de Lyon</a>
-      </div>
+      <p class="pied__marque">{MARQUE}</p>
+      <p class="pied__liens"><a href={lienGratuit}>Visiter gratuitement</a><a href={INSTAGRAM} rel="noopener">La série sur Instagram</a></p>
+      <p>© {new Date().getFullYear()} {MARQUE}. Fond de carte et trajets : IGN, Géoplateforme. Lieux : contributeurs OpenStreetMap.</p>
     </div>
-  </section>
-</Site>
+  </footer>
+
+  <script>
+    import "../scripts/accueil.ts";
+  </script>
+</Base>
+
+<style is:global>
+  @import "../styles/accueil.css";
+</style>

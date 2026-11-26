@@ -24,7 +24,7 @@ fs.mkdirSync(tmp, { recursive: true });
 
 function capturer(nom, l, h) {
   const png = path.join(tmp, nom + ".png");
-  execFileSync("node", [SHOOT, "--url", `${BASE}/lyon?visite=5-secrets&onglet=carte&nu=3d`, "--w", String(l), "--h", String(h), "--wait", "9000", "--no-tiles", "--out", png, "--profile", ".taste-skill/chrome-shoot"], { cwd: racine, stdio: "ignore", timeout: 240000 });
+  execFileSync("node", [SHOOT, "--url", `${BASE}/lyon/visite/?code=1206&visite=5-secrets&onglet=carte&nu=3d`, "--w", String(l), "--h", String(h), "--wait", "9000", "--no-tiles", "--out", png, "--profile", ".taste-skill/chrome-shoot"], { cwd: racine, stdio: "ignore", timeout: 240000 });
   const out = path.join(dst, nom + ".webp");
   execFileSync("ffmpeg", ["-v", "error", "-y", "-i", png, "-c:v", "libwebp", "-quality", "76", out]);
   console.log(nom.padEnd(16), (fs.statSync(out).size / 1024).toFixed(0) + " Ko");

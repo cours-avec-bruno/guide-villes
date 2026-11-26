@@ -1,0 +1,741 @@
+/* L'accueil, et ce que les autres pages lui reprennent (navigation, téléphone, autocollants).
+   Sans la classe « anime » sur <html> (pas de JavaScript, ou « version sans animation ») : une page simple qui se lit de haut en bas.
+   Avec « anime » : la chorégraphie au défilement, pilotée par src/scripts/accueil.ts (qui pose --n, --hfs, --ic, --pfs, --cw, --pied-y). */
+:root {
+  --n: 1;
+  --u: 1px;
+  --hfs: clamp(40px, min(15vw, 19vh), 150px);
+  --ic: calc(var(--hfs) * 0.6);
+  --pfs: clamp(28px, max(4.5vw, min(10vw, 44px)), 66px);
+  --sfs: clamp(38px, 5.6vw, 84px);
+  --mfs: clamp(54px, 8.5vw, 124px);
+  --camw: min(60vw, 280px);
+  --cw: 218;
+  --nav-h: calc(86px * var(--n));
+  --nav-creux: var(--papier);
+  --gris-clair: #8499a8; /* les mots gris sur fond nuit */
+}
+html {
+  scroll-behavior: auto;
+}
+body {
+  overflow-x: hidden;
+}
+.enveloppe {
+  width: min(1120px, 100% - 48px);
+  margin: 0 auto;
+}
+.g {
+  color: #7a828a; /* les mots gris des grands titres : 3,7:1 sur le papier */
+}
+.sombre .g {
+  color: var(--gris-clair);
+}
+/* ——— navigation */
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  height: var(--nav-h);
+  padding: 0 calc(40px * var(--n));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  pointer-events: none;
+  color: var(--encre);
+  transition: color 0.3s, background-color 0.3s;
+}
+.nav > * {
+  pointer-events: auto;
+}
+.nav__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  text-decoration: none;
+  font-family: var(--titre);
+  font-size: max(24px, calc(28px * var(--n)));
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.nav__logo svg {
+  width: max(30px, calc(40px * var(--n)));
+  height: max(30px, calc(40px * var(--n)));
+}
+.nav__logo span {
+  padding-top: 0.12em;
+}
+.nav__btn {
+  min-height: 46px;
+  padding: 0 18px;
+}
+@media (max-width: 819px) {
+  .nav {
+    padding: 0 24px;
+    gap: 12px;
+  }
+  .nav__btn {
+    padding: 0 14px;
+    font-size: 15px;
+  }
+}
+html:not(.anime) .nav {
+  position: absolute;
+}
+@media (max-width: 430px) {
+  .nav__btn svg {
+    display: none;
+  }
+}
+@media (max-width: 345px) {
+  .nav__logo span {
+    display: none;
+  }
+}
+/* ——— le hero : version simple */
+.histoire {
+  position: relative;
+}
+.hero {
+  padding: calc(var(--nav-h) + 8vh) 24px 6vh;
+  text-align: center;
+}
+.hero__titre {
+  font-family: var(--titre);
+  font-weight: 400;
+  font-size: var(--hfs);
+  line-height: 1;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+}
+.hero__mot {
+  white-space: nowrap;
+}
+.hero__mot .l {
+  display: inline-block;
+  white-space: pre;
+}
+.hero__pictos,
+.avion {
+  display: none;
+}
+.hero__sous {
+  margin: 22px auto 0;
+  max-width: 34em;
+}
+.hero__sous p {
+  font-size: clamp(17px, 1.5vw, 20px);
+  color: var(--encre2);
+  text-wrap: balance;
+}
+.hero__actions {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+/* le lien pour passer d'une version à l'autre : discret, et seulement là où il sert */
+.bascule {
+  margin-top: 6px;
+  font-size: 14px;
+}
+.bascule a {
+  display: none;
+  align-items: center;
+  min-height: 44px;
+  color: var(--encre2);
+  text-underline-offset: 3px;
+}
+.bascule a:hover {
+  color: var(--encre);
+}
+html.simple .bascule__anime {
+  display: inline-flex;
+}
+@media (prefers-reduced-motion: reduce) {
+  .anime .bascule {
+    position: absolute;
+    top: calc(var(--nav-h) - 6px);
+    right: calc(40px * var(--n));
+    margin: 0;
+    pointer-events: auto;
+  }
+  .anime .bascule__simple {
+    display: inline-flex;
+  }
+}
+@media (prefers-reduced-motion: reduce) and (max-width: 819px) {
+  .anime .bascule {
+    right: 24px;
+  }
+}
+/* ——— la scène : version simple */
+.scene {
+  padding: 4vh 0 0;
+}
+.processus {
+  text-align: center;
+  padding: 0 16px;
+}
+.processus h2 {
+  font-family: var(--titre);
+  font-weight: 400;
+  font-size: var(--pfs);
+  line-height: 0.98;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.ligne {
+  display: block;
+}
+.m {
+  display: inline-block;
+}
+.vignette {
+  width: 0.78em;
+  height: 0.82em;
+  border-radius: 0.1em;
+  vertical-align: -0.07em;
+  margin: 0 0.08em;
+  background-color: var(--sable);
+  background-position: 50% 32%;
+  background-size: cover;
+  box-shadow: 0 0.05em 0.16em rgba(22, 32, 42, 0.3);
+  rotate: -4deg;
+}
+.processus__sous {
+  margin-top: calc(var(--pfs) * 0.3);
+  font-size: clamp(16px, 1.3vw, 19px);
+  color: var(--encre2);
+}
+.cartes {
+  list-style: none;
+  margin: 6vh auto 0;
+  padding: 0 24px;
+  max-width: 1120px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+}
+.carte-v {
+  position: relative;
+  aspect-ratio: 1 / 1.32;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--sable);
+  box-shadow: 0 8px 20px rgba(22, 32, 42, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  container-type: inline-size;
+}
+.carte-v img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.carte-v__nom {
+  position: absolute;
+  left: 7cqw;
+  bottom: 7cqw;
+  background: var(--jaune);
+  color: var(--encre);
+  font-family: var(--titre);
+  font-size: 13.5cqw;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  padding: 0.3em 0.42em 0.18em;
+  border-radius: 0.14em;
+  box-shadow: 0 0.12em 0 rgba(22, 32, 42, 0.22);
+}
+.carte-v__etat {
+  position: absolute;
+  right: 6cqw;
+  top: 6cqw;
+  background: rgba(22, 32, 42, 0.82);
+  color: var(--feuille);
+  font-size: max(12px, 7.2cqw);
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.5em 0.7em;
+  border-radius: 2em;
+}
+.carte-v[data-pret] .carte-v__etat {
+  background: #c4212d;
+}
+.carte-v--question {
+  background: var(--encre);
+}
+.carte-v__point {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-bottom: 12%;
+  color: var(--jaune);
+  font-family: var(--titre);
+  font-size: 92cqw;
+  line-height: 1;
+}
+.carte-v--question .carte-v__etat {
+  background: rgba(255, 253, 246, 0.16);
+}
+/* ——— le téléphone (page d'une ville) */
+.tel {
+  position: relative;
+  width: var(--camw);
+  aspect-ratio: 390 / 844;
+  border-radius: calc(var(--camw) * 0.14);
+  padding: calc(var(--camw) * 0.028);
+  background: var(--encre);
+  box-shadow: 0 calc(var(--camw) * 0.16) calc(var(--camw) * 0.22) calc(var(--camw) * -0.1) rgba(22, 32, 42, 0.55), inset 0 0 0 1.5px rgba(255, 255, 255, 0.14);
+}
+/* ——— les autocollants (page d'une ville) */
+.tag {
+  display: inline-block;
+  background: var(--c, var(--jaune));
+  color: var(--encre);
+  font-family: var(--texte);
+  font-size: max(13px, 0.2em);
+  font-weight: 650;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1;
+  padding: 0.45em 0.7em;
+  border-radius: 0.3em;
+  box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.35);
+  rotate: var(--r, 0deg);
+  white-space: nowrap;
+}
+.tag--grand {
+  font-family: var(--titre);
+  font-size: 0.44em;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.3em 0.5em 0.18em;
+  border-radius: 0.14em;
+}
+.objet {
+  display: inline-block;
+  width: var(--t, 1em);
+  rotate: var(--r, 0deg);
+  flex: none;
+  filter: drop-shadow(0 0.08em 0.14em rgba(0, 0, 0, 0.4));
+}
+.objet svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* ——— pied */
+.pied {
+  padding: 30px 0 calc(30px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--ligne);
+  font-size: 14px;
+  color: var(--encre2);
+}
+.pied .enveloppe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 24px;
+}
+.pied__marque {
+  font-family: var(--titre);
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  color: var(--encre);
+}
+/* ═══════════════════════════════════════════════ la chorégraphie (html.anime) ═══════════════════════════════════════════════ */
+.anime .histoire {
+  height: 560vh; /* 4,6 écrans de défilement : le minutage est dans accueil.ts */
+}
+.anime .hero {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 100vh;
+  height: 100svh;
+  z-index: 9;
+  padding: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+.anime .hero__titre {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--ty, 41%);
+  height: 0;
+}
+.anime .hero__mot .l,
+.anime .hero__pictos .pi {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(var(--x, 0px), -50%);
+  transition: transform 0.34s cubic-bezier(0.25, 0.75, 0.2, 1);
+}
+.anime .hero__mot .l {
+  opacity: 0;
+  clip-path: inset(-25% 100% -25% 0);
+}
+.anime .hero__mot .l.vu {
+  opacity: 1;
+  clip-path: inset(-25% 0 -25% 0);
+  transition: transform 0.34s cubic-bezier(0.25, 0.75, 0.2, 1), clip-path 0.13s linear 0.07s;
+}
+.anime .hero__titre.fixe .l,
+.anime .hero__titre.fixe .pi {
+  transition: none;
+}
+.anime .hero__pictos {
+  display: block;
+}
+.anime .hero__pictos .pi {
+  width: var(--ic);
+  height: var(--ic);
+}
+.pi i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scale(0);
+  opacity: 0;
+}
+.pi svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.anime .avion {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--u) * 62);
+  height: calc(var(--u) * 62);
+  margin: calc(var(--u) * -31) 0 0 calc(var(--u) * -31);
+  opacity: 0;
+  will-change: transform;
+}
+.anime .hero__sous {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--ty, 41%) + var(--hfs) * 0.66);
+  margin: 0;
+  max-width: none;
+  padding: 0 24px;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.7s, transform 0.9s var(--sortie);
+}
+.anime .hero__sous.vu {
+  opacity: 1;
+  transform: none;
+}
+.anime .hero__sous p {
+  max-width: 30em;
+  margin: 0 auto;
+}
+.anime .nav > * {
+  animation: nav-entree 0.5s var(--sortie) both;
+}
+.anime .nav__logo {
+  animation-delay: 0.15s;
+}
+.anime .nav__actions {
+  animation-delay: 0.3s;
+}
+@keyframes nav-entree {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.anime .scene {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  padding: 0;
+  background: var(--papier);
+}
+.anime .processus {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  top: 15%;
+  opacity: 0;
+}
+.anime .processus .m {
+  opacity: 0;
+  transform: translateY(0.35em);
+  filter: blur(6px);
+}
+.anime .processus.vu .m {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition: opacity 0.55s var(--sortie), transform 0.55s var(--sortie), filter 0.55s var(--sortie);
+  transition-delay: calc(var(--i, 0) * 0.11s);
+}
+.anime .processus__sous {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.anime .processus.vu .processus__sous {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s var(--sortie) 0.7s, transform 0.5s var(--sortie) 0.7s, background-color 0.18s, border-color 0.18s;
+}
+.anime .cartes {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+  display: block;
+  pointer-events: none;
+}
+.anime .carte-v {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--cw) * 1px);
+  height: calc(var(--cw) * 1.32px);
+  margin: calc(var(--cw) * -0.66px) 0 0 calc(var(--cw) * -0.5px);
+  border-radius: calc(var(--cw) * 0.075px);
+  box-shadow: 0 calc(var(--cw) * 0.03px) calc(var(--cw) * 0.09px) rgba(22, 32, 42, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  opacity: 0;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+@media (max-width: 819px) {
+  .anime .processus {
+    top: 14%;
+  }
+}
+.anime .tag {
+  font-size: max(13px, 0.24em);
+}
+.anime .tag--grand {
+  font-size: 0.42em;
+}
+.anime .vu .c {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s var(--sortie), transform 0.5s var(--sortie);
+  transition-delay: calc(var(--k, 0) * 35ms);
+}
+/* le hero : l'étiquette au-dessus du titre */
+.hero__sur {
+  margin-bottom: 14px;
+}
+.anime .hero__sur {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--ty, 41%) - var(--hfs) * 0.5 - 48px);
+  margin: 0;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.6s, transform 0.8s var(--sortie);
+}
+.anime .hero__sur.vu {
+  opacity: 1;
+  transform: none;
+}
+/* « Tu as vu la vidéo ? » : la preuve sous la phrase */
+.processus__preuve {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--encre2);
+}
+.anime .processus__preuve {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.anime .processus.vu .processus__preuve {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s var(--sortie) 0.78s, transform 0.5s var(--sortie) 0.78s;
+}
+/* la navigation : les deux accès */
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+@media (max-width: 430px) {
+  .hero__actions .btn {
+    padding: 0 14px;
+    font-size: 15px;
+  }
+  .hero__actions .btn svg {
+    display: none;
+  }
+}
+/* sans animation, le titre tient toujours dans la largeur de l'écran (il mesure 8,9 fois sa taille de lettre) */
+html:not(.anime) .hero__titre {
+  font-size: min(var(--hfs), calc((100vw - 48px) / 9));
+}
+/* « 0 € » : la pastille qui dit que c'est gratuit */
+.zero {
+  display: inline-block;
+  background: var(--jaune);
+  color: var(--encre);
+  font-family: var(--titre);
+  font-size: 1.06em;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  padding: 0.3em 0.4em 0.16em;
+  border-radius: 3px;
+  box-shadow: 0 2px 0 rgba(22, 32, 42, 0.18);
+}
+.btn--petit {
+  min-height: 40px;
+  padding: 0 14px 0 9px;
+  gap: 8px;
+  font-size: 15px;
+}
+.hero__actions {
+  align-items: center;
+}
+.nav__gratuit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--encre);
+  text-decoration: none;
+}
+.nav__gratuit:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+@media (max-width: 819px) {
+  .nav__gratuit {
+    display: none;
+  }
+  .hero__actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+/* les cartes des villes sont des liens */
+.carte-v a {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: inherit;
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+}
+.carte-v a img {
+  transition: transform 0.4s var(--sortie);
+}
+.carte-v a:hover img {
+  transform: scale(1.03);
+}
+.carte-v a:focus-visible {
+  outline: 3px solid var(--mer);
+  outline-offset: -5px;
+}
+/* « Choisis ta ville » : le titre au-dessus de la roue, le bouton de la ville choisie dessous */
+.choix {
+  text-align: center;
+  padding: 9vh 16px 0;
+}
+.choix__titre {
+  font-family: var(--titre);
+  font-weight: 400;
+  font-size: var(--pfs);
+  line-height: 0.98;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.choix__pied {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 5vh 16px 9vh;
+  text-align: center;
+}
+.choix__aide {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--encre2);
+}
+html:not(.anime) .choix__aide {
+  display: none;
+}
+.anime .choix {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  top: 15%;
+  padding: 0 16px;
+  opacity: 0;
+  visibility: hidden;
+}
+.anime .choix .m {
+  opacity: 0;
+  transform: translateY(0.35em);
+  filter: blur(6px);
+}
+.anime .choix.vu .m {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition: opacity 0.5s var(--sortie), transform 0.5s var(--sortie), filter 0.5s var(--sortie);
+  transition-delay: calc(var(--i, 0) * 0.09s);
+}
+.anime .choix__pied {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  top: var(--pied-y, 78%);
+  padding: 0 16px;
+  opacity: 0;
+  visibility: hidden;
+}
+.anime .carte-v {
+  pointer-events: auto;
+}
+.anime .carte-v.milieu {
+  z-index: 2;
+  box-shadow: 0 calc(var(--cw) * 0.06px) calc(var(--cw) * 0.16px) rgba(22, 32, 42, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+@media (max-width: 819px) {
+  .anime .choix {
+    top: 13%;
+  }
+}
+.pied__liens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 22px;
+}
+.pied__liens a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--encre);
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
