@@ -29,73 +29,34 @@ if (acces === "complet") {
   }
 }
 
-// ——— le film : une horloge, des plans (les écrans de l'appli), cinq phrases, des autocollants
-if (document.documentElement.classList.contains("anime")) film();
-
-function film() {
-  const scene = document.querySelector<HTMLElement>(".film")!;
-  const tel = scene.querySelector<HTMLElement>(".tel")!;
-  const plans = [...scene.querySelectorAll<HTMLElement>(".film__plan")];
-  const textes = [...scene.querySelectorAll<HTMLElement>(".film__texte")];
-  const barres = [...scene.querySelectorAll<HTMLElement>(".film__barre b")];
-  const colles = [...scene.querySelectorAll<HTMLElement>(".film__c")].map((el) => ({ el, de: Number(el.dataset.de), a: Number(el.dataset.a) }));
-  textes.forEach((p) => p.querySelectorAll<HTMLElement>(".m").forEach((m, i) => m.style.setProperty("--i", String(i))));
-
-  const DUREE = 21; // secondes, puis ça recommence
-  const DEBUTS = [0, 4.3, 8.6, 13.4, 17.4]; // le moment où chaque phrase arrive
-  // chaque plan : quand il entre, d'où il vient (1 : du bas), le point qu'il regarde, son zoom du début à la fin ;
-  // « glisse » : entre ces deux moments, l'image descend pour montrer son haut (le reste du temps elle montre son bas)
-  const PLANS: { de: number; a: number; sens: number; point: string; zoom: [number, number]; glisse?: [number, number] }[] = [
-    { de: 0, a: 8.6, sens: 1, point: "50% 26%", zoom: [1, 1.14] }, // le parcours
-    { de: 8.6, a: 11.3, sens: 1, point: "50% 30%", zoom: [1, 1.07] }, // la fiche d'un arrêt, avec sa vidéo
-    { de: 11.3, a: 13.4, sens: 1, point: "50% 42%", zoom: [1.03, 1.12] }, // la carte et les adresses
-    // le carnet : d'abord les étapes et les photos (le bas de l'écran), puis l'image glisse vers la carte du voyage (le haut)
-    { de: 13.4, a: DUREE, sens: 1, point: "50% 50%", zoom: [1.24, 1.3], glisse: [16.9, 18.4] },
-  ];
-  const ENTREE = 0.65;
-  const borne = (x: number) => Math.min(1, Math.max(0, x));
-  const norme = (x: number, a: number, b: number) => borne((x - a) / (b - a));
-  const sortie = (x: number) => 1 - Math.pow(1 - x, 3);
-  const douce = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-  plans.forEach((p, i) => (p.style.transformOrigin = PLANS[i].point));
-
-  let actif = -1, t0 = performance.now(), pause = 0, visible = true;
-  new IntersectionObserver((e) => { visible = e[0].isIntersecting; }, { threshold: 0.1 }).observe(scene);
-
-  function image(maintenant: number) {
-    requestAnimationFrame(image);
-    if (!visible || document.hidden) { pause = pause || maintenant; return; }
-    if (pause) { t0 += maintenant - pause; pause = 0; } // le film reprend où il s'était arrêté
-    const ecoule = (maintenant - t0) / 1000, t = ecoule % DUREE, reprise = ecoule >= DUREE; // « reprise » : à partir du deuxième tour
-
-    // les plans glissent l'un sur l'autre (jamais de coupe), et chacun avance doucement vers ce qu'il montre
-    plans.forEach((p, i) => {
-      const P = PLANS[i], dernier = i === plans.length - 1;
-      const reste = dernier && reprise && t < ENTREE; // le dernier plan reste dessous pendant que le premier revient
-      const la = (t >= P.de && t < P.a + ENTREE) || reste;
-      p.style.visibility = la ? "visible" : "hidden";
-      if (!la) return;
-      const e = reste || (i === 0 && !reprise) ? 1 : sortie(norme(t, P.de, P.de + ENTREE));
-      const z = P.zoom[0] + (P.zoom[1] - P.zoom[0]) * norme(reste ? DUREE : t, P.de, P.a + ENTREE);
-      p.style.zIndex = String(i === 0 && t < ENTREE + 0.1 ? plans.length : i);
-      // un plan zoomé peut glisser de (z − 1) / 2 de sa hauteur sans montrer son bord
-      const marge = ((z - 1) / 2) * 100 * 0.92;
-      const y = P.glisse ? marge * (2 * douce(norme(reste ? DUREE : t, ...P.glisse)) - 1) : 0;
-      p.style.transform = `translate3d(0,${((1 - e) * 100 * P.sens + y).toFixed(2)}%,0) scale(${z.toFixed(4)})`;
-    });
-
-    // la phrase du moment, et la barre qui avance
-    let k = 0;
-    for (let i = 0; i < DEBUTS.length; i++) if (t >= DEBUTS[i]) k = i;
-    if (k !== actif) { actif = k; textes.forEach((p, i) => p.classList.toggle("vu", i === k)); }
-    barres.forEach((b, i) => (b.style.transform = `scaleX(${norme(t, DEBUTS[i], DEBUTS[i + 1] ?? DUREE).toFixed(3)})`));
-
-    // les autocollants autour du téléphone
-    colles.forEach((c) => c.el.classList.toggle("vu", t >= c.de && t < c.a));
-
-    // le téléphone flotte et pivote lentement
-    const s = maintenant / 1000;
-    tel.style.transform = `perspective(900px) translateY(${(Math.sin(s * 1.5) * 5).toFixed(1)}px) rotateY(${(Math.sin(s * 0.55) * 9).toFixed(2)}deg)`;
+// ——— le film : la vidéo démarre seule et sans le son (les navigateurs l'exigent) ; un bouton fait entendre la voix
+const video = document.querySelector<HTMLVideoElement>(".film__video");
+const son = document.querySelector<HTMLButtonElement>(".film__son");
+if (video && son) {
+  const texte = son.querySelector("span")!;
+  const silence = () => {
+    video.muted = true;
+    video.loop = true;
+    son.setAttribute("aria-pressed", "false");
+    texte.textContent = "Écouter la présentation";
+    video.play().catch(() => {});
+  };
+  son.addEventListener("click", () => {
+    if (!video.muted) return silence();
+    video.currentTime = 0; // une écoute, du début à la fin
+    video.muted = false;
+    video.loop = false;
+    son.setAttribute("aria-pressed", "true");
+    texte.textContent = "Couper le son";
+    video.play().catch(() => {});
+  });
+  video.addEventListener("ended", silence); // après l'écoute, le film reprend sa boucle muette
+  if (document.documentElement.classList.contains("simple")) {
+    // version sans animation : rien ne démarre tout seul, la vidéo a ses commandes
+    video.removeAttribute("autoplay");
+    video.pause();
+    video.controls = true;
+  } else {
+    new IntersectionObserver(([e]) => { if (e.isIntersecting) video.play().catch(() => {}); else if (video.muted) video.pause(); }, { threshold: 0.15 }).observe(video);
   }
-  requestAnimationFrame(image);
 }

@@ -3,8 +3,8 @@
 Le site que les Reels « Ce que tu ne sais pas sur… » font connaître. Quatre sortes de pages :
 
 - `/` : l'accueil. Ce qu'est le guide, puis la roue des villes (elle tourne au défilement, chaque carte mène à sa ville).
-- `/<ville>/` : la page d'une ville. Le « film » de présentation (le téléphone montre l'appli pendant que le texte dit
-  ce qu'on y gagne) et l'achat du guide complet. Une ville sans guide a la même page, marquée « bientôt ».
+- `/<ville>/` : la page d'une ville. Le « film » de présentation (une vidéo de 20 secondes, avec la voix de la série,
+  qui montre l'appli et dit ce qu'on y gagne) et l'achat du guide complet. Une ville sans guide a la même page, marquée « bientôt ».
 - `/gratuit/` : « Visiter gratuitement ». On y entre le code à 4 chiffres reçu après un commentaire sous le Reel de la ville.
 - `/lyon/visite/` : l'appli de visite (balades prêtes ou sur mesure, carte, adresses, carnet avec les photos).
 
@@ -53,7 +53,8 @@ Le paiement n'est pas encore branché. Le jour où il l'est : mettre le lien de 
 |---|---|
 | `src/villes.ts`, `src/marque.ts` | la liste des villes ; le nom, le prix, les liens de paiement |
 | `src/pages/index.astro`, `src/scripts/accueil.ts` | l'accueil et sa chorégraphie au défilement (éventail → roue des villes) |
-| `src/pages/[ville]/index.astro`, `src/scripts/ville.ts` | la page d'une ville : le film (plans, phrases, autocollants, tous calés sur une horloge) et l'achat |
+| `src/pages/[ville]/index.astro`, `src/scripts/ville.ts` | la page d'une ville : le lecteur du film (il démarre seul, sans le son ; un bouton fait entendre la voix) et l'achat |
+| `outils/film/` | **le film** : la scène (`film.html`, `film.css`), son déroulé image par image (`film.js`) et le minutage de la voix (`minutage.js`) |
 | `src/pages/gratuit.astro`, `src/scripts/gratuit.ts` | la page du code gratuit |
 | `src/styles/accueil.css`, `src/styles/pages.css` | la mise en forme de ces pages |
 | `src/pages/lyon/visite.astro`, `src/app/` | l'appli : `App.tsx` (accès, onglets, mémoire), `Ecrans.tsx` (balades, sur-mesure, parcours, adresses, carnet, fiches), `Carte.tsx` (MapLibre), `moteur.ts` (composition et horaires), `stockage.ts` (parcours et photos gardés sur le téléphone) |
@@ -80,8 +81,14 @@ Tous les scripts se lancent depuis la racine : `node outils/<script>.mjs`.
 | `style-carte.mjs` | recolore le Plan IGN aux couleurs « papier » → `public/data/style-papier.json` |
 | `captures.mjs` | fabrique les fonds de carte de la page de vente à partir de l'appli (serveur lancé) |
 | `vendor.mjs` | copie MapLibre dans `public/vendor/` (fait tout seul avant `dev` et `build`) |
+| `film-voix.mjs` | génère la voix du film (ElevenLabs, la voix de la série ; compte dans le quota) et son minutage ; `--garder` reprend la prise déjà faite |
+| `film-rendu.mjs` | fabrique la vidéo du film image par image (Chrome sans fenêtre + ffmpeg, 60 images par seconde, flou de mouvement) → `public/videos/presentation.mp4` |
 
 Après avoir ajouté une étape ou une adresse dans `lyon.json` : `geocoder` si besoin, puis `trajets`, puis `medias clips`.
+
+Changer le film : le texte dit est dans `film-voix.mjs` (puis `film-voix`, `film-rendu`) ; ce qu'on voit est dans
+`outils/film/` (puis `film-rendu` seul, environ un quart d'heure). `film-rendu.mjs --images 5,12` sort deux images
+de contrôle sans fabriquer la vidéo. La voix et l'original en 1080 × 1920 restent hors du dépôt (`D:/geopolitik/guide-villes-film`).
 
 ## Ce qui n'est pas branché
 

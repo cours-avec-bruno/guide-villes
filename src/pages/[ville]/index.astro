@@ -1,6 +1,6 @@
 ---
-// La page d'une ville : la présentation du guide (le « film » : le téléphone montre l'appli pendant que le texte dit ce
-// qu'on y gagne) et l'achat. Une ville dont le guide n'existe pas encore a la même page, sans prix : « bientôt ».
+// La page d'une ville : la présentation du guide (le « film » : une vidéo de 20 secondes, avec la voix de la série, qui
+// montre l'appli et dit ce qu'on y gagne) et l'achat. Une ville dont le guide n'existe pas encore a la même page, sans prix : « bientôt ».
 import Anime from "../../components/Anime.astro";
 import Logo from "../../components/Logo.astro";
 import Base from "../../layouts/Base.astro";
@@ -18,15 +18,9 @@ const nE = ETAPES.length, nA = ADRESSES.length;
 const lienGratuit = url(`/gratuit/?ville=${v.id}`);
 const lienVisite = url(`/${v.id}/visite/`);
 
-// les plans du film : les écrans réels de l'appli (celle de Lyon), et les cinq phrases, dans l'ordre
-const PLANS = ["parcours", "video", "carte", "carnet"];
-const TEXTES: [string, string][] = [
-  ["Avec le guide,", "plus besoin de réfléchir."],
-  ["Les meilleurs lieux,", "déjà en itinéraire."],
-  ["À chaque arrêt, sa vidéo", "et où bien manger à côté."],
-  ["Tes photos,", "rangées lieu par lieu."],
-  ["Et sur la carte,", "ton voyage à retracer."],
-];
+// le film de présentation : une vidéo (outils/film-voix.mjs puis outils/film-rendu.mjs), la même pour toutes les villes
+const DUREE_FILM = 20;
+const TEXTE_FILM = "Avec le guide, plus besoin de réfléchir quand tu visites une ville. Les meilleurs endroits sont déjà rangés en itinéraire. À chaque arrêt, une vidéo te raconte le lieu. Tu sais où bien manger, et quoi voir juste à côté. Tes photos se rangent lieu par lieu. Et sur la carte, tu retraces tout ton voyage.";
 const GAINS: [string, string][] = v.pret
   ? [
       [`${nE} lieux, déjà en itinéraire`, "Tu donnes ta durée, le guide trace le chemin et les horaires."],
@@ -40,7 +34,6 @@ const GAINS: [string, string][] = v.pret
       ["Où manger, juste à côté", "Les bonnes adresses, placées sur ton chemin."],
       ["Ton carnet de voyage", "Tes photos lieu par lieu, et ton trajet à rejouer sur la carte."],
     ];
-const photos = ["guignol", "traboules", "perrache"].map((id) => url(`/videos/lyon/${id}.jpg`));
 const donnees = v.pret
   ? {
       "@context": "https://schema.org",
@@ -92,40 +85,19 @@ const Coche = `<svg viewBox="0 0 20 20" width="20" height="20" fill="none" strok
         <h1 class="film__titre">Ton guide {v.de}, <span class="g">dans ta poche.</span></h1>
       </div>
 
-      <div class="film__scene" aria-hidden="true">
-        <div class="tel">
-          <div class="film__ecran">
-            {PLANS.map((p, i) => <img class="film__plan" src={url(`/plaques/ecran-${p}.webp`)} alt="" width="780" height="1688" decoding="async" loading={i ? "lazy" : "eager"} />)}
-          </div>
-        </div>
+      <div class="film__scene">
+        <video class="film__video" src={url("/videos/presentation.mp4")} poster={url("/videos/presentation.jpg")} width="720" height="1280" autoplay muted loop playsinline preload="auto" aria-label={`Présentation du guide en ${DUREE_FILM} secondes : ${TEXTE_FILM}`}>
+          <track kind="captions" srclang="fr" label="Français" src={url("/videos/presentation.vtt")} />
+        </video>
         {!v.pret && <span class="tag film__exemple" style="--c:#fffdf6">Exemple : le guide de {prete.nom}</span>}
-
-        <span class="tag tag--grand film__c" data-de="4.7" data-a="8.4" style="--r:-8deg;--c:#f5bd2f;left:-22%;top:11%">{v.pret ? `${nE} lieux` : "Les lieux à voir"}</span>
-        <span class="objet film__c" data-de="5.2" data-a="8.4" style="--r:10deg;--t:.62em;right:-9%;top:30%">
-          <svg viewBox="0 0 60 78"><path d="M30 76S4 50 4 29a26 26 0 1152 0c0 21-26 47-26 47z" fill="#de3341" stroke="#fffdf6" stroke-width="4"></path><circle cx="30" cy="29" r="10" fill="#fffdf6"></circle></svg>
-        </span>
-        <span class="objet film__c" data-de="9.1" data-a="13.2" style="--r:-9deg;--t:.82em;left:-13%;top:50%">
-          <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="35" fill="#f5bd2f" stroke="#fffdf6" stroke-width="5"></circle><path d="M30 20v15a5 5 0 005 5v22M26 20v11M34 20v11M52 20c-4 2-7 8-7 16 0 3 2 4 7 4v22" fill="none" stroke="#16202a" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        </span>
-        <span class="tag tag--grand film__c" data-de="9.6" data-a="13.2" style="--r:6deg;--c:#a9cfe2;right:-24%;top:64%">{v.pret ? `${nA} adresses` : "Les bonnes tables"}</span>
-        <span class="film__photo film__c" data-de="13.9" data-a="20.5" style="--r:-11deg;left:-17%;top:18%"><img src={photos[0]} alt="" width="540" height="960" loading="lazy" decoding="async" /></span>
-        <span class="film__photo film__c" data-de="14.4" data-a="20.5" style="--r:8deg;right:-16%;top:10%"><img src={photos[1]} alt="" width="540" height="960" loading="lazy" decoding="async" /></span>
-        <span class="film__photo film__c" data-de="14.9" data-a="20.5" style="--r:5deg;left:-12%;top:58%"><img src={photos[2]} alt="" width="540" height="960" loading="lazy" decoding="async" /></span>
-        <span class="objet film__c" data-de="17.9" data-a="20.5" style="--r:-9deg;--t:1.4em;right:-13%;top:70%">
-          <svg viewBox="0 0 150 70"><rect x="4" y="4" width="142" height="62" rx="8" fill="#fffdf6" stroke="#de3341" stroke-width="6"></rect><rect x="13" y="13" width="124" height="44" rx="4" fill="none" stroke="#de3341" stroke-width="2"></rect><text x="75" y="48" text-anchor="middle" font-family="Bebas Neue, Impact, sans-serif" font-size="38" letter-spacing="3" fill="#de3341">VISITÉ</text></svg>
-        </span>
       </div>
 
       <div class="film__bas">
-        <div class="film__textes">
-          {TEXTES.map(([gris, net], k) => (
-            <p class:list={["film__texte", { vu: k === 0 }]}>
-              <span class="film__l g">{gris.split(" ").map((m) => <Fragment><span class="m">{m}</span>{" "}</Fragment>)}</span>
-              <span class="film__l">{net.split(" ").map((m) => <Fragment><span class="m">{m}</span>{" "}</Fragment>)}</span>
-            </p>
-          ))}
-        </div>
-        <div class="film__barre" aria-hidden="true">{TEXTES.map(() => <i><b></b></i>)}</div>
+        <button type="button" class="btn btn--plein film__son" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"></path><path class="film__ondes" d="M15.5 9a4.2 4.2 0 010 6M18 6.5a7.6 7.6 0 010 11"></path></svg>
+          <span>Écouter la présentation</span>
+        </button>
+        <p class="film__duree">Le guide en {DUREE_FILM} secondes.</p>
       </div>
     </section>
 

@@ -1,0 +1,61 @@
+<!doctype html>
+<!-- Le film de présentation du guide (vertical, 1080 × 1920). Il ne joue pas tout seul : outils/film-rendu.mjs appelle
+     rendu(t) image par image et en fait une vidéo. Le minutage vient de la voix (minutage.js, écrit par film-voix.mjs).
+     Les nombres (lieux, vidéos, adresses) arrivent dans l'adresse : film.html#lieux=13&videos=18&adresses=12 -->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Le film de présentation</title>
+    <link rel="stylesheet" href="film.css" />
+  </head>
+  <body>
+    <div id="film">
+      <div class="fond"><img id="fond" src="../../public/plaques/lyon-portrait.webp" alt="" /></div>
+      <div class="voile"></div>
+
+      <p class="marque">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M24 45S8 30.8 8 19a16 16 0 1132 0c0 11.8-16 26-16 26z" fill="#16202a"></path>
+          <path d="M16.5 19a7.5 7.5 0 0115 0v5.5h-4.8V19a2.7 2.7 0 00-5.4 0v9.5" fill="none" stroke="#f3eddd" stroke-width="3.2" stroke-linecap="round"></path>
+        </svg>
+        <span>Dédale</span>
+      </p>
+
+      <div id="textes"></div>
+
+      <div id="scene">
+        <div class="tel" id="tel">
+          <div class="ecran">
+            <img class="plan" src="../../public/plaques/ecran-parcours.webp" alt="" />
+            <img class="plan" src="../../public/plaques/ecran-video.webp" alt="" />
+            <img class="plan" src="../../public/plaques/ecran-carte.webp" alt="" />
+            <img class="plan" src="../../public/plaques/ecran-carnet.webp" alt="" />
+          </div>
+        </div>
+
+        <!-- les autocollants : data-quand = « phrase.carton+délai » (le moment où ils se posent), data-fin = la phrase où ils partent -->
+        <span class="colle tag" data-quand="1.0+0.25" data-fin="2" style="--r:-8deg;--c:#f5bd2f;left:8px;top:150px"><b data-n="lieux">13</b> lieux</span>
+        <span class="colle objet" data-quand="1.1+0.1" data-fin="2" style="--r:10deg;width:118px;right:146px;top:330px">
+          <svg viewBox="0 0 60 78"><path d="M30 76S4 50 4 29a26 26 0 1152 0c0 21-26 47-26 47z" fill="#de3341" stroke="#fffdf6" stroke-width="4"></path><circle cx="30" cy="29" r="10" fill="#fffdf6"></circle></svg>
+        </span>
+        <span class="colle objet" data-quand="2.1+0.05" data-fin="3" style="--r:-7deg;width:170px;left:120px;top:470px">
+          <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="35" fill="#f5bd2f" stroke="#fffdf6" stroke-width="5"></circle><path d="M32 25v30l25-15z" fill="#16202a" stroke="#16202a" stroke-width="4" stroke-linejoin="round"></path></svg>
+        </span>
+        <span class="colle tag" data-quand="2.1+0.45" data-fin="3" style="--r:6deg;--c:#fffdf6;right:4px;top:230px"><b data-n="videos">18</b> vidéos</span>
+        <span class="colle objet" data-quand="3.0+0.35" data-fin="4" style="--r:-9deg;width:176px;left:110px;top:300px">
+          <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="35" fill="#f5bd2f" stroke="#fffdf6" stroke-width="5"></circle><path d="M30 20v15a5 5 0 005 5v22M26 20v11M34 20v11M52 20c-4 2-7 8-7 16 0 3 2 4 7 4v22" fill="none" stroke="#16202a" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </span>
+        <span class="colle tag" data-quand="3.0+0.8" data-fin="4" style="--r:5deg;--c:#a9cfe2;right:4px;top:560px"><b data-n="adresses">12</b> adresses</span>
+        <span class="colle tag" data-quand="3.1+0.2" data-fin="4" style="--r:-5deg;--c:#f5bd2f;left:8px;top:800px">À deux pas</span>
+        <span class="colle photo" data-quand="4.0+0.2" style="--r:-11deg;left:66px;top:230px"><img src="../../public/videos/lyon/guignol.jpg" alt="" /></span>
+        <span class="colle photo" data-quand="4.0+0.5" style="--r:8deg;right:50px;top:130px"><img src="../../public/videos/lyon/traboules.jpg" alt="" /></span>
+        <span class="colle photo" data-quand="4.1+0.1" style="--r:5deg;left:86px;top:690px"><img src="../../public/videos/lyon/perrache.jpg" alt="" /></span>
+        <span class="colle objet" data-quand="5.1+0.7" style="--r:-9deg;width:300px;right:0;top:820px">
+          <svg viewBox="0 0 150 70"><rect x="4" y="4" width="142" height="62" rx="8" fill="#fffdf6" stroke="#de3341" stroke-width="6"></rect><rect x="13" y="13" width="124" height="44" rx="4" fill="none" stroke="#de3341" stroke-width="2"></rect><text x="75" y="48" text-anchor="middle" font-family="Bebas Neue, Impact, sans-serif" font-size="38" letter-spacing="3" fill="#de3341">VISITÉ</text></svg>
+        </span>
+      </div>
+    </div>
+    <script src="minutage.js"></script>
+    <script src="film.js"></script>
+  </body>
+</html>
