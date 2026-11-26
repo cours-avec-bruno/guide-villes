@@ -165,12 +165,11 @@ a {
   box-shadow: 0 2px 0 rgba(22, 32, 42, 0.18);
 }
 
-/* Appareil qui demande de réduire les animations : tout se fige, sauf la page d'accueil en version animée (html.anime),
-   qui propose alors un lien « Version sans animation ». */
+/* Appareil qui demande de réduire les animations : tout se fige. */
 @media (prefers-reduced-motion: reduce) {
-  html:not(.anime) *,
-  html:not(.anime) *::before,
-  html:not(.anime) *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

@@ -1253,3 +1253,236 @@
 [data-nu] .panneau {
   display: none;
 }
+
+/* ——— l'accès : le code, les deux formules, les verrous du guide gratuit */
+.acces {
+  padding-bottom: 48px;
+}
+.code {
+  margin-top: 22px;
+}
+.code__label {
+  display: block;
+  font-size: 15px;
+  font-weight: 650;
+  margin-bottom: 8px;
+}
+.code__ligne {
+  display: flex;
+  gap: 8px;
+}
+.code__champ {
+  flex: 1;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 14px;
+  border: 1.5px solid var(--ligne-forte);
+  border-radius: var(--r-m);
+  background: var(--feuille);
+  font: inherit;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--encre);
+}
+.code__champ::placeholder {
+  color: var(--encre3);
+  letter-spacing: 0.04em;
+}
+.code__champ:focus {
+  outline: none;
+  border-color: var(--encre);
+  box-shadow: 0 0 0 3px rgba(42, 103, 136, 0.25);
+}
+.code__champ[aria-invalid="true"] {
+  border-color: var(--rouge);
+}
+.code__ligne .btn {
+  min-height: 52px;
+}
+.code__erreur {
+  margin-top: 8px;
+  font-size: 14.5px;
+  font-weight: 550;
+  color: #b3202c;
+}
+@media (max-width: 400px) {
+  .code__ligne {
+    flex-direction: column;
+  }
+}
+.acces__titre {
+  margin: 40px 0 0;
+  font-size: 19px;
+  font-weight: 650;
+}
+.formule-app {
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid var(--ligne);
+  border-radius: var(--r-l);
+  background: var(--feuille);
+  box-shadow: var(--ombre-papier);
+}
+.formule-app h3 {
+  margin: 8px 0 4px;
+  font-family: var(--titre);
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.formule-app > p:not(.formule-app__tag, .achat-bientot) {
+  color: var(--encre2);
+}
+.formule-app__tag {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 3px 9px;
+  border-radius: 3px;
+  background: var(--jaune);
+}
+.formule-app--complet {
+  background: var(--nuit);
+  color: var(--feuille);
+  border-color: transparent;
+}
+.formule-app--complet .formule-app__tag {
+  background: var(--feuille);
+  color: var(--encre);
+}
+.formule-app--complet .btn--plein {
+  background: var(--jaune);
+  border-color: var(--jaune);
+  color: var(--encre);
+}
+.formule-app .btn {
+  margin-top: 16px;
+}
+.etapes-code,
+.avantages {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.etapes-code li,
+.avantages li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 15.5px;
+}
+.etapes-code svg,
+.avantages svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--mer);
+}
+.formule-app--complet .avantages svg {
+  color: var(--jaune);
+}
+.feuille .avantages svg {
+  color: var(--vert);
+}
+.achat-bientot {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: var(--r-m);
+  border: 1.5px dashed currentColor;
+  font-size: 15px;
+  opacity: 0.9;
+}
+.acces__lien {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 15px;
+}
+.acces__lien a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--encre2);
+  text-underline-offset: 3px;
+}
+.feuille__actions--pile {
+  flex-direction: column;
+}
+.feuille__actions--pile .achat-bientot {
+  margin-top: 0;
+}
+.feuille .code {
+  margin-top: 16px;
+}
+/* les balades du guide complet, vues avec le guide gratuit */
+.balade[data-verrou] .balade__images {
+  filter: grayscale(0.7);
+  opacity: 0.75;
+}
+.balade[data-verrou] .adresse__type {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--sable-clair);
+}
+.balade[data-verrou] .balade__fleche {
+  background: var(--sable);
+  color: var(--encre);
+}
+.photos-verrou {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  border: 1.5px dashed var(--ligne-forte);
+  border-radius: var(--r-m);
+  background: transparent;
+  text-align: left;
+  font-size: 14.5px;
+  color: var(--encre2);
+  cursor: pointer;
+}
+.photos-verrou svg {
+  flex: none;
+  color: var(--encre);
+}
+.photos-verrou strong {
+  display: block;
+  color: var(--encre);
+  font-size: 15.5px;
+}
+.photos-verrou:hover {
+  border-color: var(--encre);
+}
+/* l'en-tête : « Guide gratuit · Passer au complet » */
+.tete__acces {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 12px 0 4px;
+  border: 1.5px solid var(--encre);
+  border-radius: 40px;
+  background: var(--feuille);
+  font-size: 13.5px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.tete__acces span {
+  padding: 3px 8px;
+  border-radius: 40px;
+  background: var(--jaune);
+  font-size: 12px;
+}
+@media (max-width: 360px) {
+  .tete__acces span {
+    display: none;
+  }
+}

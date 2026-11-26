@@ -1,0 +1,18 @@
+---
+// Les questions : chacune se déplie.
+import { FAQ } from "../data/faq";
+---
+
+<section class="faq" id="questions" aria-labelledby="t-faq">
+  <div class="enveloppe faq__grille">
+    <h2 id="t-faq" class="titre-section entre">Les questions avant de partir</h2>
+    <div class="faq__liste">
+      {FAQ.map((f, i) => (
+        <details class="faq__une entre" open={i === 0}>
+          <summary>{f.q}</summary>
+          <p>{f.r}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>

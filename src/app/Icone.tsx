@@ -19,6 +19,9 @@ const TRACES: Record<string, string> = {
   cible: "M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 1113 0c0 5.4-6.5 11-6.5 11zM12 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z",
   rejouer: "M4 12a8 8 0 108-8H7M10 1L7 4l3 3",
   horloge: "M12 21a9 9 0 100-18 9 9 0 000 18zM12 7v5l3.5 2",
+  cadenas: "M7.5 10.5V8a4.5 4.5 0 019 0v2.5M5.5 10.5h13V20h-13v-9.5zM12 14v2.5",
+  cle: "M14.5 9.5a4 4 0 11-8 0 4 4 0 018 0zM13.5 12.5L20 19M17 16l2-2M15 14l1.5-1.5",
+  message: "M4 5h16v11H9l-5 4V5zM8 9.5h8M8 12.5h5",
 };
 
 export function Icone({ nom, taille = 20 }: { nom: keyof typeof TRACES | string; taille?: number }) {

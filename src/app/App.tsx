@@ -1,9 +1,12 @@
-// L'appli de visite de Lyon : on choisit une balade prête (ou on la compose) → parcours avec horaires → carte, adresses, carnet.
+// L'appli de visite de Lyon : on ouvre le guide avec son code → on choisit une balade prête (ou on la compose, avec le guide
+// complet) → parcours avec horaires → carte, adresses, carnet.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { url } from "../base";
 import { MARQUE } from "../marque";
+import { ecrireAcces, lireAcces, verifier, type Niveau } from "./acces";
+import { EcranAcces, FeuilleComplet } from "./Acces";
 import Carte, { traceCarnet } from "./Carte";
-import { ADRESSES, DEPARTS, ETAPES, VISITES, chargerTrajets, depart as leDepart, type Trajets } from "./donnees";
+import { ADRESSES, DEPARTS, ETAPES, VILLE, VISITES, chargerTrajets, depart as leDepart, type Trajets } from "./donnees";
 import { Adresses, Balades, Carnet, FicheAdresse, FicheEtape, Parcours, Questionnaire, type Balade } from "./Ecrans";
 import { Icone } from "./Icone";
 import { composer, coord, planifier, vol, type Reponses } from "./moteur";
@@ -56,11 +59,17 @@ export default function App() {
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [partage, setPartage] = useState("");
   const [panne, setPanne] = useState(false);
+  const [acces, setAcces] = useState<Niveau | null>(() => lireAcces(VILLE.slug));
+  const [codeRefuse, setCodeRefuse] = useState(""); // un code arrivé par l'adresse de la page, qui ne marche pas
+  const [verrou, setVerrou] = useState<string | null>(null); // la raison de la fiche « guide complet », quand elle est ouverte
   const large = useLarge();
   const lu = useRef(false);
+  const complet = acces === "complet";
 
   const setEtat = (f: (e: Etat) => Etat) => setEtatBrut((e) => { const n = f(e); ecrire(n); return n; });
-  const voyage = etat.voyages.find((v) => v.id === etat.courant) ?? null;
+  // avec le guide gratuit, seule la balade « Les 5 secrets » s'ouvre
+  const permis = (v: Voyage) => complet || v.mode === "5-secrets";
+  const voyage = acces ? (etat.voyages.find((v) => v.id === etat.courant && permis(v)) ?? null) : null;
   const majVoyage = (f: (v: Voyage) => Voyage) => setEtat((e) => ({ ...e, voyages: e.voyages.map((v) => (v.id === e.courant ? f(v) : v)) }));
   const creerVoyage = (v: Omit<Voyage, "id" | "cree" | "vus" | "photos">) => {
     const neuf: Voyage = { ...v, id: nouvelId(), cree: Date.now(), vus: {}, photos: {} };
@@ -76,13 +85,42 @@ export default function App() {
 
   useEffect(() => { chargerTrajets().then(setT).catch(() => setPanne(true)); }, []);
 
-  // l'adresse de la page peut porter une visite toute faite (?visite=5-secrets) ou un itinéraire partagé (?i=…)
+  /** Un code vient d'ouvrir le guide : le gratuit lance tout de suite sa balade, le complet montre toutes les balades. */
+  const ouvrir = (n: Niveau) => {
+    ecrireAcces(VILLE.slug, n);
+    const avant = acces;
+    setAcces((a) => (a === "complet" ? a : n));
+    setVerrou(null);
+    setCodeRefuse("");
+    if (n === "gratuit" && avant !== "complet") {
+      // sa seule balade : on reprend celle qui existe déjà, ou on la lance
+      const deja = etat.voyages.find((v) => v.mode === "5-secrets");
+      if (deja) { setEtat((e) => ({ ...e, courant: deja.id })); setEcran(null); } else lancerSecrets();
+    } else if (n === "complet" && !etat.courant) setEcran("balades");
+  };
+
+  // l'adresse de la page peut porter un code (?code=…, le lien de l'e-mail ou du retour de paiement), une visite toute faite
+  // (?visite=5-secrets) ou un itinéraire partagé (?i=…)
   useEffect(() => {
     if (lu.current) return;
     lu.current = true;
     const p = new URLSearchParams(location.search);
+    // « ?nu » : la carte seule, sans en-tête ni boutons (sert à fabriquer les images de la page de vente, sur l'ordinateur)
+    const local = ["localhost", "127.0.0.1"].includes(location.hostname);
+    let niveau = lireAcces(VILLE.slug);
+    if (p.has("nu") && local) niveau = "complet";
+    if (p.get("code")) {
+      const n = verifier(VILLE.slug, p.get("code")!);
+      if (n) { ecrireAcces(VILLE.slug, n); niveau = niveau === "complet" ? niveau : n; }
+      else setCodeRefuse(p.get("code")!);
+    }
+    setAcces(niveau);
     const ids = (p.get("i") ?? "").split(".").filter((id) => ETAPES.some((e) => e.id === id));
-    if (p.get("visite") === "5-secrets") {
+    if (!niveau) { /* l'écran du code s'affiche */ }
+    else if (niveau === "gratuit" && (ids.length || p.has("mesure"))) {
+      setVerrou(ids.length ? "Cet itinéraire est dans le guide complet" : "La balade sur mesure est dans le guide complet");
+      if (!etat.voyages.some((v) => v.id === etat.courant && v.mode === "5-secrets")) lancerSecrets();
+    } else if (p.get("visite") === "5-secrets" || (niveau === "gratuit" && p.get("code") && !etat.voyages.some((v) => v.mode === "5-secrets"))) {
       const h = /^\d\d:\d\d$/.test(p.get("h") ?? "") ? p.get("h")! : undefined;
       if (voyage?.mode !== "5-secrets" || h) lancerSecrets(h);
     } else if (ids.length) {
@@ -93,10 +131,10 @@ export default function App() {
       });
     } else if (p.has("mesure")) setEcran("mesure");
     else if (p.has("nouveau")) setEcran("balades");
+    else if (niveau === "complet" && p.get("code")) setEcran("balades");
     const o = p.get("onglet") as Onglet | null;
     if (o && ONGLETS.some((x) => x.id === o)) setOnglet(o);
-    // « ?nu » : la carte seule, sans en-tête ni boutons (sert à fabriquer les images de la page de vente)
-    if (p.has("nu")) { document.documentElement.dataset.nu = p.get("nu") ?? ""; return; }
+    if (p.has("nu") && local) { document.documentElement.dataset.nu = p.get("nu") ?? ""; return; }
     if (p.size) history.replaceState(null, "", location.pathname);
   }, []);
 
@@ -135,7 +173,9 @@ export default function App() {
   const partager = async () => {
     if (!voyage) return;
     const r = voyage.reponses;
-    const url = `${location.origin}${location.pathname}?i=${voyage.etapes.join(".")}&d=${r.depart === "position" ? "bellecour" : r.depart}&h=${r.heure}&m=${r.montees ? 1 : 0}&r=${r.repas ? 1 : 0}`;
+    const url = voyage.mode === "5-secrets"
+      ? `${location.origin}${location.pathname}?visite=5-secrets&h=${r.heure}`
+      : `${location.origin}${location.pathname}?i=${voyage.etapes.join(".")}&d=${r.depart === "position" ? "bellecour" : r.depart}&h=${r.heure}&m=${r.montees ? 1 : 0}&r=${r.repas ? 1 : 0}`;
     try {
       if (navigator.share) await navigator.share({ title: `Mon itinéraire dans Lyon`, url });
       else { await navigator.clipboard.writeText(url); setPartage("Lien copié"); setTimeout(() => setPartage(""), 2200); }
@@ -150,13 +190,23 @@ export default function App() {
   }, [ici, voyage?.etapes, voyage?.vus]);
 
   if (panne) return <p className="attente">Le guide n'a pas pu se charger. Vérifie ta connexion, puis recharge la page.</p>;
+  if (!acces) {
+    return (
+      <div className="appli appli--q">
+        <EnTete />
+        <EcranAcces key={codeRefuse} code={codeRefuse} onOuvert={ouvrir} />
+      </div>
+    );
+  }
   if (!T) return <p className="attente" role="status">Chargement du guide de Lyon…</p>;
+  const feuilleComplet = verrou && <FeuilleComplet raison={verrou} onFermer={() => setVerrou(null)} onOuvert={ouvrir} />;
+  const debloquerPhotos = () => setVerrou("Garde tes photos dans ton carnet");
 
   if (!voyage || !plan || ecran) {
     if (ecran === "mesure") {
       return (
         <div className="appli appli--q">
-          <EnTete />
+          <EnTete acces={acces} onComplet={() => setVerrou("Passe au guide complet")} />
           <Questionnaire
             depart={voyage?.mode === "sur-mesure" ? voyage.reponses : reponsesParDefaut()}
             apercu={(r) => { const et = composer(T, r); const pl = planifier(T, r, et, nomDepart(r)); return { n: et.length, minutes: pl.minutes, metres: pl.metres }; }}
@@ -169,18 +219,21 @@ export default function App() {
     const balades: (Balade & { reponses: Reponses })[] = MODELES.map((mo) => {
       const reponses = { ...reponsesParDefaut(), ...mo.reponses };
       const etapes = mo.id === "5-secrets" ? VISITES[0].etapes : composer(T, reponses);
-      return { id: mo.id, nom: mo.nom, etiquette: mo.etiquette, accroche: mo.accroche, etapes, reponses, minutes: planifier(T, reponses, etapes, nomDepart(reponses)).minutes, depart: nomDepart(reponses) };
+      return { id: mo.id, nom: mo.nom, etiquette: mo.etiquette, accroche: mo.accroche, etapes, reponses, minutes: planifier(T, reponses, etapes, nomDepart(reponses)).minutes, depart: nomDepart(reponses), verrou: !complet && mo.id !== "5-secrets" };
     });
     return (
       <div className="appli appli--q">
-        <EnTete />
+        <EnTete acces={acces} onComplet={() => setVerrou("Passe au guide complet")} />
         <Balades
           balades={balades}
+          gratuit={!complet}
           peutFermer={!!voyage && !!plan}
           onFermer={() => setEcran(null)}
+          onVerrou={setVerrou}
           onSurMesure={() => { setEcran("mesure"); window.scrollTo(0, 0); }}
           onChoisir={(id) => { const b = balades.find((x) => x.id === id)!; creerVoyage({ mode: id === "5-secrets" ? "5-secrets" : "balade", nom: b.nom, reponses: b.reponses, etapes: b.etapes }); }}
         />
+        {feuilleComplet}
       </div>
     );
   }
@@ -192,7 +245,7 @@ export default function App() {
 
   return (
     <div className="appli" data-onglet={actif}>
-      <EnTete />
+      <EnTete acces={acces} onComplet={() => setVerrou("Passe au guide complet")} />
       <nav className="onglets" aria-label="Les parties du guide">
         {ONGLETS.map((o) => (
           <button key={o.id} type="button" className="onglet" data-id={o.id} aria-current={actif === o.id ? "page" : undefined} onClick={() => { setOnglet(o.id); window.scrollTo(0, 0); }}>
@@ -210,27 +263,28 @@ export default function App() {
 
       <main className="panneau" id="contenu">
         {actif === "parcours" && (
-          <Parcours voyage={voyage} plan={plan} proche={proche} partage={partage} onOuvrir={ouvrirEtape} onCocher={cocher} onModifier={() => { setEcran("balades"); window.scrollTo(0, 0); }} onPartager={partager} onAdresse={ouvrirAdresse} onCarnet={() => { setOnglet("carnet"); window.scrollTo(0, 0); }} />
+          <Parcours voyage={voyage} plan={plan} proche={proche} photos={complet} partage={partage} onOuvrir={ouvrirEtape} onCocher={cocher} onModifier={() => { setEcran("balades"); window.scrollTo(0, 0); }} onPartager={partager} onAdresse={ouvrirAdresse} onCarnet={() => { setOnglet("carnet"); window.scrollTo(0, 0); }} />
         )}
         {actif === "adresses" && <Adresses T={T} voyage={voyage} onAdresse={ouvrirAdresse} />}
         {actif === "carnet" && (
-          <Carnet voyage={voyage} metres={carnet?.metres ?? 0} urls={urls} onOuvrir={ouvrirEtape} onRejouer={() => setRejouer((n) => n + 1)} onParcours={() => setOnglet("parcours")} onAjouter={ajouter} onSupprimer={supprimer} />
+          <Carnet voyage={voyage} metres={carnet?.metres ?? 0} urls={urls} photos={complet} onDebloquer={debloquerPhotos} onOuvrir={ouvrirEtape} onRejouer={() => setRejouer((n) => n + 1)} onParcours={() => setOnglet("parcours")} onAjouter={ajouter} onSupprimer={supprimer} />
         )}
       </main>
 
       {fiche && (
         <FicheEtape
-          key={fiche} id={fiche} voyage={voyage} urls={urls}
+          key={fiche} id={fiche} voyage={voyage} urls={urls} photos={complet} onDebloquer={debloquerPhotos}
           numero={voyage.etapes.includes(fiche) ? voyage.etapes.indexOf(fiche) + 1 : null}
           onFermer={() => setFiche(null)} onCocher={cocher} onAjouter={ajouter} onSupprimer={supprimer}
         />
       )}
       {ficheAdr && <FicheAdresse a={ADRESSES.find((a) => a.id === ficheAdr)!} onFermer={() => setFicheAdr(null)} />}
+      {feuilleComplet}
     </div>
   );
 }
 
-function EnTete() {
+function EnTete({ acces, onComplet }: { acces?: Niveau | null; onComplet?: () => void }) {
   return (
     <header className="tete">
       <a className="evitement" href="#contenu">Aller au contenu</a>
@@ -241,7 +295,13 @@ function EnTete() {
         </svg>
         <span>{MARQUE}</span>
       </a>
-      <span className="tete__ville">Lyon</span>
+      {acces === "gratuit" && onComplet ? (
+        <button type="button" className="tete__acces" onClick={onComplet}>
+          <span>Guide gratuit</span> Passer au complet
+        </button>
+      ) : (
+        <span className="tete__ville">{VILLE.nom}</span>
+      )}
     </header>
   );
 }

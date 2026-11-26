@@ -1,0 +1,44 @@
+---
+// La rangée des villes : on la fait défiler au doigt (ou à la souris, ou avec les flèches). Chaque carte mène à la page
+// du guide de la ville. « sauf » : la ville de la page, qu'on ne remontre pas.
+import { url } from "../base";
+import { INSTAGRAM } from "../marque";
+import { VILLES } from "../data/villes";
+import Fleche from "./Fleche.astro";
+
+interface Props { titre: string; sous?: string; sauf?: string; id?: string }
+const { titre, sous, sauf, id } = Astro.props;
+const liste = VILLES.filter((v) => v.id !== sauf);
+---
+
+<section class="villes" id={id} aria-labelledby="t-villes">
+  <div class="enveloppe villes__tete">
+    <div>
+      <h2 id="t-villes" class="titre-section entre">{titre}</h2>
+      {sous && <p class="villes__sous entre">{sous}</p>}
+    </div>
+    <div class="villes__fleches" aria-hidden="true">
+      <button type="button" class="rond-btn" data-defile="-1" tabindex="-1" aria-label="Villes précédentes"><Fleche sens="gauche" /></button>
+      <button type="button" class="rond-btn" data-defile="1" tabindex="-1" aria-label="Villes suivantes"><Fleche /></button>
+    </div>
+  </div>
+  <ul class="rangee" data-rangee aria-label="Les guides de villes">
+    {liste.map((v, i) => (
+      <li>
+        <a class="carte-v" data-pret={v.pret ? "" : undefined} href={url(`/guides/${v.id}/`)} draggable="false">
+          <img src={url(`/cartes/${v.id}.webp`)} alt="" width="600" height="792" loading={i < 4 ? "eager" : "lazy"} decoding="async" draggable="false" />
+          <span class="carte-v__etat">{v.pret ? "Disponible" : "Bientôt"}</span>
+          <span class="carte-v__nom">{v.nom}</span>
+          <span class="carte-v__action">{v.pret ? <>Voir le guide<Fleche /></> : "En préparation"}</span>
+        </a>
+      </li>
+    ))}
+    <li>
+      <a class="carte-v carte-v--question" href={INSTAGRAM} rel="noopener" draggable="false">
+        <span class="carte-v__point" aria-hidden="true">?</span>
+        <span class="carte-v__nom">Ta ville</span>
+        <span class="carte-v__action">Propose-la sur Instagram</span>
+      </a>
+    </li>
+  </ul>
+</section>

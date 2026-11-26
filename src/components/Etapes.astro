@@ -1,0 +1,27 @@
+---
+// Comment ça marche : quatre gestes, quatre écrans de l'appli.
+import Telephone from "./Telephone.astro";
+const GESTES = [
+  { ecran: "parcours", titre: "Tu choisis ta balade", texte: "Le parcours s'affiche heure par heure, avec le temps de marche entre chaque lieu.", alt: "Le parcours : les étapes, leur heure de passage et le temps de marche entre chacune." },
+  { ecran: "carte", titre: "La carte te guide", texte: "Tu vois où tu es, l'étape suivante et le chemin pour y aller.", alt: "La carte de Lyon avec le tracé de la balade, les étapes numérotées et les bonnes adresses." },
+  { ecran: "video", titre: "Sur place, tu lances la vidéo", texte: "Elle te raconte ce que tu as sous les yeux, et ce qu'il ne faut pas rater.", alt: "La fiche d'une étape : la vidéo du lieu, son histoire et un conseil sur place." },
+  { ecran: "carnet", titre: "Ton carnet garde tout", texte: "Ton trajet, l'heure de chaque étape, et tes photos avec le guide complet.", alt: "Le carnet de voyage : le trajet réellement parcouru et les étapes cochées." },
+];
+---
+
+<section class="comment" id="comment" aria-labelledby="t-comment">
+  <div class="enveloppe">
+    <h2 id="t-comment" class="titre-section entre">Comment ça marche</h2>
+    <p class="section-sous entre">Tout se passe dans le navigateur de ton téléphone. Pas d'appli à installer, pas de compte.</p>
+    <ol class="gestes">
+      {GESTES.map((g, i) => (
+        <li class="geste entre">
+          <Telephone ecran={g.ecran} alt={g.alt} />
+          <p class="geste__num" aria-hidden="true">{i + 1}</p>
+          <h3>{g.titre}</h3>
+          <p>{g.texte}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

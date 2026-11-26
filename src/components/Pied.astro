@@ -1,0 +1,33 @@
+---
+import { url } from "../base";
+import { INSTAGRAM, MARQUE } from "../marque";
+import { VILLES } from "../data/villes";
+import Logo from "./Logo.astro";
+---
+
+<footer class="pied sombre">
+  <div class="enveloppe pied__grille">
+    <div>
+      <p class="pied__marque"><Logo /></p>
+      <p class="pied__texte">Les guides de visite de la série « Ce que tu ne sais pas sur… ».</p>
+    </div>
+    <nav aria-label="Les guides">
+      <p class="pied__titre">Les guides</p>
+      <ul>
+        {VILLES.slice(0, 6).map((v) => <li><a href={url(`/guides/${v.id}/`)}>{v.nom}{v.pret ? "" : " (bientôt)"}</a></li>)}
+      </ul>
+    </nav>
+    <nav aria-label="Le guide">
+      <p class="pied__titre">Le guide</p>
+      <ul>
+        <li><a href={url("/lyon/")}>J'ai un code</a></li>
+        <li><a href={url("/guides/lyon/#formules")}>Tarifs</a></li>
+        <li><a href={url("/#questions")}>Questions</a></li>
+        <li><a href={INSTAGRAM} rel="noopener">Instagram</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="enveloppe pied__bas">
+    <p>© {new Date().getFullYear()} {MARQUE}. Fond de carte et trajets : IGN, Géoplateforme. Lieux : contributeurs OpenStreetMap.</p>
+  </div>
+</footer>

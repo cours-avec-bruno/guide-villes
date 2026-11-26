@@ -1,0 +1,76 @@
+---
+// Les deux formules du guide de Lyon, côte à côte, puis les trois étapes pour avoir le code gratuit.
+import { url } from "../base";
+import { LIEN_PAIEMENT, LIEN_VIDEO, PRIX_COMPLET } from "../marque";
+import { ADRESSES, ETAPES, NB_VIDEOS, VISITES } from "../app/donnees";
+import Fleche from "./Fleche.astro";
+
+const secrets = VISITES[0];
+const GRATUIT = [
+  { oui: true, t: `1 balade : ${secrets.etapes.length} lieux, de Perrache aux Terreaux (1 h 45)` },
+  { oui: true, t: "Une vidéo à chaque arrêt" },
+  { oui: true, t: "La carte qui te guide, avec les horaires" },
+  { oui: true, t: "Les bonnes adresses sur le chemin" },
+  { oui: true, t: "Ton carnet de voyage" },
+  { oui: false, t: "Les autres balades et le sur-mesure" },
+  { oui: false, t: "Tes photos dans le carnet" },
+];
+const COMPLET = [
+  `Les ${ETAPES.length} lieux et leurs ${NB_VIDEOS} vidéos`,
+  "Toutes les balades, de 1 h 30 à la journée",
+  "Ta balade sur mesure : ton temps, ton départ, tes envies",
+  "Tes photos dans ton carnet de voyage",
+  `Les ${ADRESSES.length} bonnes adresses, la carte, les horaires`,
+];
+const Oui = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>`;
+const Non = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"></path></svg>`;
+---
+
+<section class="formules" id="formules" aria-labelledby="t-formules">
+  <div class="enveloppe">
+    <p class="etiquette entre">Le guide de Lyon</p>
+    <h2 id="t-formules" class="titre-section entre">Gratuit pour commencer. <span class="g">Complet pour tout voir.</span></h2>
+    <div class="formules__grille">
+      <article class="formule entre" aria-labelledby="t-gratuit">
+        <p class="formule__nom">Guide gratuit</p>
+        <h3 id="t-gratuit">{secrets.nom} de Lyon</h3>
+        <p class="formule__prix">0 €<small>avec un code reçu par e-mail</small></p>
+        <ul class="formule__liste">
+          {GRATUIT.map((l) => (
+            <li class:list={{ non: !l.oui }}><Fragment set:html={l.oui ? Oui : Non} /><span>{l.oui ? "" : <span class="sr">Non compris : </span>}{l.t}</span></li>
+          ))}
+        </ul>
+        <a class="btn btn--contour btn--bloc" href="#code">Recevoir mon code gratuit<Fleche sens="bas" /></a>
+      </article>
+
+      <article class="formule formule--complet sombre entre" aria-labelledby="t-complet">
+        <p class="formule__badge">Recommandé</p>
+        <p class="formule__nom">Guide complet</p>
+        <h3 id="t-complet">Tout Lyon</h3>
+        <p class="formule__prix">{PRIX_COMPLET}<small>une seule fois, sans abonnement</small></p>
+        <ul class="formule__liste">
+          {COMPLET.map((t) => <li><Fragment set:html={Oui} /><span>{t}</span></li>)}
+        </ul>
+        {LIEN_PAIEMENT ? (
+          <a class="btn btn--jaune btn--bloc" href={LIEN_PAIEMENT} rel="noopener">Acheter le guide complet<Fleche /></a>
+        ) : (
+          <p class="achat-bientot" role="note"><strong>Paiement bientôt ouvert.</strong> En attendant, commence avec le guide gratuit.</p>
+        )}
+        <p class="formule__note">Déjà acheté ? <a href={url("/lyon/")}>Entre ton code</a></p>
+      </article>
+    </div>
+
+    <div class="code-etapes entre" id="code">
+      <h3>Ton code gratuit en 3 étapes</h3>
+      <ol>
+        <li><span class="code-etapes__num">1</span><p><strong>Commente la vidéo de Lyon</strong> sur Instagram.</p></li>
+        <li><span class="code-etapes__num">2</span><p><strong>Reçois ton code</strong> par e-mail.</p></li>
+        <li><span class="code-etapes__num">3</span><p><strong>Entre-le dans le guide :</strong> ta balade s'ouvre.</p></li>
+      </ol>
+      <div class="code-etapes__actions">
+        <a class="btn btn--plein" href={LIEN_VIDEO} target="_blank" rel="noopener">Voir la vidéo à commenter<Fleche /></a>
+        <a class="btn btn--contour" href={url("/lyon/")}>J'ai déjà un code</a>
+      </div>
+    </div>
+  </div>
+</section>
