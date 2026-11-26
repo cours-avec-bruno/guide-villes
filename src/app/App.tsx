@@ -1,5 +1,7 @@
 // L'appli de visite de Lyon : on choisit une balade prête (ou on la compose) → parcours avec horaires → carte, adresses, carnet.
+// Elle s'ouvre avec un accès (src/acces.ts) : « gratuit » donne la visite des 5 secrets, « complet » donne tout le guide.
 import { useEffect, useMemo, useRef, useState } from "react";
+import { cleAchatValide, codeValide, donnerAcces, lireAcces, type Acces } from "../acces";
 import { url } from "../base";
 import { MARQUE } from "../marque";
 import Carte, { traceCarnet } from "./Carte";
@@ -31,6 +33,14 @@ const MODELES: { id: string; nom: string; etiquette: string; accroche: string; r
   { id: "coeur", nom: "Le cœur de Lyon", etiquette: "La demi-journée", accroche: "L'essentiel du centre, à pied depuis Bellecour.", reponses: { depart: "bellecour", repas: false, duree: 180 } },
   { id: "journee", nom: "Lyon en une journée", etiquette: "Le grand tour", accroche: "Les deux collines, la Presqu'île et le parc, pause repas comprise.", reponses: { depart: "bellecour", repas: true, duree: 480 } },
 ];
+const ID = "lyon";
+/** L'accès à l'ouverture. L'adresse peut porter un code gratuit (?code=1234, un lien envoyé en message privé) ou la clé d'achat (?cle=…). */
+function accesInitial(): Acces | "attente" {
+  const p = new URLSearchParams(location.search);
+  const code = p.get("code");
+  if (code && codeValide(code)) donnerAcces(ID, "gratuit");
+  return p.get("cle") ? "attente" : lireAcces(ID);
+}
 const nomDepart = (r: Reponses) => (r.depart === "position" ? "ta position" : leDepart(r.depart).nom);
 
 function useLarge() {
@@ -56,6 +66,8 @@ export default function App() {
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [partage, setPartage] = useState("");
   const [panne, setPanne] = useState(false);
+  const [acces, setAcces] = useState<Acces | "attente">(accesInitial);
+  const complet = acces === "complet";
   const large = useLarge();
   const lu = useRef(false);
 
@@ -76,6 +88,16 @@ export default function App() {
 
   useEffect(() => { chargerTrajets().then(setT).catch(() => setPanne(true)); }, []);
 
+  // la clé d'achat se vérifie avant tout ; sans accès, retour à la page de la ville
+  useEffect(() => {
+    if (acces !== "attente") return;
+    const cle = new URLSearchParams(location.search).get("cle") ?? "";
+    cleAchatValide(ID, cle).then((ok) => { if (ok) donnerAcces(ID, "complet"); setAcces(lireAcces(ID)); });
+  }, []);
+  useEffect(() => { if (acces === null) location.replace(url(`/${ID}/`)); }, [acces]);
+  // la visite gratuite, c'est celle des 5 secrets
+  useEffect(() => { if (acces === "gratuit" && T && voyage?.mode !== "5-secrets") lancerSecrets(); }, [acces, T, voyage?.id]);
+
   // l'adresse de la page peut porter une visite toute faite (?visite=5-secrets) ou un itinéraire partagé (?i=…)
   useEffect(() => {
     if (lu.current) return;
@@ -85,13 +107,13 @@ export default function App() {
     if (p.get("visite") === "5-secrets") {
       const h = /^\d\d:\d\d$/.test(p.get("h") ?? "") ? p.get("h")! : undefined;
       if (voyage?.mode !== "5-secrets" || h) lancerSecrets(h);
-    } else if (ids.length) {
+    } else if (ids.length && acces !== "gratuit") {
       const d = p.get("d") ?? "bellecour";
       creerVoyage({
         mode: "sur-mesure", etapes: ids,
         reponses: { ...reponsesParDefaut(), depart: DEPARTS.some((x) => x.id === d) ? d : "bellecour", heure: /^\d\d:\d\d$/.test(p.get("h") ?? "") ? p.get("h")! : "10:00", montees: p.get("m") !== "0", repas: p.get("r") === "1" },
       });
-    } else if (p.has("mesure")) setEcran("mesure");
+    } else if (p.has("mesure") && acces !== "gratuit") setEcran("mesure");
     else if (p.has("nouveau")) setEcran("balades");
     const o = p.get("onglet") as Onglet | null;
     if (o && ONGLETS.some((x) => x.id === o)) setOnglet(o);
@@ -150,10 +172,10 @@ export default function App() {
   }, [ici, voyage?.etapes, voyage?.vus]);
 
   if (panne) return <p className="attente">Le guide n'a pas pu se charger. Vérifie ta connexion, puis recharge la page.</p>;
-  if (!T) return <p className="attente" role="status">Chargement du guide de Lyon…</p>;
+  if (!T || acces === "attente" || acces === null) return <p className="attente" role="status">Chargement du guide de Lyon…</p>;
 
   if (!voyage || !plan || ecran) {
-    if (ecran === "mesure") {
+    if (ecran === "mesure" && complet) {
       return (
         <div className="appli appli--q">
           <EnTete />
@@ -177,6 +199,7 @@ export default function App() {
         <Balades
           balades={balades}
           peutFermer={!!voyage && !!plan}
+          complet={complet}
           onFermer={() => setEcran(null)}
           onSurMesure={() => { setEcran("mesure"); window.scrollTo(0, 0); }}
           onChoisir={(id) => { const b = balades.find((x) => x.id === id)!; creerVoyage({ mode: id === "5-secrets" ? "5-secrets" : "balade", nom: b.nom, reponses: b.reponses, etapes: b.etapes }); }}
@@ -222,6 +245,7 @@ export default function App() {
         <FicheEtape
           key={fiche} id={fiche} voyage={voyage} urls={urls}
           numero={voyage.etapes.includes(fiche) ? voyage.etapes.indexOf(fiche) + 1 : null}
+          complet={complet} onEtape={ouvrirEtape} onAdresse={ouvrirAdresse}
           onFermer={() => setFiche(null)} onCocher={cocher} onAjouter={ajouter} onSupprimer={supprimer}
         />
       )}

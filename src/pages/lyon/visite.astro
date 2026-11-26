@@ -1,0 +1,19 @@
+---
+// L'appli de visite de Lyon. Elle s'ouvre avec un accès : la visite gratuite (un code) ou le guide complet (l'achat).
+// Sans accès, elle renvoie à la page de la ville.
+import Base from "../../layouts/Base.astro";
+import App from "../../app/App.tsx";
+import "../../app/app.css";
+import { MARQUE } from "../../marque";
+---
+
+<Base
+  titre={`Ton guide de Lyon | ${MARQUE}`}
+  description="Ta visite de Lyon : une vidéo à chaque étape, la carte, les horaires, les bonnes adresses et ton carnet de voyage."
+>
+  <meta slot="tete" name="robots" content="noindex" />
+  <App client:only="react">
+    <p class="attente" slot="fallback">Chargement du guide de Lyon…</p>
+  </App>
+  <noscript><p class="attente">Le guide a besoin de JavaScript pour composer ton itinéraire.</p></noscript>
+</Base>

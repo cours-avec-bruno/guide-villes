@@ -1,8 +1,8 @@
 // Les écrans de l'appli : les balades, le sur-mesure, le parcours, les adresses, le carnet, et la fiche d'une étape.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { url } from "../base";
-import { ADRESSES, DEPARTS, THEMES, VIDEOS, dureeVideo, etape, type Adresse, type Trajets } from "./donnees";
-import { distance, duree, hhmm, troncon, type Plan, type Reponses } from "./moteur";
+import { ADRESSES, DEPARTS, ETAPES, THEMES, VIDEOS, dureeVideo, etape, type Adresse, type Trajets } from "./donnees";
+import { distance, duree, hhmm, troncon, vol, type Plan, type Reponses } from "./moteur";
 import { Icone } from "./Icone";
 import type { Voyage } from "./stockage";
 
@@ -26,10 +26,11 @@ function Puce({ actif, onClick, children }: { actif: boolean; onClick: () => voi
 // ——————————————————————————————————————————————————————————— les balades prêtes à lancer (le premier écran)
 export type Balade = { id: string; nom: string; etiquette: string; accroche: string; etapes: string[]; minutes: number; depart: string };
 
-export function Balades({ balades, peutFermer, onChoisir, onSurMesure, onFermer }: {
-  balades: Balade[]; peutFermer: boolean;
+export function Balades({ balades, peutFermer, complet, onChoisir, onSurMesure, onFermer }: {
+  balades: Balade[]; peutFermer: boolean; complet: boolean;
   onChoisir: (id: string) => void; onSurMesure: () => void; onFermer: () => void;
 }) {
+  const guide = url("/lyon/"); // la page qui présente le guide complet
   return (
     <main className="q" id="contenu">
       <div className="q__tete">
@@ -41,33 +42,43 @@ export function Balades({ balades, peutFermer, onChoisir, onSurMesure, onFermer 
         )}
       </div>
       <h1 className="q__titre">Le guide de Lyon</h1>
-      <p className="q__chapo">Choisis une balade. Elle s'ouvre tout de suite, avec la carte et une vidéo à chaque étape.</p>
+      <p className="q__chapo">{complet ? "Choisis une balade. Elle s'ouvre tout de suite, avec la carte et une vidéo à chaque étape." : "Ta visite gratuite : Les 5 secrets. Les autres balades s'ouvrent avec le guide complet."}</p>
 
       <ul className="balades">
-        {balades.map((b) => (
-          <li key={b.id}>
-            <button type="button" className="balade" onClick={() => onChoisir(b.id)}>
+        {balades.map((b) => {
+          const fermee = !complet && b.id !== "5-secrets";
+          const contenu = (
+            <>
               <span className="balade__images" aria-hidden="true">
                 {[b.etapes[0], b.etapes[Math.floor(b.etapes.length / 2)], b.etapes[b.etapes.length - 1]].map((id) => (
                   <img key={id} src={url(`/videos/lyon/${etape(id).videos[0]}.jpg`)} alt="" loading="lazy" width="60" height="80" />
                 ))}
               </span>
               <span className="balade__texte">
-                <span className="adresse__type">{b.etiquette}</span>
+                <span className="adresse__type">{fermee ? "Dans le guide complet" : b.etiquette}</span>
                 <strong>{b.nom}</strong>
                 <span>{b.accroche}</span>
                 <span className="balade__meta">{b.etapes.length} étapes · {duree(b.minutes)} · départ {b.depart}</span>
               </span>
-              <span className="balade__fleche"><Icone nom="fleche" /></span>
-            </button>
-          </li>
-        ))}
+              <span className="balade__fleche"><Icone nom={fermee ? "cadenas" : "fleche"} /></span>
+            </>
+          );
+          return (
+            <li key={b.id}>
+              {fermee ? <a className="balade balade--fermee" href={guide}>{contenu}</a> : <button type="button" className="balade" onClick={() => onChoisir(b.id)}>{contenu}</button>}
+            </li>
+          );
+        })}
       </ul>
 
       <div className="q__pied">
-        <button type="button" className="btn btn--contour btn--bloc" onClick={onSurMesure}>
-          <Icone nom="crayon" taille={16} /> Composer ma balade sur mesure
-        </button>
+        {complet ? (
+          <button type="button" className="btn btn--contour btn--bloc" onClick={onSurMesure}>
+            <Icone nom="crayon" taille={16} /> Composer ma balade sur mesure
+          </button>
+        ) : (
+          <a className="btn btn--plein btn--bloc" href={guide}>Voir le guide complet <Icone nom="fleche" taille={16} /></a>
+        )}
       </div>
     </main>
   );
@@ -400,8 +411,9 @@ export function Photos({ cles, urls, onAjouter, onSupprimer }: {
   );
 }
 
-export function FicheEtape({ id, numero, voyage, urls, onFermer, onCocher, onAjouter, onSupprimer }: {
-  id: string; numero: number | null; voyage: Voyage; urls: Record<string, string>;
+export function FicheEtape({ id, numero, voyage, urls, complet, onEtape, onAdresse, onFermer, onCocher, onAjouter, onSupprimer }: {
+  id: string; numero: number | null; voyage: Voyage; urls: Record<string, string>; complet: boolean;
+  onEtape: (id: string) => void; onAdresse: (id: string) => void;
   onFermer: () => void; onCocher: (id: string) => void; onAjouter: (id: string, f: File) => void; onSupprimer: (id: string, cle: string) => void;
 }) {
   const e = etape(id);
@@ -410,6 +422,10 @@ export function FicheEtape({ id, numero, voyage, urls, onFermer, onCocher, onAjo
   const video = useRef<HTMLVideoElement>(null);
   const vu = voyage.vus[id];
   const choisir = (x: string) => { setV(x); setJoue(true); };
+  // à deux pas : les deux adresses les plus proches, et le lieu du guide le plus proche qui n'est pas dans la balade
+  const ici: [number, number] = [e.lon, e.lat];
+  const tables = ADRESSES.map((a) => ({ a, d: vol(ici, [a.lon, a.lat]) })).sort((x, y) => x.d - y.d).slice(0, 2);
+  const aussi = ETAPES.filter((x) => x.id !== id && !voyage.etapes.includes(x.id)).map((x) => ({ x, d: vol(ici, [x.lon, x.lat]) })).filter((x) => x.d < 800).sort((x, y) => x.d - y.d)[0]; // « à deux pas » : moins de 800 m
   useEffect(() => { if (joue) video.current?.play().catch(() => {}); }, [v, joue]);
   return (
     <Feuille titre={e.nom} onFermer={onFermer}>
@@ -445,6 +461,32 @@ export function FicheEtape({ id, numero, voyage, urls, onFermer, onCocher, onAjo
         </button>
         <a className="btn btn--contour" href={guidage(e.lat, e.lon)} target="_blank" rel="noopener">Me guider</a>
       </div>
+      <h3 className="feuille__sous-titre">À deux pas</h3>
+      <ul className="pres">
+        {tables.map(({ a, d }) => (
+          <li key={a.id}>
+            <button type="button" className="pres__ligne" onClick={() => onAdresse(a.id)}>
+              <Icone nom="fourchette" taille={18} />
+              <span><strong>{a.nom}</strong><span>Pour manger · {a.type} · à {distance(d)}</span></span>
+            </button>
+          </li>
+        ))}
+        {aussi && (
+          <li>
+            {complet ? (
+              <button type="button" className="pres__ligne" onClick={() => onEtape(aussi.x.id)}>
+                <Icone nom="cible" taille={18} />
+                <span><strong>{aussi.x.nom}</strong><span>À voir aussi · à {distance(aussi.d)}</span></span>
+              </button>
+            ) : (
+              <a className="pres__ligne" href={url("/lyon/")}>
+                <Icone nom="cadenas" taille={18} />
+                <span><strong>{aussi.x.nom}</strong><span>À voir aussi · à {distance(aussi.d)} · dans le guide complet</span></span>
+              </a>
+            )}
+          </li>
+        )}
+      </ul>
       <h3 className="feuille__sous-titre">Tes photos ici</h3>
       <Photos cles={voyage.photos[id] ?? []} urls={urls} onAjouter={(f) => onAjouter(id, f)} onSupprimer={(c) => onSupprimer(id, c)} />
     </Feuille>

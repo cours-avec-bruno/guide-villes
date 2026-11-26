@@ -1253,3 +1253,54 @@
 [data-nu] .panneau {
   display: none;
 }
+
+/* ——— à deux pas d'une étape : où manger, quoi voir à côté */
+.pres {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.pres__ligne {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 14px;
+  border: 1px solid var(--ligne);
+  border-radius: var(--r-m);
+  background: var(--feuille);
+  color: var(--encre);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.18s, transform 0.18s var(--sortie);
+}
+.pres__ligne:hover {
+  border-color: var(--ligne-forte);
+}
+.pres__ligne:active {
+  transform: scale(0.99);
+}
+.pres__ligne > span {
+  display: grid;
+}
+.pres__ligne strong {
+  font-weight: 650;
+}
+.pres__ligne span span {
+  font-size: 14px;
+  color: var(--encre2);
+}
+/* une balade du guide complet, vue depuis la visite gratuite */
+.balade--fermee {
+  text-decoration: none;
+  color: inherit;
+}
+.balade--fermee .balade__images {
+  opacity: 0.55;
+}

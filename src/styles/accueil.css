@@ -1,6 +1,6 @@
-/* La page de vente.
-   Sans la classe « anime » sur <html> (pas de JavaScript, ou « réduire les animations ») : une page simple qui se lit de haut en bas.
-   Avec « anime » : la chorégraphie au défilement, pilotée par src/scripts/accueil.ts (qui pose --n, --hfs, --ic, --pfs, --sfs, --mfs, --camw, --cw). */
+/* L'accueil, et ce que les autres pages lui reprennent (navigation, téléphone, autocollants).
+   Sans la classe « anime » sur <html> (pas de JavaScript, ou « version sans animation ») : une page simple qui se lit de haut en bas.
+   Avec « anime » : la chorégraphie au défilement, pilotée par src/scripts/accueil.ts (qui pose --n, --hfs, --ic, --pfs, --cw, --pied-y). */
 :root {
   --n: 1;
   --u: 1px;
@@ -31,7 +31,6 @@ body {
 .sombre .g {
   color: var(--gris-clair);
 }
-
 /* ——— navigation */
 .nav {
   position: fixed;
@@ -68,85 +67,23 @@ body {
 .nav__logo span {
   padding-top: 0.12em;
 }
-.nav__liens {
-  display: flex;
-  gap: max(22px, calc(30px * var(--n)));
-}
-.nav__liens a {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--encre2);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.nav__liens a::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 9px;
-  height: 2px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.3s var(--sortie);
-}
-.nav__liens a:hover,
-.nav__liens a[aria-current] {
-  color: var(--encre);
-}
-.nav__liens a:hover::after,
-.nav__liens a[aria-current]::after {
-  transform: scaleX(1);
-}
 .nav__btn {
   min-height: 46px;
   padding: 0 18px;
-}
-body.nav-fond .nav {
-  background: var(--papier);
-  box-shadow: 0 1px 0 var(--ligne);
-}
-body.nav-sombre {
-  --nav-creux: var(--nuit);
-}
-body.nav-sombre .nav {
-  color: var(--feuille);
-}
-body.nav-sombre .nav__liens a {
-  color: #9fb2bf;
-}
-body.nav-sombre .nav__liens a:hover,
-body.nav-sombre .nav__liens a[aria-current] {
-  color: #fff;
-}
-body.nav-sombre .nav__btn {
-  background: var(--feuille);
-  border-color: var(--feuille);
-  color: var(--encre);
 }
 @media (max-width: 819px) {
   .nav {
     padding: 0 24px;
     gap: 12px;
   }
-  .nav__liens {
-    display: none;
-  }
   .nav__btn {
     padding: 0 14px;
     font-size: 15px;
   }
 }
-
 html:not(.anime) .nav {
   position: absolute;
 }
-
 @media (max-width: 430px) {
   .nav__btn svg {
     display: none;
@@ -157,7 +94,6 @@ html:not(.anime) .nav {
     display: none;
   }
 }
-
 /* ——— le hero : version simple */
 .histoire {
   position: relative;
@@ -201,7 +137,6 @@ html:not(.anime) .nav {
   justify-content: center;
   gap: 10px;
 }
-
 /* le lien pour passer d'une version à l'autre : discret, et seulement là où il sert */
 .bascule {
   margin-top: 6px;
@@ -237,7 +172,6 @@ html.simple .bascule__anime {
     right: 24px;
   }
 }
-
 /* ——— la scène : version simple */
 .scene {
   padding: 4vh 0 0;
@@ -276,9 +210,6 @@ html.simple .bascule__anime {
   margin-top: calc(var(--pfs) * 0.3);
   font-size: clamp(16px, 1.3vw, 19px);
   color: var(--encre2);
-}
-.processus__btn {
-  margin-top: 22px;
 }
 .cartes {
   list-style: none;
@@ -349,43 +280,7 @@ html.simple .bascule__anime {
 .carte-v--question .carte-v__etat {
   background: rgba(255, 253, 246, 0.16);
 }
-
-/* ——— le panneau de l'appli : version simple */
-.panneau {
-  position: relative;
-  margin-top: 10vh;
-  padding: 9vh 24px;
-  overflow: hidden;
-  display: grid;
-  justify-items: center;
-  gap: 5vh;
-  text-align: center;
-}
-.panneau__fond img {
-  position: absolute;
-  max-width: none;
-  left: -4%;
-  top: -4%;
-  width: 108%;
-  height: 108%;
-  object-fit: cover;
-}
-.panneau__voile {
-  position: absolute;
-  inset: 0;
-  background: rgba(243, 237, 221, 0.62);
-}
-.mots {
-  position: relative;
-  font-family: var(--titre);
-  font-size: var(--sfs);
-  line-height: 0.98;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-}
-.panneau .g {
-  color: #6f7a83;
-}
+/* ——— le téléphone (page d'une ville) */
 .tel {
   position: relative;
   width: var(--camw);
@@ -395,64 +290,7 @@ html.simple .bascule__anime {
   background: var(--encre);
   box-shadow: 0 calc(var(--camw) * 0.16) calc(var(--camw) * 0.22) calc(var(--camw) * -0.1) rgba(22, 32, 42, 0.55), inset 0 0 0 1.5px rgba(255, 255, 255, 0.14);
 }
-.tel__ecran {
-  position: absolute;
-  inset: calc(var(--camw) * 0.028);
-  width: calc(100% - var(--camw) * 0.056);
-  height: calc(100% - var(--camw) * 0.056);
-  max-width: none;
-  object-fit: cover;
-  object-position: top;
-  border-radius: calc(var(--camw) * 0.115);
-  background: var(--papier);
-  opacity: 0;
-  transition: opacity 0.4s;
-}
-.tel__ecran.actif {
-  opacity: 1;
-}
-.noir {
-  display: none;
-}
-
-/* ——— la ligne : version simple */
-.manifeste {
-  background: var(--nuit);
-  color: #fff;
-  padding: 12vh 24px;
-}
-.piste {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: calc(var(--mfs) * 0.22) calc(var(--mfs) * 0.3);
-  max-width: 1120px;
-  margin: 0 auto;
-  font-family: var(--titre);
-  font-size: calc(var(--mfs) * 0.62);
-  line-height: 1;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-}
-.bloc.intro {
-  position: relative;
-  flex-basis: 100%;
-  display: grid;
-  gap: 0.2em;
-  margin: 0.8em 0 1.2em;
-}
-.bloc.intro p {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 0.26em;
-}
-.mot {
-  display: inline-block;
-  white-space: nowrap;
-}
-.mot .c {
-  display: inline-block;
-}
+/* ——— les autocollants (page d'une ville) */
 .tag {
   display: inline-block;
   background: var(--c, var(--jaune));
@@ -469,12 +307,6 @@ html.simple .bascule__anime {
   rotate: var(--r, 0deg);
   white-space: nowrap;
 }
-.bloc.intro .tag {
-  justify-self: start;
-}
-.anime .bloc.intro .tag {
-  position: absolute;
-}
 .tag--grand {
   font-family: var(--titre);
   font-size: 0.44em;
@@ -483,11 +315,6 @@ html.simple .bascule__anime {
   text-transform: uppercase;
   padding: 0.3em 0.5em 0.18em;
   border-radius: 0.14em;
-}
-.pile {
-  display: inline-grid;
-  justify-items: start;
-  gap: 0.1em;
 }
 .objet {
   display: inline-block;
@@ -501,177 +328,6 @@ html.simple .bascule__anime {
   width: 100%;
   height: auto;
 }
-.polaroid {
-  background: var(--feuille);
-  padding: 0.07em 0.07em 0.26em;
-  border-radius: 0.04em;
-}
-.polaroid img {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  object-position: 50% 30%;
-}
-.piste__fin {
-  display: none;
-}
-
-/* ——— les offres */
-.offres {
-  padding: calc(var(--nav-h) + 3vh) 0 5vh; /* « Voir l'offre » y mène d'un coup : tout doit tenir dans l'écran */
-  min-height: 100vh;
-  min-height: 100svh;
-  display: grid;
-  align-items: center;
-}
-.offres h2 {
-  font-family: var(--titre);
-  font-weight: 400;
-  font-size: clamp(44px, 6vw, 84px);
-  line-height: 0.96;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-}
-.offres__grille {
-  display: grid;
-  grid-template-columns: 1fr 1.15fr;
-  gap: 24px;
-  margin-top: 28px;
-  align-items: stretch;
-}
-.offre {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  padding: 30px;
-  border-radius: 22px;
-  border: 1px solid var(--ligne);
-  background: var(--feuille);
-  box-shadow: var(--ombre-papier);
-}
-.offre--forte {
-  background: var(--encre);
-  border-color: var(--encre);
-  color: var(--feuille);
-}
-.offre__tag {
-  position: absolute;
-  right: 26px;
-  top: -14px;
-  rotate: 3deg;
-}
-.offre h3 {
-  font-family: var(--titre);
-  font-weight: 400;
-  font-size: clamp(34px, 3.4vw, 46px);
-  line-height: 1;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-}
-.offre__prix {
-  margin-top: 6px;
-  font-family: var(--titre);
-  font-size: clamp(54px, 6vw, 84px);
-  line-height: 1;
-  letter-spacing: 0.01em;
-}
-.offre--forte .offre__prix {
-  color: var(--jaune);
-}
-.offre ul {
-  list-style: none;
-  margin: 18px 0 26px;
-  padding: 0;
-  display: grid;
-  gap: 0;
-  flex: 1;
-  align-content: start;
-}
-.offre li {
-  padding: 12px 0 12px 30px;
-  border-top: 1px solid var(--ligne);
-  position: relative;
-  font-size: 17px;
-}
-.offre--forte li {
-  border-color: rgba(255, 253, 246, 0.18);
-}
-.offre li::before {
-  content: "";
-  position: absolute;
-  left: 2px;
-  top: 17px;
-  width: 15px;
-  height: 8px;
-  border-left: 2.5px solid var(--rouge);
-  border-bottom: 2.5px solid var(--rouge);
-  rotate: -45deg;
-}
-.offre--forte li::before {
-  border-color: var(--jaune);
-}
-.offre__vignettes {
-  display: flex;
-  margin: 20px 0 0 8px;
-}
-.offre__vignettes img {
-  width: 46px;
-  height: 60px;
-  object-fit: cover;
-  object-position: 50% 36%;
-  border-radius: 8px;
-  border: 2px solid var(--feuille);
-  margin-left: -8px;
-  background: var(--sable);
-  box-shadow: 0 4px 8px -4px rgba(22, 32, 42, 0.4);
-  transition: transform 0.3s var(--sortie);
-}
-.offre__vignettes img:nth-child(odd) {
-  rotate: -3deg;
-}
-.offre__vignettes img:nth-child(even) {
-  rotate: 2deg;
-}
-.offre:hover .offre__vignettes img {
-  transform: translateY(-3px);
-}
-.offre__plus {
-  align-self: center;
-  margin-left: 8px;
-  min-width: 44px;
-  padding: 9px 8px 6px;
-  border-radius: 22px;
-  background: var(--jaune);
-  color: var(--encre);
-  font-family: var(--titre);
-  font-size: 22px;
-  line-height: 1;
-  text-align: center;
-}
-.offre--forte .offre__vignettes img {
-  border-color: var(--encre);
-}
-.offre ul {
-  margin-top: 14px;
-}
-.offres__suite {
-  margin-top: 28px;
-  color: var(--encre2);
-  max-width: 46em;
-}
-@media (max-width: 819px) {
-  .offres__grille {
-    grid-template-columns: 1fr;
-    gap: 30px;
-  }
-  .offre {
-    padding: 24px 20px;
-  }
-  .offre--forte {
-    order: -1;
-  }
-}
-
 /* ——— pied */
 .pied {
   padding: 30px 0 calc(30px + env(safe-area-inset-bottom, 0px));
@@ -692,10 +348,9 @@ html.simple .bascule__anime {
   letter-spacing: 0.02em;
   color: var(--encre);
 }
-
 /* ═══════════════════════════════════════════════ la chorégraphie (html.anime) ═══════════════════════════════════════════════ */
 .anime .histoire {
-  height: 680vh; /* 5,8 écrans de défilement : le minutage est dans accueil.ts */
+  height: 560vh; /* 4,6 écrans de défilement : le minutage est dans accueil.ts */
 }
 .anime .hero {
   position: absolute;
@@ -792,9 +447,6 @@ html.simple .bascule__anime {
 .anime .nav__logo {
   animation-delay: 0.15s;
 }
-.anime .nav__liens {
-  animation-delay: 0.24s;
-}
 .anime .nav__actions {
   animation-delay: 0.3s;
 }
@@ -804,7 +456,6 @@ html.simple .bascule__anime {
     transform: translateY(-6px);
   }
 }
-
 .anime .scene {
   position: sticky;
   top: 0;
@@ -822,33 +473,26 @@ html.simple .bascule__anime {
   top: 15%;
   opacity: 0;
 }
-.anime .processus .m,
-.anime .mots .m {
+.anime .processus .m {
   opacity: 0;
   transform: translateY(0.35em);
   filter: blur(6px);
 }
-.anime .processus.vu .m,
-.anime .mots.vu .m {
+.anime .processus.vu .m {
   opacity: 1;
   transform: none;
   filter: none;
   transition: opacity 0.55s var(--sortie), transform 0.55s var(--sortie), filter 0.55s var(--sortie);
   transition-delay: calc(var(--i, 0) * 0.11s);
 }
-.anime .processus__sous,
-.anime .processus__btn {
+.anime .processus__sous {
   opacity: 0;
   transform: translateY(8px);
 }
-.anime .processus.vu .processus__sous,
-.anime .processus.vu .processus__btn {
+.anime .processus.vu .processus__sous {
   opacity: 1;
   transform: none;
   transition: opacity 0.5s var(--sortie) 0.7s, transform 0.5s var(--sortie) 0.7s, background-color 0.18s, border-color 0.18s;
-}
-.anime .processus.vu .processus__btn {
-  transition-delay: 0.85s, 0.85s, 0s, 0s;
 }
 .anime .cartes {
   position: absolute;
@@ -873,96 +517,10 @@ html.simple .bascule__anime {
   will-change: transform, opacity;
   backface-visibility: hidden;
 }
-.anime .panneau {
-  position: absolute;
-  inset: 0;
-  z-index: 6;
-  margin: 0;
-  padding: 0;
-  display: block;
-  visibility: hidden;
-  will-change: clip-path;
-}
-.anime .panneau__fond img {
-  will-change: transform;
-}
-.anime .tel {
-  position: absolute;
-  left: 50%;
-  top: var(--tel-y, 51%); /* sur téléphone, le script le centre dans la place qui reste */
-  will-change: transform;
-}
-.anime .panneau__tete {
-  position: absolute;
-  left: calc(40px * var(--n));
-  top: calc(104px * var(--n));
-  justify-items: start;
-  gap: 16px;
-  text-align: left;
-}
-.anime .mots--bd {
-  position: absolute;
-  right: calc(40px * var(--n));
-  bottom: calc(46px * var(--n));
-  text-align: right;
-}
-.anime .mots--bd .m {
-  --i: calc(var(--j) + 4);
-}
-.anime .noir {
-  display: block;
-  position: absolute;
-  inset: 0;
-  z-index: 8;
-  background: var(--nuit);
-  opacity: 0;
-  pointer-events: none;
-}
 @media (max-width: 819px) {
   .anime .processus {
     top: 14%;
   }
-  .anime .panneau__tete {
-    left: 16px;
-    right: 16px;
-    top: 84px;
-  }
-  .anime .mots--bd {
-    right: 16px;
-    bottom: 28px;
-  }
-}
-
-.anime .manifeste {
-  height: 700vh; /* le script la règle sur la longueur de la ligne */
-  padding: 0;
-}
-.anime .manifeste__scene {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100svh;
-  overflow: hidden;
-}
-.anime .piste {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  max-width: none;
-  margin: 0;
-  flex-wrap: nowrap;
-  gap: calc(var(--mfs) * 0.32);
-  font-size: var(--mfs);
-  white-space: nowrap;
-  will-change: transform;
-}
-.anime .bloc.intro {
-  flex: none;
-  font-size: 0.72em;
-  margin: 0;
-}
-.anime .bloc.intro p {
-  flex-wrap: nowrap;
 }
 .anime .tag {
   font-size: max(13px, 0.24em);
@@ -970,47 +528,15 @@ html.simple .bascule__anime {
 .anime .tag--grand {
   font-size: 0.42em;
 }
-.anime .bloc.intro .tag {
-  font-size: max(13px, 0.3em);
-}
-.anime .mot .c {
-  opacity: 0;
-  transform: translateY(0.55em) rotate(14deg);
-  transform-origin: bottom left;
-}
-.anime .vu .c,
-.anime .mot.vu .c {
+.anime .vu .c {
   opacity: 1;
   transform: none;
   transition: opacity 0.5s var(--sortie), transform 0.5s var(--sortie);
   transition-delay: calc(var(--k, 0) * 35ms);
 }
-.anime .auto {
-  scale: 0;
-  rotate: -14deg;
-}
-.anime .auto.vu {
-  scale: 1;
-  rotate: var(--r, 0deg);
-  transition: scale 0.5s cubic-bezier(0.34, 1.45, 0.64, 1) 0.12s, rotate 0.5s cubic-bezier(0.34, 1.45, 0.64, 1) 0.12s;
-}
-.anime .piste__fin {
-  display: block;
-  flex: none;
-  width: 12vw;
-  height: 1px;
-}
-
-/* ═══════════════════════════════════════════════ la page refaite autour du produit ═══════════════════════════════════════════════ */
-/* le hero : l'étiquette au-dessus du titre, la ligne de réassurance sous le bouton */
+/* le hero : l'étiquette au-dessus du titre */
 .hero__sur {
   margin-bottom: 14px;
-}
-.hero__note {
-  margin-top: 12px;
-  font-size: 14px !important;
-  font-weight: 600;
-  color: var(--encre2);
 }
 .anime .hero__sur {
   position: absolute;
@@ -1027,7 +553,6 @@ html.simple .bascule__anime {
   opacity: 1;
   transform: none;
 }
-
 /* « Tu as vu la vidéo ? » : la preuve sous la phrase */
 .processus__preuve {
   margin-top: 6px;
@@ -1044,400 +569,11 @@ html.simple .bascule__anime {
   transform: none;
   transition: opacity 0.5s var(--sortie) 0.78s, transform 0.5s var(--sortie) 0.78s;
 }
-.processus__btn {
-  margin-top: 18px;
-}
-
-/* le téléphone : les légendes des quatre écrans */
-.legendes {
-  position: relative;
-  display: grid;
-  gap: 0.12em;
-}
-.legende {
-  font-size: calc(var(--sfs) * 0.62);
-}
-.anime .legendes {
-  position: absolute;
-  right: calc(40px * var(--n));
-  bottom: calc(46px * var(--n));
-  display: block;
-  width: min(90vw, 13em * 4);
-  height: calc(var(--sfs) * 2.1);
-  font-size: var(--sfs);
-  pointer-events: none;
-}
-.anime .legende {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  font-size: var(--sfs);
-  text-align: right;
-  opacity: 0;
-  transform: translateY(0.3em);
-  transition: opacity 0.35s, transform 0.5s var(--sortie);
-}
-.anime .legendes.vu .legende.actif {
-  opacity: 1;
-  transform: none;
-}
-@media (max-width: 819px) {
-  .anime .legendes {
-    right: 16px;
-    bottom: 72px; /* au-dessus du raccourci « Voir l'offre » */
-    width: calc(100vw - 32px);
-  }
-}
-
-/* la ligne : les numéros des trois gestes, la bande des lieux, le bouton */
-.num {
-  flex: none;
-  display: inline-grid;
-  place-items: center;
-  width: 0.92em;
-  height: 0.92em;
-  padding-top: 0.06em;
-  border-radius: 50%;
-  background: var(--jaune);
-  color: var(--encre);
-  font-size: 0.86em;
-  line-height: 1;
-  rotate: var(--r, 0deg);
-  box-shadow: 0 0.06em 0 rgba(0, 0, 0, 0.3);
-}
-.lieux {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 14px;
-  flex-basis: 100%;
-}
-.lieu {
-  position: relative;
-  aspect-ratio: 3 / 4.3;
-  border-radius: 14px;
-  overflow: hidden;
-  background: var(--mer-fonce);
-  rotate: var(--r, 0deg);
-  box-shadow: 0 10px 24px -8px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.18);
-}
-.lieu img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 30%;
-}
-.lieu__num {
-  position: absolute;
-  left: 9px;
-  top: 9px;
-  min-width: 30px;
-  height: 30px;
-  padding: 3px 7px 0;
-  border-radius: 5px;
-  background: var(--rouge);
-  color: #fff;
-  font-family: var(--titre);
-  font-size: 24px;
-  line-height: 28px;
-  letter-spacing: 0;
-  text-align: center;
-}
-.lieu__texte {
-  position: absolute;
-  inset: auto 0 0 0;
-  display: grid;
-  gap: 2px;
-  padding: 28px 11px 11px;
-  background: linear-gradient(to top, rgba(14, 42, 61, 0.94) 55%, rgba(14, 42, 61, 0));
-  font-family: var(--texte);
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0;
-  line-height: 1.25;
-  text-transform: none;
-  color: #c9d6de;
-  white-space: normal;
-}
-.lieu__texte strong {
-  font-size: 15px;
-  font-weight: 650;
-  color: #fff;
-}
-.piste__btn {
-  flex: none;
-  font-size: 16px;
-  letter-spacing: -0.005em;
-  text-transform: none;
-}
-.anime .lieux {
-  flex: none;
-  display: grid;
-  grid-template-columns: none;
-  grid-template-rows: repeat(2, auto);
-  grid-auto-flow: column;
-  gap: 16px calc(var(--mfs) * 0.16);
-}
-.anime .lieu {
-  width: var(--lw, 200px); /* posée par le script : deux rangs tiennent dans la hauteur de l'écran */
-}
-
-/* un arrêt du guide, en vrai */
-.exemple {
-  padding: calc(var(--nav-h) + 5vh) 0 8vh;
-  min-height: 100vh;
-  min-height: 100svh;
-  display: grid;
-  align-items: center;
-}
-.exemple__grille {
-  display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
-  align-items: center;
-  gap: clamp(28px, 6vw, 88px);
-}
-.exemple__lecteur {
-  justify-self: end;
-  width: min(100%, 320px, 56vh * 0.5625);
-}
-.lecteur-ex,
-.lecteur-ex__video {
-  position: relative;
-  display: block;
-  width: 100%;
-  aspect-ratio: 9 / 16;
-  padding: 0;
-  border: 0;
-  border-radius: 24px;
-  overflow: hidden;
-  background: var(--nuit);
-  box-shadow: 0 30px 50px -24px rgba(14, 42, 61, 0.7), 0 0 0 7px var(--encre);
-  cursor: pointer;
-}
-.lecteur-ex__video {
-  object-fit: cover;
-  cursor: auto;
-}
-.lecteur-ex img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.6s var(--sortie);
-}
-.lecteur-ex:hover img {
-  transform: scale(1.03);
-}
-.lecteur-ex::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(14, 42, 61, 0.75), rgba(14, 42, 61, 0) 45%);
-}
-.lecteur-ex__rond {
-  position: absolute;
-  left: 50%;
-  bottom: 62px;
-  z-index: 1;
-  width: 68px;
-  height: 68px;
-  margin-left: -34px;
-  display: grid;
-  place-items: center;
-  padding-left: 4px;
-  border-radius: 50%;
-  background: var(--jaune);
-  color: var(--encre);
-  transition: transform 0.3s var(--sortie);
-}
-.lecteur-ex:hover .lecteur-ex__rond {
-  transform: scale(1.08);
-}
-.lecteur-ex:active .lecteur-ex__rond {
-  transform: scale(0.94);
-}
-.lecteur-ex__texte {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 24px;
-  z-index: 1;
-  color: #fff;
-  font-family: var(--texte);
-  font-size: 16px;
-  font-weight: 650;
-  text-align: center;
-}
-.exemple h2,
-.faq h2,
-.fin h2 {
-  font-family: var(--titre);
-  font-weight: 400;
-  font-size: clamp(44px, 6vw, 84px);
-  line-height: 0.96;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-}
-.exemple h2 {
-  margin-top: 14px;
-}
-.exemple__lieu {
-  margin-top: 6px;
-  font-weight: 650;
-  color: var(--mer-fonce);
-}
-.exemple__fait {
-  margin-top: 18px;
-  font-size: clamp(18px, 1.6vw, 21px);
-  max-width: 30em;
-}
-.exemple__conseil {
-  margin-top: 14px;
-  padding: 14px 16px;
-  border-radius: var(--r-m);
-  background: var(--sable-clair);
-  max-width: 34em;
-}
-.exemple .btn {
-  margin-top: 24px;
-}
-@media (max-width: 819px) {
-  .exemple__grille {
-    grid-template-columns: 1fr;
-  }
-  .exemple__lecteur {
-    justify-self: center;
-    width: min(72vw, 300px);
-  }
-}
-
-/* le tarif */
-.offre__prix small {
-  display: inline-block;
-  margin-left: 12px;
-  font-family: var(--texte);
-  font-size: 15px;
-  font-weight: 500;
-  letter-spacing: 0;
-  color: #b9c5cd;
-  vertical-align: 0.5em;
-}
-.offre__note {
-  margin-top: 12px;
-  font-size: 14px;
-  text-align: center;
-  color: var(--encre2);
-}
-.offre--forte .offre__note {
-  color: #b9c5cd;
-}
-.offres__grille {
-  grid-template-columns: 1.15fr 1fr;
-}
-@media (max-width: 819px) {
-  .offres__grille {
-    grid-template-columns: 1fr;
-  }
-  .offre--forte {
-    order: 0;
-  }
-}
-
-/* les questions */
-.faq {
-  padding: 9vh 0 10vh;
-  border-top: 1px solid var(--ligne);
-}
-.faq__liste {
-  margin: 40px 0 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 56px;
-}
-.faq__liste > div {
-  padding: 22px 0;
-  border-top: 1px solid var(--ligne);
-}
-.faq dt {
-  font-size: 19px;
-  font-weight: 650;
-}
-.faq dd {
-  margin: 8px 0 0;
-  color: var(--encre2);
-  max-width: 34em;
-}
-@media (max-width: 819px) {
-  .faq__liste {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* le dernier appel */
-.fin {
-  padding: 13vh 0;
-  background: var(--nuit);
-  color: #fff;
-  text-align: center;
-}
-.fin .btn {
-  margin-top: 30px;
-}
-.fin__suite {
-  margin: 34px auto 0;
-  max-width: 34em;
-  color: #b9c5cd;
-}
-.fin__suite a {
-  color: #fff;
-  font-weight: 600;
-  text-underline-offset: 3px;
-}
-.pied {
-  border-top: 0;
-}
-
-/* la navigation sur les parties sombres qui défilent normalement */
-body.nav-fond.nav-sombre .nav {
-  background: var(--nuit);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.12);
-}
-
-/* les blocs des sections normales montent en entrant à l'écran */
-.anime .entre {
-  opacity: 0;
-  transform: translateY(26px);
-}
-.anime .entre.vu {
-  opacity: 1;
-  transform: none;
-  transition: opacity 0.7s var(--sortie), transform 0.9s var(--sortie), background-color 0.18s, border-color 0.18s;
-  transition-delay: calc(var(--d, 0) * 80ms), calc(var(--d, 0) * 80ms), 0s, 0s;
-}
-
-/* ═══════════════════════════════════════════════ les accès à l'offre ═══════════════════════════════════════════════ */
-/* la navigation : « Voir l'offre » à côté de « Commencer la visite » (grand écran) */
+/* la navigation : les deux accès */
 .nav__actions {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-.nav__offre {
-  min-height: 46px;
-  padding: 0 16px;
-}
-body.nav-sombre .nav__offre {
-  border-color: rgba(255, 253, 246, 0.75);
-  color: var(--feuille);
-}
-body.nav-sombre .nav__offre:hover {
-  background: rgba(255, 253, 246, 0.12);
-}
-@media (max-width: 819px) {
-  .nav__offre {
-    display: none;
-  }
 }
 @media (max-width: 430px) {
   .hero__actions .btn {
@@ -1448,93 +584,158 @@ body.nav-sombre .nav__offre:hover {
     display: none;
   }
 }
-
-/* le panneau de l'appli : le titre et son bouton */
-.panneau__tete {
-  position: relative;
+/* sans animation, le titre tient toujours dans la largeur de l'écran (il mesure 8,9 fois sa taille de lettre) */
+html:not(.anime) .hero__titre {
+  font-size: min(var(--hfs), calc((100vw - 48px) / 9));
+}
+/* « 0 € » : la pastille qui dit que c'est gratuit */
+.zero {
+  display: inline-block;
+  background: var(--jaune);
+  color: var(--encre);
+  font-family: var(--titre);
+  font-size: 1.06em;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  padding: 0.3em 0.4em 0.16em;
+  border-radius: 3px;
+  box-shadow: 0 2px 0 rgba(22, 32, 42, 0.18);
+}
+.btn--petit {
+  min-height: 40px;
+  padding: 0 14px 0 9px;
+  gap: 8px;
+  font-size: 15px;
+}
+.hero__actions {
+  align-items: center;
+}
+.nav__gratuit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--encre);
+  text-decoration: none;
+}
+.nav__gratuit:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+@media (max-width: 819px) {
+  .nav__gratuit {
+    display: none;
+  }
+  .hero__actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+/* les cartes des villes sont des liens */
+.carte-v a {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: inherit;
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+}
+.carte-v a img {
+  transition: transform 0.4s var(--sortie);
+}
+.carte-v a:hover img {
+  transform: scale(1.03);
+}
+.carte-v a:focus-visible {
+  outline: 3px solid var(--mer);
+  outline-offset: -5px;
+}
+/* « Choisis ta ville » : le titre au-dessus de la roue, le bouton de la ville choisie dessous */
+.choix {
+  text-align: center;
+  padding: 9vh 16px 0;
+}
+.choix__titre {
+  font-family: var(--titre);
+  font-weight: 400;
+  font-size: var(--pfs);
+  line-height: 0.98;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.choix__pied {
   display: grid;
   justify-items: center;
-  gap: 18px;
+  gap: 10px;
+  padding: 5vh 16px 9vh;
+  text-align: center;
 }
-.anime .panneau__btn {
-  opacity: 0;
-  transform: translateY(8px);
-  pointer-events: none;
+.choix__aide {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--encre2);
 }
-.anime .mots--hg.vu + .panneau__btn {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
-  transition: opacity 0.5s var(--sortie) 0.6s, transform 0.5s var(--sortie) 0.6s, background-color 0.18s, border-color 0.18s;
-}
-@media (max-width: 819px) {
-  .anime .panneau__btn {
-    display: none; /* sur téléphone, la place va au téléphone : la navigation et le raccourci portent les boutons */
-  }
-}
-
-/* le raccourci « Voir l'offre » : sur téléphone, il reste en bas de l'écran pendant toute la chorégraphie */
-.raccourci {
+html:not(.anime) .choix__aide {
   display: none;
 }
-@media (max-width: 819px) {
-  .anime .raccourci {
-    position: fixed;
-    z-index: 40;
-    left: 50%;
-    bottom: 16px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 44px;
-    padding: 0 16px 0 18px;
-    border: 1.5px solid var(--encre);
-    border-radius: var(--r-m);
-    background: var(--feuille);
-    color: var(--encre);
-    font-size: 15px;
-    font-weight: 600;
-    text-decoration: none;
-    white-space: nowrap;
-    box-shadow: 0 8px 20px -6px rgba(22, 32, 42, 0.45);
-    translate: -50% 0;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(14px);
-    transition: opacity 0.25s, transform 0.35s var(--sortie), visibility 0s 0.25s;
-  }
-  .anime .raccourci svg {
-    width: 15px;
-    height: 15px;
-  }
-  .anime .raccourci:active {
-    transform: scale(0.97);
-  }
-  body.raccourci-vu .raccourci {
-    opacity: 1;
-    visibility: visible;
-    transform: none;
-    transition: opacity 0.25s, transform 0.35s var(--sortie), visibility 0s;
-  }
-  @supports (height: 100svh) {
-    .anime .raccourci {
-      top: calc(100svh - 60px); /* dans la scène, même quand la barre du navigateur se replie */
-      bottom: auto;
-    }
-  }
+.anime .choix {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  top: 15%;
+  padding: 0 16px;
+  opacity: 0;
+  visibility: hidden;
 }
-#offres:focus {
-  outline: none;
+.anime .choix .m {
+  opacity: 0;
+  transform: translateY(0.35em);
+  filter: blur(6px);
 }
-.btn--bas:hover svg {
-  transform: translateY(3px); /* la flèche pointe vers le bas : elle descend */
+.anime .choix.vu .m {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition: opacity 0.5s var(--sortie), transform 0.5s var(--sortie), filter 0.5s var(--sortie);
+  transition-delay: calc(var(--i, 0) * 0.09s);
+}
+.anime .choix__pied {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  top: var(--pied-y, 78%);
+  padding: 0 16px;
+  opacity: 0;
+  visibility: hidden;
+}
+.anime .carte-v {
+  pointer-events: auto;
+}
+.anime .carte-v.milieu {
+  z-index: 2;
+  box-shadow: 0 calc(var(--cw) * 0.06px) calc(var(--cw) * 0.16px) rgba(22, 32, 42, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 @media (max-width: 819px) {
-  .anime .piste__btn--offre {
-    display: none; /* sur téléphone, le raccourci du bas de l'écran fait déjà ce travail */
+  .anime .choix {
+    top: 13%;
   }
 }
-/* sans animation, le titre tient toujours dans la largeur de l'écran (il mesure 6,6 fois sa taille de lettre) */
-html:not(.anime) .hero__titre {
-  font-size: min(var(--hfs), calc((100vw - 48px) / 6.7));
+.pied__liens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 22px;
+}
+.pied__liens a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--encre);
+  font-weight: 600;
+  text-underline-offset: 3px;
 }

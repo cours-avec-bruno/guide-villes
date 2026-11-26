@@ -1,29 +1,11 @@
-// La chorégraphie de la page de vente, sans bibliothèque. Elle ne tourne que si <html> porte la classe « anime ».
+// La chorégraphie de la page d'accueil, sans bibliothèque. Elle ne tourne que si <html> porte la classe « anime ».
 // Ordre : entrée (avion, cartes, pictos → lettres), puis tout suit le défilement :
-//   éventail → dispersion → pile → roue qui tourne → le panneau de l'appli grandit → les quatre écrans défilent dans le
-//   téléphone → on plonge dans l'écran → la ligne défile de côté (les trois gestes, puis les 13 lieux).
-// Les liens « Voir l'offre » sautent tout cela et mènent droit aux offres.
+//   éventail → dispersion (« Tu as vu la vidéo ? ») → pile → roue. La roue tourne ensuite avec le défilement :
+//   la ville du milieu est celle qu'on choisit, et chaque carte mène à la page de sa ville.
+// Les boutons « guide complet » ([data-roue]) mènent droit à la roue.
 
 const html = document.documentElement;
-lecteurExemple();
 if (html.classList.contains("anime")) demarrer();
-
-/** L'arrêt d'exemple : un clic remplace l'image par la vraie vidéo, avec le son. Marche aussi sans animation. */
-function lecteurExemple() {
-  const bouton = document.querySelector<HTMLButtonElement>(".lecteur-ex");
-  if (!bouton) return;
-  bouton.addEventListener("click", () => {
-    const v = document.createElement("video");
-    v.src = bouton.dataset.video!;
-    v.controls = true;
-    v.playsInline = true;
-    v.autoplay = true;
-    v.className = "lecteur-ex__video";
-    v.setAttribute("aria-label", bouton.getAttribute("aria-label") ?? "Vidéo de l'arrêt");
-    bouton.replaceWith(v);
-    v.play().catch(() => {});
-  });
-}
 
 function demarrer() {
   const un = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector(s) as T;
@@ -31,13 +13,9 @@ function demarrer() {
 
   const histoire = un(".histoire"), hero = un(".hero"), titre = un(".hero__titre"), pictosEl = un(".hero__pictos");
   const avion = un(".avion"), sous = un(".hero__sous"), sur = un(".hero__sur"), processus = un(".processus");
+  const choix = un(".choix"), pied = un(".choix__pied"), bouton = un<HTMLAnchorElement>(".choix__btn");
   const lettres = tous(".hero__mot .l"), cartes = tous(".carte-v");
-  const panneau = un(".panneau"), fond = un(".panneau__fond img"), tel = un(".tel"), noir = un(".noir");
-  const motsHG = un(".mots--hg"), tete = un(".panneau__tete"), legendes = un(".legendes"), ecrans = tous(".tel__ecran"), legs = tous(".legende");
-  const manifeste = un(".manifeste"), piste = un(".piste"), offres = un("#offres");
-  const suite = manifeste.nextElementSibling as HTMLElement; // la première section « normale » après la chorégraphie
-  const zones = [...tous("main > section"), un(".pied")];
-  const liens = tous(".nav__liens a");
+  const liens = cartes.map((c) => c.querySelector("a")!);
 
   // ——— outils
   const borne = (x: number, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -57,18 +35,19 @@ function demarrer() {
   const eGlisse = bezier(0.25, 0.75, 0.2, 1);
 
   // ——— le minutage : la part du défilement de l'histoire (0 → 1) où chaque mouvement commence et finit.
-  // L'histoire fait 5,8 écrans de défilement (voir « .anime .histoire » dans accueil.css).
+  // L'histoire fait 4,6 écrans de défilement (voir « .anime .histoire » dans accueil.css).
   type Plage = [number, number];
-  const T_EPARS: Plage = [0.004, 0.1]; // l'éventail se disperse
-  const T_PHRASE: Plage = [0.05, 0.08]; // « Tu as vu la vidéo ? » apparaît
-  const T_PILE: Plage = [0.17, 0.26]; // les cartes se rangent en pile
-  const T_ROUE: Plage = [0.26, 0.345]; // la pile s'ouvre en roue
-  const T_TOUR: Plage = [0.345, 0.475]; // la roue tourne
-  const T_PANNEAU: Plage = [0.51, 0.62]; // le panneau de l'appli grandit
-  const T_ECRANS: Plage = [0.64, 0.88]; // les quatre écrans se succèdent
-  const T_PLONGEON: Plage = [0.89, 0.975]; // on plonge dans l'écran
+  const T_EPARS: Plage = [0.004, 0.12]; // l'éventail se disperse
+  const T_PHRASE: Plage = [0.05, 0.09]; // « Tu as vu la vidéo ? » apparaît…
+  const T_PHRASE_FIN: Plage = [0.24, 0.29]; // … puis s'efface
+  const T_PILE: Plage = [0.22, 0.3]; // les cartes se rangent en pile
+  const T_ROUE: Plage = [0.3, 0.39]; // la pile s'ouvre en roue, la ville prête au milieu
+  const T_CHOIX: Plage = [0.35, 0.4]; // « Choisis ta ville » et le bouton apparaissent
+  const T_TOUR: Plage = [0.45, 0.97]; // la roue tourne : un cran par ville
+  const P_CHOIX = 0.42; // là où mènent les boutons « guide complet » : la roue formée, avant qu'elle tourne
   const VITESSE_MOLETTE = 1.25; // un cran de molette fait avancer un peu plus que dans une page ordinaire
-  const PART_LIGNE = 0.36, PART_LIGNE_TEL = 0.42; // la ligne avance 2,8 fois plus vite que le défilement (2,4 fois sur téléphone)
+  const N = cartes.length; // 12 cartes : 11 villes et « Ta ville »
+  const PRETE = Math.max(0, cartes.findIndex((c) => c.hasAttribute("data-pret"))); // celle qui ouvre la roue
 
   // ——— les pictos en pixels (9 × 9) : avion, épingle, porte de traboule, basilique, couverts, appareil photo, soleil
   const PAL: Record<string, string> = { k: "#16202a", b: "#2a6788", w: "#fffdf6", p: "#f5bd2f", r: "#de3341" };
@@ -92,35 +71,21 @@ function demarrer() {
   });
 
   // ——— préparer les mots
-  tous(".processus .m").forEach((m, i) => m.style.setProperty("--i", String(i)));
-  tous(".m", motsHG).forEach((m, i) => m.style.setProperty("--i", String(i)));
-  tous(".mot", piste).forEach((mot) => {
-    const txt = mot.textContent ?? "";
-    mot.textContent = "";
-    [...txt].forEach((c, k) => {
-      const s = document.createElement("span");
-      s.className = "c";
-      s.textContent = c;
-      s.style.setProperty("--k", String(k));
-      mot.appendChild(s);
-    });
-  });
-  // les éléments de la ligne qui apparaissent un par un : ses enfants directs, et chaque carte de lieu
-  const elements = tous(":scope > :not(.piste__fin):not(.lieux), :scope > .lieux > .lieu", piste);
-
-  // les blocs des sections « normales » montent quand ils entrent à l'écran
-  const vue = new IntersectionObserver(
-    (entrees) => entrees.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("vu"); vue.unobserve(e.target); } }),
-    { rootMargin: "0px 0px -12% 0px" },
-  );
-  tous(".entre").forEach((el, i) => { el.style.setProperty("--d", String(i % 4)); vue.observe(el); });
+  tous(".m", processus).forEach((m, i) => m.style.setProperty("--i", String(i)));
+  tous(".m", choix).forEach((m, i) => m.style.setProperty("--i", String(i)));
 
   // ——— mesures
-  let W = 0, H = 0, mobile = false, n = 1, hfs = 100, ic = 60, cw = 218, navH = 86, ty = 0.38;
-  let hTop = 0, hH = 1, mTop = 0, mH = 1, sTop = 0, oTop = 0, pisteW = 0;
-  let largeurs: number[] = [], gauches: number[] = [], hauts: number[] = [];
+  let W = 0, H = 0, mobile = false, n = 1, hfs = 100, ic = 60, cw = 218, navH = 86, ty = 0.38, g = 1.12;
+  let hTop = 0, hH = 1;
+  let largeurs: number[] = [];
   const estLettre = lettres.map((l) => (l.textContent ?? "").trim() !== "");
   const nbLettres = estLettre.filter(Boolean).length;
+
+  // la roue : son rayon, l'écart entre deux cartes, la hauteur de la carte du milieu
+  const rayon = () => (mobile ? W * 1.15 : (860 * W) / 1440);
+  const ecart = () => 2 * Math.asin((1.16 * cw * g) / (2 * rayon()));
+  const milieuY = () => H * (mobile ? 0.52 : 0.57);
+  const GROS = () => (mobile ? 0.25 : 0.18); // la carte du milieu est un peu plus grande que les autres
 
   function mesurer() {
     W = window.innerWidth; H = window.innerHeight;
@@ -129,37 +94,28 @@ function demarrer() {
     n = mobile ? Math.min(1, W / 560) : borne(W / 1440, 0.62, 1.25);
     ty = mobile ? 0.41 : 0.38; // la hauteur du titre dans le premier écran
     hfs = mobile ? Math.min(W * 0.145, H * 0.1) : Math.min(W * 0.105, H * 0.18);
-    ic = hfs * 0.6;
     const pfs = mobile ? Math.min(W * 0.092, 44) : Math.min(W * 0.045, H * 0.08);
-    const sfs = mobile ? Math.min(W * 0.125, 52, H * 0.06) : Math.min(W * 0.056, H * 0.105);
-    const mfs = mobile ? Math.min(W * 0.16, H * 0.1) : Math.min(W * 0.085, H * 0.17);
-    let camw = mobile ? Math.min(W * 0.5, H * 0.3) : Math.min(W * 0.17, H * 0.31);
     cw = mobile ? Math.min(W * 0.3, H * 0.2) : Math.min(W / 1440, H / 780) * 218;
+    g = mobile ? 1.45 : 1.12; // dans la roue, les cartes sont plus grandes que dans l'éventail
     navH = Math.max(60, 86 * n);
     const s = html.style;
-    s.setProperty("--u", u + "px"); s.setProperty("--n", String(n)); s.setProperty("--hfs", hfs + "px"); s.setProperty("--ic", ic + "px");
-    s.setProperty("--pfs", pfs + "px"); s.setProperty("--sfs", sfs + "px"); s.setProperty("--mfs", mfs + "px");
-    s.setProperty("--camw", camw + "px"); s.setProperty("--cw", String(cw)); s.setProperty("--nav-h", navH + "px");
+    s.setProperty("--u", u + "px"); s.setProperty("--n", String(n)); s.setProperty("--hfs", hfs + "px");
+    s.setProperty("--pfs", pfs + "px"); s.setProperty("--cw", String(cw)); s.setProperty("--nav-h", navH + "px");
     s.setProperty("--ty", ty * 100 + "%");
-    // sur téléphone, le téléphone du panneau prend la place qui reste entre le titre (en haut) et la légende, elle-même
-    // au-dessus du raccourci « Voir l'offre » (en bas)
-    if (mobile) {
-      const haut = 84 + motsHG.offsetHeight + 12, bas = H - (72 + sfs * 2.1 + 12);
-      camw = Math.max(110, Math.min(W * 0.5, (bas - haut - 14) / (844 / 390)));
-      s.setProperty("--camw", camw + "px");
-      s.setProperty("--tel-y", ((haut + bas) / 2).toFixed(1) + "px");
-    } else s.removeProperty("--tel-y");
-    // les cartes des lieux, sur deux rangs : leur taille suit la hauteur de l'écran
-    const place = H - 2 * Math.max(navH + 10, 76);
-    s.setProperty("--lw", Math.min(Math.max(168, mfs * 1.85), ((place - 16) / 2) * (3 / 4.3)).toFixed(1) + "px");
-    // la section de la ligne est d'autant plus haute que la ligne est longue
-    pisteW = piste.scrollWidth;
-    manifeste.style.height = Math.round(H + Math.max(0, pisteW - W * 0.9) * (mobile ? PART_LIGNE_TEL : PART_LIGNE)) + "px";
-    hTop = histoire.offsetTop; hH = histoire.offsetHeight; mTop = manifeste.offsetTop; mH = manifeste.offsetHeight; sTop = suite.offsetTop;
-    oTop = offres.offsetTop;
-    hauts = zones.map((z) => z.offsetTop);
+    // le titre tient sur une ligne : si elle dépasse, la taille des lettres diminue d'autant
     largeurs = lettres.map((l) => l.getBoundingClientRect().width);
-    gauches = elements.map((e) => e.offsetLeft);
+    const ligne = largeurs.reduce((a, b) => a + b, 0), place = W - (mobile ? 28 : 120);
+    if (ligne > place) {
+      const k = place / ligne;
+      hfs *= k;
+      largeurs = largeurs.map((l) => l * k);
+      s.setProperty("--hfs", hfs + "px");
+    }
+    ic = hfs * 0.6;
+    s.setProperty("--ic", ic + "px");
+    // le bouton de la ville choisie se place juste sous la carte du milieu
+    s.setProperty("--pied-y", (milieuY() + (cw * 1.32 * g * (1 + GROS())) / 2 + (mobile ? 18 : 22)).toFixed(1) + "px");
+    hTop = histoire.offsetTop; hH = histoire.offsetHeight;
   }
 
   // ——— le titre : k lettres visibles, le reste en pictos ; l'ensemble reste centré
@@ -222,14 +178,22 @@ function demarrer() {
     return [W * x, H * y, r, 1, 1];
   }
   function pile(i: number): Pose {
-    return [W * 0.5 + ((i % 3) - 1) * cw * 0.08, H * (mobile ? 0.7 : 0.66) + (((i * 7) % 5) - 2) * cw * 0.04, (i % 2 ? 1 : -1) * (4 + i * 1.3), 1, 1];
+    return [W * 0.5 + ((i % 3) - 1) * cw * 0.08, H * (mobile ? 0.62 : 0.62) + (((i * 7) % 5) - 2) * cw * 0.04, (i % 2 ? 1 : -1) * (4 + i * 1.3), 1, 1];
   }
+  /** La roue. « rot » : sa position, en crans ; la carte i est au milieu quand i + rot vaut 0 (à 12 près). */
   function roue(i: number, rot: number): Pose {
-    const R = mobile ? W * 1.2 : (900 * W) / 1440;
-    const cran = ((((i + rot) % 12) + 12) % 12) - 5.5;
-    const a = cran * pas(R);
-    const cy = H * (mobile ? 0.8 : 0.84) + R;
-    return [W * 0.5 + R * Math.sin(a), cy - R * Math.cos(a), deg(a), 1, Math.abs(deg(a)) < 62 ? 1 : 0];
+    const R = rayon();
+    const cran = ((((i + rot + N / 2) % N) + N) % N) - N / 2;
+    const a = cran * ecart();
+    const milieu = Math.max(0, 1 - Math.abs(cran));
+    return [W * 0.5 + R * Math.sin(a), milieuY() + R - R * Math.cos(a), deg(a), g * (1 + GROS() * milieu), Math.abs(cran) < (mobile ? 2.6 : 4.4) ? 1 : 0];
+  }
+  /** La position de la roue pour un défilement donné : elle s'attarde sur chaque ville et passe vite de l'une à l'autre. */
+  function rotation(p: number) {
+    const r = norme(p, ...T_TOUR) * (N - 1);
+    const e = Math.floor(r), f = r - e;
+    const m = f < 0.5 ? 0.5 * Math.pow(2 * f, 2.4) : 1 - 0.5 * Math.pow(2 * (1 - f), 2.4);
+    return -PRETE - (e + m);
   }
   const melPose = (a: Pose, b: Pose, t: number): Pose => [mel(a[0], b[0], t), mel(a[1], b[1], t), mel(a[2], b[2], t), mel(a[3], b[3], t), mel(a[4], b[4], t)];
   function cible(i: number, p: number): Pose {
@@ -237,19 +201,34 @@ function demarrer() {
     if (p < T_EPARS[1]) return melPose(eventail(i), epars(i), eInOut(norme(p, ...T_EPARS)));
     if (p < T_PILE[0]) return epars(i);
     if (p < T_PILE[1]) return melPose(epars(i), pile(i), eInOut(norme(p, ...T_PILE)));
-    if (p < T_ROUE[1]) return melPose(pile(i), roue(i, 0), eGlisse(norme(p, ...T_ROUE)));
-    return roue(i, -3 * eInOut(norme(p, ...T_TOUR)));
+    if (p < T_ROUE[1]) return melPose(pile(i), roue(i, -PRETE), eGlisse(norme(p, ...T_ROUE)));
+    return roue(i, rotation(p));
   }
   const poses: Pose[] = cartes.map(() => [0, 0, 0, 1, 0]);
   const poser = (el: HTMLElement, q: Pose) => {
     el.style.transform = `translate3d(${q[0].toFixed(1)}px,${q[1].toFixed(1)}px,0) rotate(${q[2].toFixed(2)}deg) scale(${q[3].toFixed(3)})`;
     el.style.opacity = q[4].toFixed(3);
+    el.style.pointerEvents = q[4] > 0.5 ? "" : "none";
   };
+
+  // ——— la ville du milieu : le bouton sous la roue la nomme et mène à sa page
+  let choisie = -1;
+  function annoncer(k: number) {
+    if (k === choisie) return;
+    choisie = k;
+    const c = cartes[k], pret = c.hasAttribute("data-pret");
+    bouton.href = liens[k].href;
+    bouton.rel = c.dataset.ville === "autre" ? "noopener" : "";
+    bouton.firstElementChild!.textContent = pret ? `Voir le guide ${c.dataset.de}` : c.dataset.ville === "autre" ? "Proposer ma ville sur Instagram" : `${c.dataset.nom} : bientôt`;
+    bouton.classList.toggle("btn--plein", pret);
+    bouton.classList.toggle("btn--contour", !pret);
+    cartes.forEach((x, i) => x.classList.toggle("milieu", i === k));
+  }
 
   // ——— l'entrée, calée sur le temps
   const VOL: [number, number, number][] = [[0.33, -3, 73], [0.45, 4, 71], [0.6, 13, 65], [0.7, 22, 55], [0.8, 31, 44], [0.87, 32.5, 47.5], [0.93, 26, 48], [1.0, 21.5, 45], [1.07, 22.5, 51.5], [1.15, 27, 52]];
   const LEVER: [number, number][] = [[5, 0.53], [2, 0.6], [0, 0.63], [1, 0.7], [3, 0.8], [4, 0.86]];
-  const T_PICTOS = 1.27, T_LETTRES = 1.9, PAS_LETTRE = 0.17, T_FIN = T_LETTRES + lettres.length * PAS_LETTRE;
+  const T_PICTOS = 1.27, T_LETTRES = 1.9, PAS_LETTRE = 0.13, T_FIN = T_LETTRES + lettres.length * PAS_LETTRE;
   let t0 = 0, entree = false, fini = false, ecloses = 0;
   function cr(a: number, b: number, c: number, d: number, s: number) {
     return 0.5 * (2 * b + (-a + c) * s + (2 * a - 5 * b + 4 * c - d) * s * s + (-a + 3 * b - 3 * c + d) * s * s * s);
@@ -292,18 +271,18 @@ function demarrer() {
       const k = Math.min(lettres.length, Math.floor((t - T_LETTRES) / PAS_LETTRE) + 1);
       if (k !== visibles) montrer(k);
     }
-    if (t >= 1.5) montrerTexte(); // le texte et le bouton n'attendent pas la fin du titre
+    if (t >= 1.5) montrerTexte(); // le texte et les boutons n'attendent pas la fin du titre
     if (t >= T_FIN + 0.4) { fini = true; avion.style.opacity = "0"; }
   }
 
   // ——— le défilement
   const fin = window.matchMedia("(pointer: fine)").matches;
-  let sy = window.scrollY, cibleY = window.scrollY, dernierWheel = 0, dernier = performance.now();
+  let sy = window.scrollY, cibleY = window.scrollY, dernierWheel = 0, dernier = performance.now(), sansPhrase = 0;
   window.addEventListener(
     "wheel",
     (e) => {
       if (!fin || e.ctrlKey) return;
-      const limite = sTop - H; // au-delà (les sections normales) : le défilement habituel du navigateur
+      const limite = hTop + hH - H; // au-delà (le pied de page) : le défilement habituel du navigateur
       if (window.scrollY > limite + 1 || (window.scrollY >= limite - 1 && e.deltaY > 0)) return;
       e.preventDefault();
       if (performance.now() - dernierWheel > 250) cibleY = window.scrollY;
@@ -314,26 +293,19 @@ function demarrer() {
     },
     { passive: false },
   );
-  tous("[data-saut]").forEach((a) =>
-    a.addEventListener("click", (e) => {
-      e.preventDefault();
-      window.scrollTo(0, hTop + Number(a.dataset.saut) * (hH - H));
-    }),
-  );
-
-  // « Voir l'offre » : on y va d'un coup, sans faire défiler toute l'histoire
-  offres.tabIndex = -1;
-  tous('a[href="#offres"]').forEach((a) =>
+  // « Guide complet » : droit à la roue ; les cartes y vont d'un seul mouvement, sans s'arrêter sur la phrase
+  tous("[data-roue]").forEach((a) =>
     a.addEventListener("click", (e) => {
       e.preventDefault();
       mesurer();
-      cibleY = sy = oTop;
-      window.scrollTo(0, oTop);
-      offres.focus({ preventScroll: true });
+      if (!fini) etatFinal();
+      cibleY = hTop + P_CHOIX * (hH - H);
+      if (sy < cibleY) sansPhrase = performance.now() + 1100;
+      window.scrollTo(0, cibleY);
+      bouton.focus({ preventScroll: true });
     }),
   );
 
-  let ps = 0, autorise = false, ecranActif = 0, raccourci = false;
   function image(maintenant: number) {
     const dt = Math.min(1000, maintenant - dernier); // large : si le navigateur ralentit les images, tout rattrape quand même
     dernier = maintenant;
@@ -360,7 +332,6 @@ function demarrer() {
     }
 
     // les cartes
-    let posees = true;
     cartes.forEach((el, i) => {
       let c = cible(i, p);
       if (p < 0.004 && entree && i < 6 && t < 1.7) {
@@ -370,91 +341,36 @@ function demarrer() {
         poses[i] = c;
       } else if (p < 0.004) poses[i] = c;
       else {
-        const poids = 0.072 + (i % 4) * 0.01;
+        const poids = 0.085 + (i % 4) * 0.012;
         const k = 1 - Math.pow(1 - poids, dt / 16.67);
         const q = poses[i];
         for (let j = 0; j < 5; j++) q[j] += (c[j] - q[j]) * (j === 4 ? Math.min(1, k * 2.2) : k);
-        if (Math.abs(c[0] - q[0]) > 3 || Math.abs(c[1] - q[1]) > 3 || Math.abs(c[2] - q[2]) > 1) posees = false;
       }
       poser(el, poses[i]);
     });
 
     // « Tu as vu la vidéo ? Maintenant, va voir en vrai. »
-    const op = norme(p, ...T_PHRASE);
+    const op = maintenant < sansPhrase ? 0 : Math.min(norme(p, ...T_PHRASE), 1 - norme(p, ...T_PHRASE_FIN));
     processus.style.opacity = op.toFixed(3);
-    processus.style.pointerEvents = op > 0.5 && ps < 0.5 ? "auto" : "none";
     processus.style.visibility = op === 0 ? "hidden" : "visible";
-    if (p > T_PHRASE[1]) processus.classList.add("vu"); else if (p < T_PHRASE[0]) processus.classList.remove("vu");
+    if (op > 0 && p > T_PHRASE[1]) processus.classList.add("vu"); else if (p < T_PHRASE[0]) processus.classList.remove("vu");
 
-    // le panneau de l'appli : il attend que la roue ait fini de tourner et que les cartes soient posées
-    if (p >= T_TOUR[1] && posees) autorise = true;
-    if (p < T_TOUR[1] - 0.012) autorise = false;
-    const visee = autorise ? norme(p, ...T_PANNEAU) : 0;
-    ps += (visee - ps) * (1 - Math.pow(1 - 0.12, dt / 16.67));
-    if (Math.abs(visee - ps) < 0.0008) ps = visee;
-    if (ps > 0.002) {
-      const e = eInOut(ps), r = 1 - e;
-      const fw = mobile ? 0.42 : 0.17, fh = mobile ? 0.16 : 0.2, dec = mobile ? 0.06 : 0.12;
-      const g = (1 - fw) / 2, h = 0.5 - dec - fh / 2, b = 1 - h - fh;
-      panneau.style.visibility = "visible";
-      panneau.style.clipPath = `inset(${(h * r * 100).toFixed(3)}% ${(g * r * 100).toFixed(3)}% ${(b * r * 100).toFixed(3)}% ${(g * r * 100).toFixed(3)}% round ${(14 * r).toFixed(1)}px)`;
-      fond.style.transform = `scale(${(1.18 - 0.18 * e).toFixed(4)})`;
-      // les quatre écrans de l'appli se succèdent pendant que le téléphone pivote
-      const k = Math.min(ecrans.length - 1, Math.floor(norme(p, ...T_ECRANS) * ecrans.length));
-      if (k !== ecranActif) {
-        ecranActif = k;
-        ecrans.forEach((el, i) => el.classList.toggle("actif", i === k));
-        legs.forEach((el, i) => el.classList.toggle("actif", i === k));
-      }
-      const lacet = mel(-10, 10, norme(p, T_PANNEAU[1], T_PLONGEON[0]));
-      const houle = Math.sin((maintenant / 1000) * 1.6) * 6 * n;
-      const q = Math.pow(norme(p, ...T_PLONGEON), 1.6) * norme(ps, 0.9, 1);
-      const echelle = (0.5 + 0.5 * e) * (1 + q * q * 28);
-      tel.style.transform = `translate(-50%,-50%) perspective(900px) translateY(${houle.toFixed(1)}px) rotateY(${lacet.toFixed(2)}deg) scale(${echelle.toFixed(4)})`;
-      noir.style.opacity = norme(q, 0.45, 0.85).toFixed(3);
-      const mots = (1 - norme(q, 0, 0.25)).toFixed(3); // les mots s'effacent quand on plonge dans l'écran
-      tete.style.opacity = mots;
-      legendes.style.opacity = mots;
-      const plein = ps > 0.985;
-      if (plein) motsHG.classList.add("vu"); else if (ps < 0.6) motsHG.classList.remove("vu");
-      legendes.classList.toggle("vu", plein);
-    } else {
-      panneau.style.visibility = "hidden";
-      noir.style.opacity = "0";
+    // « Choisis ta ville » et le bouton de la ville du milieu
+    const oc = norme(p, ...T_CHOIX);
+    for (const el of [choix, pied]) {
+      el.style.opacity = oc.toFixed(3);
+      el.style.visibility = oc === 0 ? "hidden" : "visible";
     }
+    if (p > T_CHOIX[1]) { choix.classList.add("vu"); pied.classList.add("vu"); } else if (p < T_CHOIX[0]) { choix.classList.remove("vu"); pied.classList.remove("vu"); }
+    if (p >= T_ROUE[0]) annoncer((((Math.round(-rotation(p)) % N) + N) % N));
 
-    // la navigation prend la couleur de la partie qu'elle survole
-    let z = 0;
-    for (let i = 0; i < zones.length; i++) if (sy + navH * 0.5 >= hauts[i]) z = i;
-    const zone = zones[z];
-    document.body.classList.toggle("nav-sombre", zone.classList.contains("sombre") || (zone === histoire && p > 0.985));
-    document.body.classList.toggle("nav-fond", zone !== histoire && zone !== manifeste);
-    const ici = zone === histoire ? (p >= T_PANNEAU[0] ? "#appli" : p > T_PHRASE[0] ? "#guide" : "") : zone === manifeste ? "#lieux" : "";
-    liens.forEach((a) => (a.getAttribute("href") === ici ? a.setAttribute("aria-current", "true") : a.removeAttribute("aria-current")));
-
-    const montrer = sy > H * 0.3 && sy < oTop - H * 1.15;
-    if (montrer !== raccourci) { raccourci = montrer; document.body.classList.toggle("raccourci-vu", montrer); }
-
-    // la ligne qui défile de côté
-    if (sy > mTop - H * 1.2 && sy < mTop + mH) {
-      const mp = borne((sy - mTop) / (mH - H));
-      const x = mel(W * (mobile ? 0.08 : 0.06), -(pisteW - W * 0.9), mp);
-      piste.style.transform = `translate3d(${x.toFixed(1)}px,-50%,0)`;
-      if (sy > mTop - H * 0.2) {
-        const seuil = W * (mobile ? 0.92 : 0.86);
-        elements.forEach((el, i) => {
-          if (!el.classList.contains("vu") && gauches[i] + x < seuil) {
-            el.classList.add("vu");
-            tous(".auto", el).forEach((a) => a.classList.add("vu"));
-          }
-        });
-      }
-    }
     requestAnimationFrame(image);
   }
 
   function lancer() {
     mesurer();
+    // « …/#villes » (le lien « Toutes les villes » des autres pages) : on arrive directement sur la roue
+    if (location.hash === "#villes") { cibleY = hTop + P_CHOIX * (hH - H); sy = cibleY; window.scrollTo(0, cibleY); }
     if (window.scrollY > 8) etatFinal(); else { placer(0); visibles = 0; }
     entree = true;
     t0 = performance.now();
@@ -466,7 +382,7 @@ function demarrer() {
     cancelAnimationFrame(attente);
     attente = requestAnimationFrame(() => { mesurer(); titre.classList.add("fixe"); placer(visibles); requestAnimationFrame(() => titre.classList.remove("fixe")); });
   });
-  window.addEventListener("load", () => mesurer()); // les images chargées, la ligne a sa vraie longueur
+  window.addEventListener("load", () => mesurer());
   // les lettres se mesurent avec la bonne police : on attend qu'elle soit là (1,2 s au plus)
   Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1200))]).then(lancer);
 }

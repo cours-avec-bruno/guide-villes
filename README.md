@@ -1,8 +1,12 @@
 # Guide de villes — V1 Lyon
 
-Le site que les Reels « Ce que tu ne sais pas sur… » font connaître : une page de vente (`/`) et une appli de visite
-(`/lyon`) qui propose des balades prêtes à lancer ou sur mesure, les fait suivre sur une carte, donne des adresses
-et garde un carnet de voyage avec les photos. `/lyon/?nouveau` ouvre le choix des balades, `/lyon/?mesure` le sur-mesure.
+Le site que les Reels « Ce que tu ne sais pas sur… » font connaître. Quatre sortes de pages :
+
+- `/` : l'accueil. Ce qu'est le guide, puis la roue des villes (elle tourne au défilement, chaque carte mène à sa ville).
+- `/<ville>/` : la page d'une ville. Le « film » de présentation (le téléphone montre l'appli pendant que le texte dit
+  ce qu'on y gagne) et l'achat du guide complet. Une ville sans guide a la même page, marquée « bientôt ».
+- `/gratuit/` : « Visiter gratuitement ». On y entre le code à 4 chiffres reçu après un commentaire sous le Reel de la ville.
+- `/lyon/visite/` : l'appli de visite (balades prêtes ou sur mesure, carte, adresses, carnet avec les photos).
 
 Le nom « Dédale » et le prix de 6,90 € sont **provisoires** : ils se changent dans `src/marque.ts`.
 
@@ -24,23 +28,44 @@ Pour le voir en local comme en ligne : `npm run build:pages` puis `npm run previ
 (http://127.0.0.1:4322/guide-villes/). Le jour où le site a son propre nom de domaine, il suffit de retirer `BASE_PATH`
 du fichier de mise en ligne et d'y mettre la bonne `SITE_URL`.
 
-La page d'accueil s'ouvre toujours en version animée (le défilement avec les cartes de villes). Sur un appareil qui
+Les pages s'ouvrent toujours en version animée (le défilement avec les cartes de villes, le film). Sur un appareil qui
 demande de « réduire les animations », un lien « Version sans animation » apparaît sous le menu : il mène à
 `/?simple`, la page sans chorégraphie, et ce choix est retenu ; `/?anime` revient à la version animée.
+
+## Les accès
+
+L'appli s'ouvre avec un accès, retenu sur l'appareil du visiteur (`src/acces.ts`) :
+
+| Accès | Ce qu'il ouvre | Comment on l'obtient |
+|---|---|---|
+| gratuit | la visite des 5 secrets | un code à 4 chiffres, multiple de 6 ou de 8, entré sur `/gratuit/` (ou porté par un lien `/lyon/visite/?code=1234`) |
+| complet | tout le guide | la clé d'achat, que le paiement renvoie dans l'adresse : `/lyon/visite/?cle=<clé>` |
+
+Sans accès, l'appli renvoie à la page de la ville. C'est une barrière légère : le site est statique, tout se vérifie
+dans le navigateur. Le dépôt ne contient que l'empreinte de la clé d'achat, pas la clé.
+
+Le paiement n'est pas encore branché. Le jour où il l'est : mettre le lien de paiement dans `LIENS_PAIEMENT`
+(`src/marque.ts`) et régler chez le prestataire l'adresse de retour `/lyon/visite/?cle=<clé>`.
 
 ## Où est quoi
 
 | Dossier | Contenu |
 |---|---|
-| `src/pages/index.astro` | la page de vente (textes, cartes de villes, offres) |
-| `src/styles/accueil.css`, `src/scripts/accueil.ts` | sa mise en forme et sa chorégraphie au défilement |
-| `src/pages/lyon.astro`, `src/app/` | l'appli : `App.tsx` (onglets, mémoire), `Ecrans.tsx` (balades prêtes à lancer, sur-mesure, parcours, adresses, carnet, fiches), `Carte.tsx` (MapLibre), `moteur.ts` (composition et horaires), `stockage.ts` (parcours et photos gardés sur le téléphone) |
+| `src/villes.ts`, `src/marque.ts` | la liste des villes ; le nom, le prix, les liens de paiement |
+| `src/pages/index.astro`, `src/scripts/accueil.ts` | l'accueil et sa chorégraphie au défilement (éventail → roue des villes) |
+| `src/pages/[ville]/index.astro`, `src/scripts/ville.ts` | la page d'une ville : le film (plans, phrases, autocollants, tous calés sur une horloge) et l'achat |
+| `src/pages/gratuit.astro`, `src/scripts/gratuit.ts` | la page du code gratuit |
+| `src/styles/accueil.css`, `src/styles/pages.css` | la mise en forme de ces pages |
+| `src/pages/lyon/visite.astro`, `src/app/` | l'appli : `App.tsx` (accès, onglets, mémoire), `Ecrans.tsx` (balades, sur-mesure, parcours, adresses, carnet, fiches), `Carte.tsx` (MapLibre), `moteur.ts` (composition et horaires), `stockage.ts` (parcours et photos gardés sur le téléphone) |
 | `src/data/lyon.json` | **les contenus de Lyon** : étapes, vidéos (image de début et de fin dans l'épisode), adresses, points de départ |
 | `src/styles/base.css` | la charte (papier, encre, mer, étiquettes jaunes ; Bebas Neue et Space Grotesk) |
 | `public/videos/lyon/` | les clips des étapes, découpés dans les épisodes |
-| `public/cartes/`, `public/plaques/` | les images des cartes de villes, les fonds de carte et l'écran du téléphone |
+| `public/cartes/`, `public/plaques/` | les images des cartes de villes, les fonds de carte et les écrans du téléphone |
 | `public/data/` | les trajets à pied calculés à l'avance et le fond de carte « papier » |
 | `outils/` | les scripts qui fabriquent tout ça (voir ci-dessous) |
+
+Ajouter une ville : la passer à `pret: true` dans `src/villes.ts`, lui donner ses plaques (`public/plaques/<ville>-paysage.webp`
+et `-portrait.webp`), sa page d'appli et sa clé d'achat.
 
 ## Refaire les contenus
 

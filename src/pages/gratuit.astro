@@ -1,0 +1,65 @@
+---
+// « Visiter gratuitement » : la visite gratuite d'une ville s'ouvre avec un code à 4 chiffres, envoyé en message privé
+// à ceux qui commentent le Reel de cette ville. La page explique la marche à suivre et reçoit le code.
+import Anime from "../components/Anime.astro";
+import Logo from "../components/Logo.astro";
+import Base from "../layouts/Base.astro";
+import { url } from "../base";
+import { INSTAGRAM, MARQUE } from "../marque";
+import { VILLES } from "../villes";
+
+const pretes = VILLES.filter((v) => v.pret);
+---
+
+<Base
+  titre={`Visiter gratuitement : entre ton code | ${MARQUE}`}
+  description="Commente le Reel de ta ville, reçois ton code à 4 chiffres en message privé et ouvre ta visite gratuite : un itinéraire, une vidéo à chaque arrêt, la carte qui te guide."
+>
+  <Anime slot="tete" />
+
+  <a class="evitement" href="#code">Aller au code</a>
+
+  <nav class="nav" aria-label="Navigation principale">
+    <Logo href={url("/")} nom={`${MARQUE}, retour à l'accueil`} />
+    <a class="nav__retour" href={url("/#villes")}>Toutes les villes</a>
+  </nav>
+
+  <main class="gratuit">
+    <div class="enveloppe gratuit__grille">
+      <div>
+        <p class="etiquette">0 € · la visite gratuite</p>
+        <h1>Ta visite gratuite, <span class="g">contre un commentaire.</span></h1>
+        <ol class="pas">
+          <li><span><strong>Ouvre le Reel de ta ville</strong> sur notre compte Instagram.</span></li>
+          <li><span><strong>Laisse un commentaire</strong> sous ce Reel.</span></li>
+          <li><span><strong>Reçois ton code à 4 chiffres</strong> en message privé.</span></li>
+          <li><span><strong>Entre-le ici</strong> : ta visite s'ouvre tout de suite.</span></li>
+        </ol>
+        <a class="btn btn--contour gratuit__insta" href={INSTAGRAM} rel="noopener">Ouvrir Instagram</a>
+      </div>
+
+      <form class="code" novalidate>
+        <h2>Entre ton code</h2>
+        <label for="ville">Ta ville</label>
+        <select id="ville" name="ville">
+          {VILLES.map((v) => <option value={v.id} disabled={!v.pret} selected={v.id === pretes[0].id}>{v.nom}{v.pret ? "" : " (bientôt)"}</option>)}
+        </select>
+        <label for="code">Ton code à 4 chiffres</label>
+        <input class="code__saisie" id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="4" pattern="[0-9]{4}" placeholder="0000" aria-describedby="code-message" required />
+        <p class="code__message" id="code-message" role="alert"></p>
+        <button class="btn btn--plein btn--bloc" type="submit">Ouvrir ma visite gratuite</button>
+        <a class="code__deja" href={url(`/${pretes[0].id}/visite/`)} hidden>Tu as déjà le guide complet : l'ouvrir</a>
+        {pretes.map((v) => <p class="code__note">La visite gratuite {v.de} : {v.gratuit}.</p>)}
+      </form>
+    </div>
+  </main>
+
+  <script>
+    import "../scripts/gratuit.ts";
+  </script>
+</Base>
+
+<style is:global>
+  @import "../styles/accueil.css";
+  @import "../styles/pages.css";
+</style>
